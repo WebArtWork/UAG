@@ -1,0 +1,47 @@
+version: 1
+validation: sovereign
+default_denom: uuag
+
+accounts:
+  - name: alice
+    coins:
+      - 200000000000uuag
+  - name: bob
+    coins:
+      - 100000000000uuag
+
+client:
+  openapi:
+    path: docs/static/openapi.json
+
+faucet:
+  name: bob
+  coins:
+    - 100000000uuag
+
+validators:
+  - name: alice
+    bonded: 100000000000uuag
+  - name: validator1
+    bonded: 200000000000uuag
+  - name: validator2
+    bonded: 100000000000uuag
+
+genesis:
+  chain_id: "uag-test-1"
+  app_state:
+    staking:
+      params:
+        bond_denom: "uuag"
+        max_validators: 50
+        unbonding_time: "1814400s"          # 21 days
+        min_commission_rate: "0.050000000000000000"
+    mint:
+      params:
+        mint_denom: "uuag"
+        inflation_rate_change: "0.000000000000000000"
+        inflation_max: "0.070000000000000000"
+        inflation_min: "0.070000000000000000"
+    distribution:
+      params:
+        community_tax: "0.020000000000000000"
