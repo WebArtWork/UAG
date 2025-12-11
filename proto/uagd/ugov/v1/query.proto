@@ -1,0 +1,32 @@
+syntax = "proto3";
+package uagd.ugov.v1;
+
+import "google/api/annotations.proto";
+import "uagd/ugov/v1/ugov.proto";
+
+option go_package = "uagd/x/ugov/types";
+
+// Query service for ugov module.
+service Query {
+  rpc Plan(QueryPlanRequest) returns (QueryPlanResponse) {
+    option (google.api.http).get = "/uagd/ugov/v1/plans/{id}";
+  }
+
+  rpc Plans(QueryPlansRequest) returns (QueryPlansResponse) {
+    option (google.api.http).get = "/uagd/ugov/v1/plans";
+  }
+}
+
+message QueryPlanRequest {
+  uint64 id = 1;
+}
+
+message QueryPlanResponse {
+  Plan plan = 1;
+}
+
+message QueryPlansRequest {}
+
+message QueryPlansResponse {
+  repeated Plan plans = 1;
+}

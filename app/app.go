@@ -49,6 +49,7 @@ import (
 	fundmodulekeeper "uagd/x/fund/keeper"
 	growthmodulekeeper "uagd/x/growth/keeper"
 	uagdmodulekeeper "uagd/x/uagd/keeper"
+	ugovmodulekeeper "uagd/x/ugov/keeper"
 )
 
 const (
@@ -105,6 +106,7 @@ type App struct {
 	UagdKeeper   uagdmodulekeeper.Keeper
 	FundKeeper   fundmodulekeeper.Keeper
 	GrowthKeeper growthmodulekeeper.Keeper
+	UgovKeeper   ugovmodulekeeper.Keeper
 }
 
 func init() {
@@ -187,6 +189,7 @@ func New(
 		&app.FundKeeper,
 		&app.GrowthKeeper,
 		&app.UagdKeeper,
+		&app.UgovKeeper,
 	); err != nil {
 		panic(err)
 	}

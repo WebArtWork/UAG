@@ -13,6 +13,8 @@ option go_package = "uagd/x/fund/types";
 service Msg {
   option (cosmos.msg.v1.service) = true;
 
+  // ExecuteFundPlan executes a fund plan directly in x/fund.
+  // NOTE: recommended governance flow is ugov.MsgExecuteFundPlan (proposal message) which then calls x/fund internally.
   rpc ExecuteFundPlan(MsgExecuteFundPlan) returns (MsgExecuteFundPlanResponse);
 }
 

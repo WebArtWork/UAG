@@ -9,5 +9,6 @@ option go_package = "uagd/x/fund/types";
 message Module {
   option (cosmos.app.v1alpha1.module) = {go_import: "uagd/x/fund"};
 
+  // authority is the address that controls the module (defaults to x/gov unless overwritten).
   string authority = 1;
 }

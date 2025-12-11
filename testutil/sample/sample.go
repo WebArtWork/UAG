@@ -3,6 +3,8 @@ package sample
 import (
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	_ "uagd/app" // ensure bech32 prefix init runs in tests
 )
 
 // AccAddress returns a sample account address

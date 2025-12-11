@@ -10,7 +10,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/testutil"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
+	_ "uagd/app" // ensure bech32 prefix init runs in tests
 	fundkeeper "uagd/x/fund/keeper"
 	fundmodule "uagd/x/fund/module"
 	"uagd/x/fund/types"
@@ -27,12 +30,15 @@ func FundKeeper(t testing.TB) (fundkeeper.Keeper, context.Context) {
 	storeService := runtime.NewKVStoreService(storeKey)
 	ctx := testutil.DefaultContextWithDB(t, storeKey, storetypes.NewTransientStoreKey("transient_fund_test")).Ctx
 
+	authority := authtypes.NewModuleAddress(govtypes.ModuleName).String()
+
 	k := fundkeeper.NewKeeper(
 		storeService,
 		encCfg.Codec,
 		addressCodec,
 		nil, // bankKeeper
 		nil, // stakingKeeper
+		authority,
 	)
 
 	if err := k.Params.Set(ctx, types.DefaultParams()); err != nil {
