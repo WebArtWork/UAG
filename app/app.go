@@ -46,6 +46,7 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 
 	"uagd/docs"
+	fundmodulekeeper "uagd/x/fund/keeper"
 	uagdmodulekeeper "uagd/x/uagd/keeper"
 )
 
@@ -101,6 +102,7 @@ type App struct {
 	// simulation manager
 	sm         *module.SimulationManager
 	UagdKeeper uagdmodulekeeper.Keeper
+	FundKeeper fundmodulekeeper.Keeper
 }
 
 func init() {
@@ -180,6 +182,7 @@ func New(
 		&app.ConsensusParamsKeeper,
 		&app.CircuitBreakerKeeper,
 		&app.ParamsKeeper,
+		&app.FundKeeper,
 		&app.UagdKeeper,
 	); err != nil {
 		panic(err)

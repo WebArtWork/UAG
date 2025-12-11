@@ -1,0 +1,17 @@
+syntax = "proto3";
+package uagd.fund.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "uagd/fund/v1/fund.proto";
+import "uagd/fund/v1/params.proto";
+
+option go_package = "uagd/x/fund/types";
+
+// GenesisState defines the fund module's genesis state.
+message GenesisState {
+  option (amino.name) = "uagd/x/fund/GenesisState";
+
+  Params params = 1 [(gogoproto.nullable) = false];
+  repeated Fund funds = 2 [(gogoproto.nullable) = false];
+}

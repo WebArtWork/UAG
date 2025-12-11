@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package fund;
+
+option go_package = "uagd/x/fund/types";
+
+import "fund/fund.proto";
+import "cosmos/msg/v1/msg.proto";
+
+// Msg defines the fund module's transaction service.
+service Msg {
+  // ExecuteFundPlan executes a plan of delegations and payouts
+  // from a specific fund, if called by the authorized admin.
+  rpc ExecuteFundPlan(MsgExecuteFundPlan) returns (MsgExecuteFundPlanResponse);
+}
+
+// MsgExecuteFundPlan is the message used to execute a fund plan.
+message MsgExecuteFundPlan {
+  // Address allowed to execute the plan (for v1: global admin).
+  string authority = 1 [(cosmos.msg.v1.signer) = "authority"];
+
+  // The plan to execute.
+  FundPlan plan = 2;
+}
+
+// Empty response; details are in events.
+message MsgExecuteFundPlanResponse {}
+
