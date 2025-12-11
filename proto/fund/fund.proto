@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+package fund;
+
+option go_package = "uagd/x/fund/types";
+
+import "cosmos/base/v1beta1/coin.proto";
+
+// High-level classification of fund.
+enum FundType {
+  FUND_TYPE_UNSPECIFIED = 0;
+  FUND_TYPE_REGION      = 1;
+  FUND_TYPE_UKRAINE     = 2;
+  FUND_TYPE_PROJECTS    = 3;
+}
+
+// Core fund metadata and configuration.
+message Fund {
+  // On-chain account address that holds tokens (bech32).
+  string address = 1;
+
+  // Type of the fund: region / Ukraine / projects.
+  FundType type = 2;
+
+  // Region identifier, e.g. "UA-05" or "lviv"; empty for non-region funds.
+  string region_id = 3;
+
+  // Human-readable name, e.g. "Kyiv regional fund".
+  string name = 4;
+
+  // Optional description.
+  string description = 5;
+
+  // Current president/operator address (bech32).
+  string president = 6;
+
+  // Base maximum amount that can be delegated in a given period.
+  cosmos.base.v1beta1.Coin base_delegation_limit = 7;
+
+  // Base maximum amount that can be paid as salaries/grants in a given period.
+  cosmos.base.v1beta1.Coin base_payroll_limit = 8;
+
+  // Whether this fund is active.
+  bool active = 9;
+}
+
+// A single delegation entry inside a plan.
+message FundDelegation {
+  // Validator operator address (bech32).
+  string validator_address = 1;
+
+  // Amount in uuag to delegate.
+  cosmos.base.v1beta1.Coin amount = 2;
+}
+
+// A single payout entry inside a plan.
+message FundPayout {
+  // Recipient account address (bech32).
+  string recipient_address = 1;
+
+  // Amount in uuag to send.
+  cosmos.base.v1beta1.Coin amount = 2;
+
+  // Category, e.g. "salary", "grant".
+  string category = 3;
+}
+
+// A plan describing how a fund should delegate and pay out tokens.
+message FundPlan {
+  // Plan identifier (local to this module).
+  uint64 id = 1;
+
+  // Address of the fund executing this plan.
+  string fund_address = 2;
+
+  // Human-readable title.
+  string title = 3;
+
+  // Longer description.
+  string description = 4;
+
+  // Delegations to validators.
+  repeated FundDelegation delegations = 5;
+
+  // Payouts to recipients.
+  repeated FundPayout payouts = 6;
+}
+
+// Module parameters.
+message Params {
+  // Admin address allowed to execute plans (for v1).
+  string admin = 1;
+}
+
+// Genesis state of the fund module.
+message GenesisState {
+  // All funds known at genesis.
+  repeated Fund funds = 1;
+
+  // Module parameters.
+  Params params = 2;
+}
+

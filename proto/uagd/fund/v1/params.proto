@@ -1,0 +1,16 @@
+syntax = "proto3";
+package uagd.fund.v1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "uagd/x/fund/types";
+
+// Params defines the fund module parameters.
+message Params {
+  option (amino.name) = "uagd/x/fund/Params";
+
+  // admin is the address allowed to execute fund plans.
+  string admin = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}

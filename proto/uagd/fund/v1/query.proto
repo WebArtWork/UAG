@@ -1,0 +1,49 @@
+syntax = "proto3";
+package uagd.fund.v1;
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "google/api/annotations.proto";
+import "uagd/fund/v1/fund.proto";
+
+option go_package = "uagd/x/fund/types";
+
+// Query service for fund module.
+service Query {
+  rpc Fund(QueryFundRequest) returns (QueryFundResponse) {
+    option (google.api.http).get = "/uagd/fund/v1/funds/{address}";
+  }
+
+  rpc Funds(QueryFundsRequest) returns (QueryFundsResponse) {
+    option (google.api.http).get = "/uagd/fund/v1/funds";
+  }
+
+  rpc FundsByType(QueryFundsByTypeRequest) returns (QueryFundsByTypeResponse) {
+    option (google.api.http).get = "/uagd/fund/v1/funds/by_type";
+  }
+}
+
+message QueryFundRequest {
+  string address = 1;
+}
+
+message QueryFundResponse {
+  Fund fund = 1;
+}
+
+message QueryFundsRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryFundsResponse {
+  repeated Fund funds = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryFundsByTypeRequest {
+  FundType type = 1;
+  string region_id = 2;
+}
+
+message QueryFundsByTypeResponse {
+  repeated Fund funds = 1;
+}
