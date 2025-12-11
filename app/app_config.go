@@ -4,6 +4,8 @@ import (
 	"time"
 	_ "uagd/x/fund/module"
 	fundmoduletypes "uagd/x/fund/types"
+	_ "uagd/x/growth/module"
+	growthmoduletypes "uagd/x/growth/types"
 	_ "uagd/x/uagd/module"
 	uagdmoduletypes "uagd/x/uagd/types"
 
@@ -128,6 +130,7 @@ var (
 						ibcexported.ModuleName,
 						// chain modules
 						fundmoduletypes.ModuleName,
+						growthmoduletypes.ModuleName,
 						uagdmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/beginBlockers
 					},
@@ -138,6 +141,7 @@ var (
 						group.ModuleName,
 						// chain modules
 						fundmoduletypes.ModuleName,
+						growthmoduletypes.ModuleName,
 						uagdmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/endBlockers
 					},
@@ -176,6 +180,7 @@ var (
 						icatypes.ModuleName,
 						// chain modules
 						fundmoduletypes.ModuleName,
+						growthmoduletypes.ModuleName,
 						uagdmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/initGenesis
 					},
@@ -276,6 +281,10 @@ var (
 			{
 				Name:   fundmoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&fundmoduletypes.Module{}),
+			},
+			{
+				Name:   growthmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&growthmoduletypes.Module{}),
 			},
 			{
 				Name:   uagdmoduletypes.ModuleName,

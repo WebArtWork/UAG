@@ -47,6 +47,7 @@ import (
 
 	"uagd/docs"
 	fundmodulekeeper "uagd/x/fund/keeper"
+	growthmodulekeeper "uagd/x/growth/keeper"
 	uagdmodulekeeper "uagd/x/uagd/keeper"
 )
 
@@ -100,9 +101,10 @@ type App struct {
 	TransferKeeper      ibctransferkeeper.Keeper
 
 	// simulation manager
-	sm         *module.SimulationManager
-	UagdKeeper uagdmodulekeeper.Keeper
-	FundKeeper fundmodulekeeper.Keeper
+	sm           *module.SimulationManager
+	UagdKeeper   uagdmodulekeeper.Keeper
+	FundKeeper   fundmodulekeeper.Keeper
+	GrowthKeeper growthmodulekeeper.Keeper
 }
 
 func init() {
@@ -183,6 +185,7 @@ func New(
 		&app.CircuitBreakerKeeper,
 		&app.ParamsKeeper,
 		&app.FundKeeper,
+		&app.GrowthKeeper,
 		&app.UagdKeeper,
 	); err != nil {
 		panic(err)

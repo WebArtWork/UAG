@@ -1,0 +1,31 @@
+syntax = "proto3";
+package uagd.growth.v1;
+
+import "uagd/growth/v1/growth.proto";
+
+option go_package = "uagd/x/growth/types";
+
+// Query service for growth module.
+service Query {
+  rpc RegionMetric(QueryRegionMetricRequest) returns (QueryRegionMetricResponse);
+
+  rpc GrowthScore(QueryGrowthScoreRequest) returns (QueryGrowthScoreResponse);
+}
+
+message QueryRegionMetricRequest {
+  string region_id = 1;
+  string period = 2;
+}
+
+message QueryRegionMetricResponse {
+  RegionMetric metric = 1;
+}
+
+message QueryGrowthScoreRequest {
+  string region_id = 1;
+  string period = 2;
+}
+
+message QueryGrowthScoreResponse {
+  GrowthScore score = 1;
+}
