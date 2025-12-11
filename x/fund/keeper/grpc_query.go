@@ -42,9 +42,9 @@ func (k Keeper) FundsByType(ctx context.Context, req *types.QueryFundsByTypeRequ
 	funds := k.GetFundsByType(ctx, req.Type)
 	var filtered []*types.Fund
 	if req.RegionId != "" {
-		for _, f := range funds {
-			if f.RegionId == req.RegionId {
-				filtered = append(filtered, &f)
+		for i := range funds {
+			if funds[i].RegionId == req.RegionId {
+				filtered = append(filtered, &funds[i])
 			}
 		}
 	} else {
