@@ -50,7 +50,11 @@ func (AppModule) RegisterInterfaces(registrar codectypes.InterfaceRegistry) {
 	types.RegisterInterfaces(registrar)
 }
 
-func (AppModule) RegisterServices(_ grpc.ServiceRegistrar) error { return nil }
+func (am AppModule) RegisterServices(registrar grpc.ServiceRegistrar) error {
+	types.RegisterMsgServer(registrar, keeper.NewMsgServerImpl(am.keeper))
+	types.RegisterQueryServer(registrar, keeper.NewQueryServer(am.keeper))
+	return nil
+}
 
 func (AppModule) DefaultGenesis(codec.JSONCodec) json.RawMessage {
 	bz, err := json.Marshal(types.DefaultGenesis())
