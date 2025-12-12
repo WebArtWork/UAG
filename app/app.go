@@ -45,7 +45,6 @@ import (
 	ibctransferkeeper "github.com/cosmos/ibc-go/v10/modules/apps/transfer/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 
-	"uagd/docs"
 	fundmodulekeeper "uagd/x/fund/keeper"
 	growthmodulekeeper "uagd/x/growth/keeper"
 	uagdmodulekeeper "uagd/x/uagd/keeper"
@@ -283,8 +282,6 @@ func (app *App) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig
 		panic(err)
 	}
 
-	// register app's OpenAPI routes.
-	docs.RegisterOpenAPIService(Name, apiSvr.Router)
 }
 
 // GetMaccPerms returns a copy of the module account permissions
