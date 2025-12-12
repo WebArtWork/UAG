@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 
+	corestore "cosmossdk.io/core/store"
 	storetypes "cosmossdk.io/store/types"
-
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
@@ -15,9 +16,9 @@ import (
 )
 
 type Keeper struct {
-	cdc      codec.BinaryCodec
-	storeKey storetypes.StoreKey
-	ps       paramtypes.Subspace
+	cdc          codec.BinaryCodec
+	storeService corestore.KVStoreService
+	ps           paramtypes.Subspace
 
 	fundKeeper   FundKeeper
 	govAuthority sdk.AccAddress
@@ -25,7 +26,7 @@ type Keeper struct {
 
 func NewKeeper(
 	cdc codec.BinaryCodec,
-	key storetypes.StoreKey,
+	storeService corestore.KVStoreService,
 	ps paramtypes.Subspace,
 	fundKeeper FundKeeper,
 	govAuthority sdk.AccAddress,
@@ -35,7 +36,7 @@ func NewKeeper(
 	}
 	return Keeper{
 		cdc:          cdc,
-		storeKey:     key,
+		storeService: storeService,
 		ps:           ps,
 		fundKeeper:   fundKeeper,
 		govAuthority: govAuthority,
@@ -74,7 +75,9 @@ func (k Keeper) SetParams(ctx sdk.Context, p types.Params) {
 
 func (k Keeper) GovAuthority() sdk.AccAddress { return k.govAuthority }
 
-func (k Keeper) store(ctx sdk.Context) storetypes.KVStore { return ctx.KVStore(k.storeKey) }
+func (k Keeper) store(ctx sdk.Context) runtime.KVStoreAdapter {
+	return runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx.Context()))
+}
 
 func presidentKey(role types.PresidentRoleType, regionId string) []byte {
 	b := []byte{byte(role), byte(len(regionId))}
