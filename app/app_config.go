@@ -289,6 +289,10 @@ var (
 				Config: appconfig.WrapAny(&epochsmodulev1.Module{}),
 			},
 			{
+				Name:   citizenmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&citizenmoduletypes.Module{}),
+			},
+			{
 				Name:   fundmoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&fundmoduletypes.Module{}),
 			},
