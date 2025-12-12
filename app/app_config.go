@@ -13,6 +13,7 @@ import (
 	_ "uagd/x/ugov"
 	ugovmoduletypes "uagd/x/ugov/types"
 
+	wasmmodulev1 "github.com/CosmWasm/wasmd/api/wasm/module/v1"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
 	runtimev1alpha1 "cosmossdk.io/api/cosmos/app/runtime/v1alpha1"
@@ -318,7 +319,7 @@ var (
 			},
 			{
 				Name: wasmtypes.ModuleName,
-				Config: appconfig.WrapAny(&wasmtypes.Module{
+				Config: appconfig.WrapAny(&wasmmodulev1.Module{
 					// Enable permissionless code upload for testnets. Other defaults are kept standard.
 					UploadPermission: wasmtypes.AccessConfig{Permission: wasmtypes.AccessTypeEverybody},
 				}),

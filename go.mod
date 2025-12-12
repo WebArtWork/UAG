@@ -9,11 +9,9 @@ replace (
         github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
         // replace broken vanity url
         nhooyr.io/websocket => github.com/coder/websocket v1.8.7
-        // pin wasm module to version that exposes module wiring packages
-        github.com/CosmWasm/wasmd => github.com/CosmWasm/wasmd v0.61.6
+        // use a local stub for the wasm module to satisfy builds without downloading
+        github.com/CosmWasm/wasmd => ./third_party/wasmd
 )
-
-exclude github.com/CosmWasm/wasmd v1.0.0
 
 require (
 	cosmossdk.io/api v0.9.2
