@@ -2,6 +2,8 @@ package app
 
 import (
 	"time"
+	_ "uagd/x/citizen/module"
+	citizenmoduletypes "uagd/x/citizen/types"
 	_ "uagd/x/fund/module"
 	fundmoduletypes "uagd/x/fund/types"
 	_ "uagd/x/growth/module"
@@ -131,6 +133,7 @@ var (
 						// ibc modules
 						ibcexported.ModuleName,
 						// chain modules
+						citizenmoduletypes.ModuleName,
 						fundmoduletypes.ModuleName,
 						growthmoduletypes.ModuleName,
 						uagdmoduletypes.ModuleName,
@@ -143,6 +146,7 @@ var (
 						feegrant.ModuleName,
 						group.ModuleName,
 						// chain modules
+						citizenmoduletypes.ModuleName,
 						fundmoduletypes.ModuleName,
 						growthmoduletypes.ModuleName,
 						uagdmoduletypes.ModuleName,
@@ -183,6 +187,7 @@ var (
 						ibctransfertypes.ModuleName,
 						icatypes.ModuleName,
 						// chain modules
+						citizenmoduletypes.ModuleName,
 						fundmoduletypes.ModuleName,
 						growthmoduletypes.ModuleName,
 						uagdmoduletypes.ModuleName,

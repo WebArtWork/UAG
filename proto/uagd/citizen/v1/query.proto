@@ -1,0 +1,44 @@
+syntax = "proto3";
+package uagd.citizen.v1;
+
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "uagd/citizen/v1/citizen.proto";
+
+option go_package = "uagd/x/citizen/types";
+
+service Query {
+  rpc RegionByAddress(QueryRegionByAddressRequest) returns (QueryRegionByAddressResponse) {
+    option (cosmos_proto.method_added_in) = "v1";
+  }
+
+  rpc AddressesByRegion(QueryAddressesByRegionRequest) returns (QueryAddressesByRegionResponse) {
+    option (cosmos_proto.method_added_in) = "v1";
+  }
+
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (cosmos_proto.method_added_in) = "v1";
+  }
+}
+
+message QueryRegionByAddressRequest {
+  string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+message QueryRegionByAddressResponse {
+  string region_id = 1;
+}
+
+message QueryAddressesByRegionRequest {
+  string region_id = 1;
+}
+
+message QueryAddressesByRegionResponse {
+  repeated string addresses = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+message QueryParamsRequest {}
+
+message QueryParamsResponse {
+  Params params = 1 [(gogoproto.nullable) = false];
+}

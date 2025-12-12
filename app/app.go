@@ -45,6 +45,7 @@ import (
 	ibctransferkeeper "github.com/cosmos/ibc-go/v10/modules/apps/transfer/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 
+	citizenmodulekeeper "uagd/x/citizen/keeper"
 	fundmodulekeeper "uagd/x/fund/keeper"
 	growthmodulekeeper "uagd/x/growth/keeper"
 	uagdmodulekeeper "uagd/x/uagd/keeper"
@@ -101,11 +102,12 @@ type App struct {
 	TransferKeeper      ibctransferkeeper.Keeper
 
 	// simulation manager
-	sm           *module.SimulationManager
-	UagdKeeper   uagdmodulekeeper.Keeper
-	FundKeeper   fundmodulekeeper.Keeper
-	GrowthKeeper growthmodulekeeper.Keeper
-	UgovKeeper   ugovmodulekeeper.Keeper
+	sm            *module.SimulationManager
+	UagdKeeper    uagdmodulekeeper.Keeper
+	FundKeeper    fundmodulekeeper.Keeper
+	GrowthKeeper  growthmodulekeeper.Keeper
+	CitizenKeeper citizenmodulekeeper.Keeper
+	UgovKeeper    ugovmodulekeeper.Keeper
 }
 
 func init() {
@@ -186,6 +188,7 @@ func New(
 		&app.CircuitBreakerKeeper,
 		&app.ParamsKeeper,
 		&app.FundKeeper,
+		&app.CitizenKeeper,
 		&app.GrowthKeeper,
 		&app.UagdKeeper,
 		&app.UgovKeeper,
