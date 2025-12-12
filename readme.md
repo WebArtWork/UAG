@@ -273,6 +273,45 @@ Open smart-contract platform:
 
 Gas and fees are always paid in **`uuag`**.
 
+#### CosmWasm CLI quickstart
+
+All commands use the `uagdd` binary and the `uuag` fee token.
+
+1. **Store a contract** (any account can upload):
+
+   ```bash
+   uagdd tx wasm store path/to/contract.wasm \\
+     --from <key-name> \\
+     --chain-id uag-test-1 \\
+     --gas auto --gas-adjustment 1.3 --fees 7500uuag
+   ```
+
+2. **Instantiate** the uploaded code (replace `<code-id>` from the store result):
+
+   ```bash
+   uagdd tx wasm instantiate <code-id> '{"count":0}' \\
+     --label "demo-counter" \\
+     --admin <admin-address> \\
+     --from <key-name> --chain-id uag-test-1 \\
+     --gas auto --gas-adjustment 1.3 --fees 6000uuag
+   ```
+
+3. **Execute** a contract message:
+
+   ```bash
+   uagdd tx wasm execute <contract-address> '{"increment":{}}' \\
+     --from <key-name> --chain-id uag-test-1 \\
+     --gas auto --gas-adjustment 1.3 --fees 5000uuag
+   ```
+
+4. **Query** contract state:
+
+   ```bash
+   uagdd query wasm contract-state smart <contract-address> '{"get_count":{}}'
+   ```
+
+Uploads are permissionless, and state writes pay gas in `uuag`.
+
 ---
 
 ### `x/staking` (Cosmos SDK)
