@@ -35,8 +35,7 @@ func NewAppModule(cdc codec.Codec, keeper keeper.Keeper) AppModule {
 	return AppModule{cdc: cdc, keeper: keeper}
 }
 
-func (AppModule) IsAppModule()        {}
-func (AppModule) IsOnePerModuleType() {}
+func (AppModule) IsAppModule() {}
 
 func (AppModule) Name() string { return types.ModuleName }
 

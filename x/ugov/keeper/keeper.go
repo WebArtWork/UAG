@@ -75,7 +75,7 @@ func (k Keeper) SetParams(ctx sdk.Context, p types.Params) {
 
 func (k Keeper) GovAuthority() sdk.AccAddress { return k.govAuthority }
 
-func (k Keeper) store(ctx sdk.Context) runtime.KVStoreAdapter {
+func (k Keeper) store(ctx sdk.Context) storetypes.KVStore {
 	return runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx.Context()))
 }
 
