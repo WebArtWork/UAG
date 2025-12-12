@@ -10,7 +10,7 @@ replace (
         // replace broken vanity url
         nhooyr.io/websocket => github.com/coder/websocket v1.8.7
         // pin wasm module to version that exposes module wiring packages
-        github.com/CosmWasm/wasmd => github.com/CosmWasm/wasmd v0.60.0
+        github.com/CosmWasm/wasmd => github.com/CosmWasm/wasmd v0.61.6
 )
 
 exclude github.com/CosmWasm/wasmd v1.0.0
@@ -37,7 +37,7 @@ github.com/cosmos/cosmos-proto v1.0.0-beta.5
 github.com/cosmos/cosmos-sdk v0.53.4
 github.com/cosmos/gogoproto v1.7.0
 github.com/cosmos/ibc-go/v10 v10.4.0
-github.com/CosmWasm/wasmd v0.60.0
+        github.com/CosmWasm/wasmd v0.61.6
 github.com/golang/protobuf v1.5.4
 	github.com/gorilla/mux v1.8.1
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
