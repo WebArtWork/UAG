@@ -41,7 +41,7 @@ Each regional fund can **only**:
 
 1. **Delegate** coins to validators
 2. **Pay limited salaries and grants** to people working on Ukraine Growth in that region
-3. Regional **occupation over 50%** lock all delegations, salaries and grants
+3. If regional **occupation exceeds 50%**, all delegations, salaries and grants from that fund are locked
 
 The **maximum allowed amounts** depend on how well the region grows over time.
 
@@ -87,16 +87,39 @@ This makes UAG **anti-populist by design**.
 
 ---
 
+## Verified citizens and regions (`x/citizen`)
+
+To connect real people and regions to on-chain rewards, UAG introduces a **minimal on-chain identity layer**:
+
+- A **citizen** is defined as:
+  - a wallet address
+  - a region identifier
+  - a `verified` flag
+  - a generic KYC source (e.g. `DIIA_V1`)
+  - a hash pointing to an off-chain KYC record
+
+Personal data (full name, passport, etc.) stays **off-chain** in partner systems (e.g. Diia-integrated backends).
+On-chain we only store:
+
+- `address → { region_id, verified, kyc_source, proof_hash }`
+
+Only special **registrar accounts** (run by the UAG backend and partners) can create or update citizen records.
+This allows:
+
+- inflation rewards to be directed **only to verified citizens**
+- rewards and programs to be **filtered by region**
+- growth-based logic to reason about “real people, real regions” without leaking PII on-chain.
+
+---
+
 ## Governance model (»presidents are servants«)
 
 At both levels − **regional** and **national** − governance works the same way:
 
 1. A president **prepares a plan**
-
    - how much to delegate
    - whom to pay
    - which grants to support
-
 2. The plan is **publicly explained**
 3. The community **votes on-chain**
 4. If approved − the president **executes exactly that plan**
@@ -120,15 +143,14 @@ Each CRM can enable **UAG mode**.
 
 ### How it works
 
-- A company selects certain records as **critical**
-
+- A company selects certain records as **critical**:
   - ownership
   - balances
   - contracts
   - inventory checkpoints
   - audit milestones
-
-- These records are **anchored to the UAG chain**
+- These records are **anchored to the UAG chain**:
+  - either via **native modules** or via **CosmWasm smart contracts (`x/wasm`)**
 - Once written:
 
   - ❌ cannot be changed
@@ -147,7 +169,53 @@ The chain guarantees **those facts are immutable**.
 
 ---
 
+## Smart contracts and builders layer (`x/wasm`)
+
+UAG is not only a protocol for Ukraine Growth itself; it is also a **platform for builders**.
+
+By integrating **CosmWasm** as `x/wasm`, the chain allows anyone with UAG to:
+
+- upload smart contracts (WASM code)
+- instantiate them
+- execute methods that:
+  - manage their own state
+  - store arbitrary business data
+  - implement custom logic, DAOs, games, audit trails, etc.
+
+Every contract interaction is a normal transaction:
+
+- pays **gas in `uuag`**
+- writes to the chain’s immutable state
+- can interoperate with UAG-native modules (e.g. read `x/citizen` or react to `x/fund` decisions)
+
+This gives:
+
+- **Businesses** – a way to build tailor-made logic on top of UAG
+- **Developers** – a permissionless environment to deploy tools for citizens, regions, and companies
+
+---
+
 ## Protocol modules (what can do what)
+
+### `x/citizen`
+
+Minimal identity layer:
+
+- Maps **wallet → region + verified flag**
+- Stores only:
+  - address
+  - region id
+  - verified / active flags
+  - KYC source tag
+  - hash of off-chain KYC payload
+- Write access restricted to **registrar accounts**
+- Read access is public for other modules and apps
+
+Used by:
+
+- `x/fund` and `x/growth` to direct rewards and programs to **verified citizens** in specific regions.
+
+---
 
 ### `x/fund`
 
@@ -156,12 +224,13 @@ Controls all protocol-owned funds.
 - Regional funds (27)
 - Ukraine-level fund
 - Projects fund
-- Enforces:
 
-  - allowed actions
-  - spending caps
-  - delegation-only rules
-  - vote-required execution
+Enforces:
+
+- allowed actions (delegate, limited payroll/grants)
+- spending caps
+- occupation locks
+- vote-required execution
 
 No module or account can bypass this logic.
 
@@ -171,7 +240,7 @@ No module or account can bypass this logic.
 
 Connects **off-chain economic indicators** to **on-chain limits**.
 
-- Stores growth metrics
+- Stores growth metrics per region and country
 - Calculates dynamic caps
 - Feeds limits into `x/fund`
 - Makes spending mathematically dependent on real growth
@@ -186,6 +255,23 @@ Global governance.
 - Parameter changes
 - Projects fund approvals
 - Protocol upgrades
+
+---
+
+### `x/wasm` (CosmWasm smart contracts)
+
+Open smart-contract platform:
+
+- Any address with UAG can:
+  - upload contracts
+  - instantiate contracts
+  - execute contract messages
+- Contracts can:
+  - store arbitrary state
+  - serve as app backends (CRMs, registries, DAOs)
+  - integrate with UAG’s native economics
+
+Gas and fees are always paid in **`uuag`**.
 
 ---
 

@@ -3,6 +3,7 @@
 package types
 
 import (
+	appmodulev1alpha1 "cosmossdk.io/api/cosmos/app/v1alpha1"
 	_ "cosmossdk.io/depinject/appconfig/v1alpha1"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -67,6 +68,9 @@ func (x *Module) GetAuthority() string {
 var File_uagd_ugov_module_v1_module_proto protoreflect.FileDescriptor
 
 var file_uagd_ugov_module_v1_module_proto_rawDesc = func() []byte {
+	moduleMsgOpts := &descriptorpb.MessageOptions{}
+	proto.SetExtension(moduleMsgOpts, appmodulev1alpha1.E_Module, &appmodulev1alpha1.ModuleDescriptor{GoImport: "uagd/x/ugov"})
+
 	fd := &descriptorpb.FileDescriptorProto{
 		Syntax:  proto.String("proto3"),
 		Name:    proto.String("uagd/ugov/module/v1/module.proto"),
@@ -76,7 +80,8 @@ var file_uagd_ugov_module_v1_module_proto_rawDesc = func() []byte {
 		},
 		MessageType: []*descriptorpb.DescriptorProto{
 			{
-				Name: proto.String("Module"),
+				Name:    proto.String("Module"),
+				Options: moduleMsgOpts,
 				Field: []*descriptorpb.FieldDescriptorProto{
 					{
 						Name:     proto.String("authority"),
