@@ -45,10 +45,10 @@ import (
 	ibctransferkeeper "github.com/cosmos/ibc-go/v10/modules/apps/transfer/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 
-	"uagd/docs"
 	fundmodulekeeper "uagd/x/fund/keeper"
 	growthmodulekeeper "uagd/x/growth/keeper"
 	uagdmodulekeeper "uagd/x/uagd/keeper"
+	ugovmodulekeeper "uagd/x/ugov/keeper"
 )
 
 const (
@@ -105,6 +105,7 @@ type App struct {
 	UagdKeeper   uagdmodulekeeper.Keeper
 	FundKeeper   fundmodulekeeper.Keeper
 	GrowthKeeper growthmodulekeeper.Keeper
+	UgovKeeper   ugovmodulekeeper.Keeper
 }
 
 func init() {
@@ -187,6 +188,7 @@ func New(
 		&app.FundKeeper,
 		&app.GrowthKeeper,
 		&app.UagdKeeper,
+		&app.UgovKeeper,
 	); err != nil {
 		panic(err)
 	}
@@ -280,8 +282,6 @@ func (app *App) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig
 		panic(err)
 	}
 
-	// register app's OpenAPI routes.
-	docs.RegisterOpenAPIService(Name, apiSvr.Router)
 }
 
 // GetMaccPerms returns a copy of the module account permissions

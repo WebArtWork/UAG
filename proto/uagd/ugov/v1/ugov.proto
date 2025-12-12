@@ -1,0 +1,43 @@
+syntax = "proto3";
+package uagd.ugov.v1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "uagd/fund/v1/fund.proto";
+
+option go_package = "uagd/x/ugov/types";
+
+// PlanStatus defines lifecycle of a plan managed by ugov.
+enum PlanStatus {
+  PLAN_STATUS_UNSPECIFIED = 0;
+  PLAN_STATUS_DRAFT = 1;
+  PLAN_STATUS_SUBMITTED = 2;
+  PLAN_STATUS_EXECUTED = 3;
+  PLAN_STATUS_REJECTED = 4;
+  PLAN_STATUS_CANCELLED = 5;
+}
+
+// Plan is a governance-plan wrapper that later can be executed via x/gov.
+message Plan {
+  option (amino.name) = "uagd/x/ugov/Plan";
+
+  uint64 id = 1;
+
+  // Creator (president) who authored the plan.
+  string creator = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // Fund address this plan targets.
+  string fund_address = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  string title = 4;
+  string description = 5;
+
+  PlanStatus status = 6;
+
+  // The actual fund plan actions (delegations + payouts) to be executed.
+  uagd.fund.v1.FundPlan plan = 7 [(gogoproto.nullable) = false];
+
+  // Optional: link to a gov proposal id once submitted.
+  uint64 proposal_id = 8;
+}

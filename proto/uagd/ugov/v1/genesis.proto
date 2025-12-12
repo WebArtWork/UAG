@@ -1,0 +1,18 @@
+syntax = "proto3";
+package uagd.ugov.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "uagd/ugov/v1/params.proto";
+import "uagd/ugov/v1/ugov.proto";
+
+option go_package = "uagd/x/ugov/types";
+
+// GenesisState defines the ugov module's genesis state.
+message GenesisState {
+  option (amino.name) = "uagd/x/ugov/GenesisState";
+
+  Params params = 1 [(gogoproto.nullable) = false];
+  repeated Plan plans = 2 [(gogoproto.nullable) = false];
+  uint64 next_plan_id = 3;
+}

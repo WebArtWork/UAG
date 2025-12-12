@@ -8,6 +8,8 @@ import (
 	growthmoduletypes "uagd/x/growth/types"
 	_ "uagd/x/uagd/module"
 	uagdmoduletypes "uagd/x/uagd/types"
+	_ "uagd/x/ugov"
+	ugovmoduletypes "uagd/x/ugov/types"
 
 	runtimev1alpha1 "cosmossdk.io/api/cosmos/app/runtime/v1alpha1"
 	appv1alpha1 "cosmossdk.io/api/cosmos/app/v1alpha1"
@@ -132,6 +134,7 @@ var (
 						fundmoduletypes.ModuleName,
 						growthmoduletypes.ModuleName,
 						uagdmoduletypes.ModuleName,
+						ugovmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/beginBlockers
 					},
 					EndBlockers: []string{
@@ -143,6 +146,7 @@ var (
 						fundmoduletypes.ModuleName,
 						growthmoduletypes.ModuleName,
 						uagdmoduletypes.ModuleName,
+						ugovmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/endBlockers
 					},
 					// The following is mostly only needed when ModuleName != StoreKey name.
@@ -182,6 +186,7 @@ var (
 						fundmoduletypes.ModuleName,
 						growthmoduletypes.ModuleName,
 						uagdmoduletypes.ModuleName,
+						ugovmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/initGenesis
 					},
 				}),
@@ -289,6 +294,10 @@ var (
 			{
 				Name:   uagdmoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&uagdmoduletypes.Module{}),
+			},
+			{
+				Name:   ugovmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&ugovmoduletypes.Module{}),
 			},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},
