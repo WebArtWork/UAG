@@ -13,8 +13,6 @@ import (
 	_ "uagd/x/ugov"
 	ugovmoduletypes "uagd/x/ugov/types"
 
-	_ "github.com/CosmWasm/wasmd/x/wasm/module"
-	wasmmodulev1 "github.com/CosmWasm/wasmd/x/wasm/module/v1"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
 	runtimev1alpha1 "cosmossdk.io/api/cosmos/app/runtime/v1alpha1"
@@ -320,9 +318,9 @@ var (
 			},
 			{
 				Name: wasmtypes.ModuleName,
-				Config: appconfig.WrapAny(&wasmmodulev1.Module{
+				Config: appconfig.WrapAny(&wasmtypes.Module{
 					// Enable permissionless code upload for testnets. Other defaults are kept standard.
-					UploadPermission: wasmmodulev1.AccessConfig{Permission: wasmtypes.AccessTypeEverybody},
+					UploadPermission: wasmtypes.AccessConfig{Permission: wasmtypes.AccessTypeEverybody},
 				}),
 			},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
