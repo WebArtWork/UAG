@@ -1,177 +1,224 @@
-
 # UAGD – Ukraine Growth blockchain
 
-`uagd` is the reference implementation of the **Ukraine Growth (UAG)** blockchain, built on **Cosmos SDK + CometBFT** and scaffolded with [Ignite CLI](https://ignite.com/cli).
+`uagd` is the reference implementation of the **Ukraine Growth (UAG)** blockchain, built on **Cosmos SDK + CometBFT** and scaffolded with **Ignite CLI**.
 
-- **Chain ID:** `uag-1`  
-- **Base denom:** `uuag` (1 UAG = 1,000,000 uuag)
-
-This repo contains the source code for the node binary **`uagdd`**, which is used to run full nodes and validators.
+Ukraine Growth is not a typical crypto project.
+It is a **public economic coordination layer** designed to tie on-chain rules to **real-world regional growth**, using transparent governance and immutable records.
 
 ---
 
-## Releases & versioning
+## Network basics
 
-Releases follow semantic versioning:
+- **Chain ID:** `uag-1`
+- **Native token:** `UAG`
+- **Base denom:** `uuag`
 
-- `v0.x.y` – testnets / early public networks  
-- `v1.0.0` – first mainnet release (planned)
+  - `1 UAG = 1,000,000 uuag`
 
-Each tag `v*` triggers CI to build binaries for:
+- **Initial supply:** `370,000,000 UAG`
+- **Inflation:** `7% yearly`, enabled from day one
 
-- Linux (amd64)
-- macOS (amd64, arm64)
-- Windows (amd64)
-
-You can find them in **GitHub → Releases**.
+The node binary is **`uagdd`**, used by full nodes and validators.
 
 ---
 
-## Install `uagdd` (validator / full node)
+## Core idea (one paragraph)
 
-> Always pick the archive that matches your OS and CPU from the latest release.
-
-### 1. Linux (amd64)
-
-1. Download the latest Linux archive from **Releases**.
-2. Extract it and move the binary:
-
-```bash
-tar -xzf <archive-name>.tar.gz
-cd <extracted-folder>
-chmod +x uagdd
-sudo mv uagdd /usr/local/bin/uagdd
-uagdd version
-````
-
-You should see the version printed without errors.
+UAG is a coordination token whose **usage limits are algorithmically tied to real economic growth** − not political promises or private control. Funds cannot be secretly moved, rewritten, or inflated beyond what Ukraine and its regions demonstrably produce in the real world.
 
 ---
 
-### 2. macOS (Intel & Apple Silicon)
+## Token distribution (hard-coded protocol logic)
 
-1. Download the `darwin-amd64` (Intel) or `darwin-arm64` (Apple Silicon) archive.
-2. Extract and install:
+All UAG supply (including inflation) is split into **three protocol-owned buckets**:
 
-```bash
-tar -xzf <archive-name>.tar.gz
-cd <extracted-folder>
-chmod +x uagdd
-sudo mv uagdd /usr/local/bin/uagdd
-uagdd version
-```
+### 1. Regional funds – **70%**
 
-On macOS you might need to allow the binary in **System Settings → Privacy & Security** if Gatekeeper complains.
+- One fund for **each of the 27 regions**
+- Coins are owned by the **protocol**, not by people
 
----
+Each regional fund can **only**:
 
-### 3. Windows (amd64)
+1. **Delegate** coins to validators
+2. **Pay limited salaries and grants** to people working on Ukraine Growth in that region
+3. Regional **occupation over 50%** lock all delegations, salaries and grants
 
-1. Download the Windows archive (`windows-amd64`).
-2. Extract it (e.g. with 7-Zip).
-3. Move `uagdd.exe` somewhere in your `PATH` (or run from the extracted folder):
-
-```powershell
-uagdd.exe version
-```
+The **maximum allowed amounts** depend on how well the region grows over time.
 
 ---
 
-## Running a node
+### 2. Ukraine-level fund – **20%**
 
-You can run `uagdd` either as a **full node** or a **validator**.
-The basic flow is the same for all OSes.
+A single national fund that can **only**:
 
-### 1. Initialize node home
+1. Delegate coins to validators
+2. Pay limited salaries and grants for Ukraine-level work
 
-```bash
-uagdd init <moniker> --chain-id uag-1
-```
-
-This creates the config and data directory, usually:
-
-* Linux/macOS: `~/.uagd`
-* Windows: `%USERPROFILE%\.uagd`
-
-### 2. Put the correct `genesis.json`
-
-Download the official `genesis.json` for the current UAG network (testnet or mainnet) and place it into:
-
-```bash
-# Linux/macOS
-cp genesis.json ~/.uagd/config/genesis.json
-```
-
-On Windows, place it into `%USERPROFILE%\.uagd\config\genesis.json`.
-
-### 3. Configure networking & gas prices
-
-Edit:
-
-* `~/.uagd/config/config.toml`
-
-  * set `persistent_peers` / `seeds`
-* `~/.uagd/config/app.toml`
-
-  * set `minimum-gas-prices` (e.g. `0.025uuag`)
-
-Save and exit.
-
-### 4. Start as a full node
-
-```bash
-uagdd start
-```
-
-If everything is correct, the node will start syncing blocks.
+Its limits depend on **country-wide growth**, not on political decisions.
 
 ---
 
-## Becoming a validator (basics)
+### 3. Projects fund – **10%**
 
-1. **Create a key (validator operator):**
+1. Delegate coins to validators
+2. Pay limited salaries and grants for developers
 
-```bash
-uagdd keys add validator
-```
-
-2. **Fund the address** with `uuag` (from faucet or another wallet).
-
-3. **Create validator transaction** (example):
-
-```bash
-uagdd tx staking create-validator \
-  --from validator \
-  --amount 1000000uuag \
-  --pubkey "$(uagdd tendermint show-validator)" \
-  --moniker "<your-moniker>" \
-  --chain-id uag-1 \
-  --commission-rate "0.05" \
-  --commission-max-rate "0.20" \
-  --commission-max-change-rate "0.01" \
-  --min-self-delegation "1"
-```
-
-4. After the tx is included and your node is healthy, you will enter the active validator set when you have enough voting power.
-
-> **Note:** For production we will publish a separate “Validator Guide” with recommended hardware, security practices, and upgrade process.
+- Used only for **ecosystem projects and tools**
+- **Every spend requires a global on-chain vote**
+- No unilateral control, no emergency keys
+- With maximum allowed amounts
 
 ---
 
-## Development
+## Growth-based limits (the key rule)
 
-For local development (not for validators), you can still use Ignite’s dev workflow:
+Neither regions nor the Ukraine-level fund can freely spend.
 
-```bash
-ignite chain serve
-```
+Their limits are dynamically derived from **transparent real-world indicators**, such as:
 
-This will build, init, and run a local single-node devnet.
+- Taxes collected
+- GDP
+- Exports
+
+As the country or a region grows, **its on-chain capacity grows**.
+If growth stalls − limits tighten automatically.
+
+This makes UAG **anti-populist by design**.
 
 ---
 
-## Learn more
+## Governance model (»presidents are servants«)
 
-* [Ignite CLI](https://ignite.com/cli)
-* [Cosmos SDK docs](https://docs.cosmos.network)
-* [Ignite CLI docs](https://docs.ignite.com)
+At both levels − **regional** and **national** − governance works the same way:
+
+1. A president **prepares a plan**
+
+   - how much to delegate
+   - whom to pay
+   - which grants to support
+
+2. The plan is **publicly explained**
+3. The community **votes on-chain**
+4. If approved − the president **executes exactly that plan**
+
+Presidents:
+
+- ❌ cannot secretly move coins
+- ❌ cannot invent extra payouts
+- ❌ cannot bypass votes
+- ✅ only execute approved decisions
+
+They are **operators, not owners**.
+
+---
+
+## CRM + immutable business records
+
+Ukraine Growth also provides **ready-made CRM systems** for businesses.
+
+Each CRM can enable **UAG mode**.
+
+### How it works
+
+- A company selects certain records as **critical**
+
+  - ownership
+  - balances
+  - contracts
+  - inventory checkpoints
+  - audit milestones
+
+- These records are **anchored to the UAG chain**
+- Once written:
+
+  - ❌ cannot be changed
+  - ❌ cannot be deleted
+  - ❌ cannot be rewritten by devops, admins, employees, or owners
+
+### Why this matters
+
+This directly blocks the classic **»devops + employee« fraud**:
+
+- In a normal database → numbers can be quietly edited
+- With UAG → any later database change **no longer matches the chain**
+
+The company decides **what to anchor**.
+The chain guarantees **those facts are immutable**.
+
+---
+
+## Protocol modules (what can do what)
+
+### `x/fund`
+
+Controls all protocol-owned funds.
+
+- Regional funds (27)
+- Ukraine-level fund
+- Projects fund
+- Enforces:
+
+  - allowed actions
+  - spending caps
+  - delegation-only rules
+  - vote-required execution
+
+No module or account can bypass this logic.
+
+---
+
+### `x/growth`
+
+Connects **off-chain economic indicators** to **on-chain limits**.
+
+- Stores growth metrics
+- Calculates dynamic caps
+- Feeds limits into `x/fund`
+- Makes spending mathematically dependent on real growth
+
+---
+
+### `x/gov`
+
+Global governance.
+
+- Community votes
+- Parameter changes
+- Projects fund approvals
+- Protocol upgrades
+
+---
+
+### `x/staking` (Cosmos SDK)
+
+Standard validator and delegation logic.
+
+- Validators
+- Delegators
+- Slashing
+- Rewards
+
+Used by `x/fund`, but not controlled by it.
+
+---
+
+## What this chain explicitly forbids
+
+- ❌ Private treasury keys
+- ❌ Hidden admin balances
+- ❌ Manual minting
+- ❌ Silent database edits
+- ❌ Political overrides of protocol rules
+
+If it’s not voted and enforced by code − **it doesn’t happen**.
+
+---
+
+## Philosophy (short)
+
+Ukraine Growth is not about speculation.
+It is about **making growth measurable, enforceable, and irreversible**.
+
+- ✅ Code > promises
+- ✅ Votes > power
+- ✅ Growth > inflation

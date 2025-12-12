@@ -74,7 +74,7 @@ func (k Keeper) SetParams(ctx sdk.Context, p types.Params) {
 
 func (k Keeper) GovAuthority() sdk.AccAddress { return k.govAuthority }
 
-func (k Keeper) store(ctx sdk.Context) sdk.KVStore { return ctx.KVStore(k.storeKey) }
+func (k Keeper) store(ctx sdk.Context) storetypes.KVStore { return ctx.KVStore(k.storeKey) }
 
 func presidentKey(role types.PresidentRoleType, regionId string) []byte {
 	b := []byte{byte(role), byte(len(regionId))}
@@ -91,7 +91,8 @@ func planKey(id uint64) []byte {
 // --- Presidents ---
 
 func (k Keeper) SetPresident(ctx sdk.Context, p types.President) {
-	k.store(ctx).Set(presidentKey(p.RoleType, p.RegionId), k.cdc.MustMarshal(&p))
+	bz := mustMarshalJSON(p)
+	k.store(ctx).Set(presidentKey(p.RoleType, p.RegionId), bz)
 }
 
 func (k Keeper) GetPresident(ctx sdk.Context, role types.PresidentRoleType, regionId string) (types.President, bool) {
@@ -100,18 +101,18 @@ func (k Keeper) GetPresident(ctx sdk.Context, role types.PresidentRoleType, regi
 		return types.President{}, false
 	}
 	var p types.President
-	k.cdc.MustUnmarshal(bz, &p)
+	mustUnmarshalJSON(bz, &p)
 	return p, true
 }
 
 func (k Keeper) GetAllPresidents(ctx sdk.Context) []types.President {
-	it := sdk.KVStorePrefixIterator(k.store(ctx), types.PresidentKeyPrefix)
+	it := storetypes.KVStorePrefixIterator(k.store(ctx), types.PresidentKeyPrefix)
 	defer it.Close()
 
 	out := []types.President{}
 	for ; it.Valid(); it.Next() {
 		var p types.President
-		k.cdc.MustUnmarshal(it.Value(), &p)
+		mustUnmarshalJSON(it.Value(), &p)
 		out = append(out, p)
 	}
 	return out
@@ -133,7 +134,8 @@ func (k Keeper) nextPlanId(ctx sdk.Context) uint64 {
 }
 
 func (k Keeper) SetPlan(ctx sdk.Context, p types.StoredFundPlan) {
-	k.store(ctx).Set(planKey(p.Id), k.cdc.MustMarshal(&p))
+	bz := mustMarshalJSON(p)
+	k.store(ctx).Set(planKey(p.Id), bz)
 }
 
 func (k Keeper) GetPlan(ctx sdk.Context, id uint64) (types.StoredFundPlan, bool) {
@@ -142,17 +144,17 @@ func (k Keeper) GetPlan(ctx sdk.Context, id uint64) (types.StoredFundPlan, bool)
 		return types.StoredFundPlan{}, false
 	}
 	var p types.StoredFundPlan
-	k.cdc.MustUnmarshal(bz, &p)
+	mustUnmarshalJSON(bz, &p)
 	return p, true
 }
 
 func (k Keeper) GetPlansByStatus(ctx sdk.Context, status types.FundPlanStatus) []types.StoredFundPlan {
-	it := sdk.KVStorePrefixIterator(k.store(ctx), types.PlanKeyPrefix)
+	it := storetypes.KVStorePrefixIterator(k.store(ctx), types.PlanKeyPrefix)
 	defer it.Close()
 	out := []types.StoredFundPlan{}
 	for ; it.Valid(); it.Next() {
 		var p types.StoredFundPlan
-		k.cdc.MustUnmarshal(it.Value(), &p)
+		mustUnmarshalJSON(it.Value(), &p)
 		if p.Status == status {
 			out = append(out, p)
 		}
@@ -236,15 +238,29 @@ func (k Keeper) MarkSubmitted(ctx sdk.Context, planId uint64, proposalId uint64)
 }
 
 func (k Keeper) MarkRejectedByProposalId(ctx sdk.Context, proposalId uint64) {
-	it := sdk.KVStorePrefixIterator(k.store(ctx), types.PlanKeyPrefix)
+	it := storetypes.KVStorePrefixIterator(k.store(ctx), types.PlanKeyPrefix)
 	defer it.Close()
 	for ; it.Valid(); it.Next() {
 		var p types.StoredFundPlan
-		k.cdc.MustUnmarshal(it.Value(), &p)
+		mustUnmarshalJSON(it.Value(), &p)
 		if p.GovProposalId == proposalId && p.Status == types.PLAN_STATUS_SUBMITTED {
 			p.Status = types.PLAN_STATUS_REJECTED
 			k.SetPlan(ctx, p)
 			return
 		}
+	}
+}
+
+func mustMarshalJSON[T any](v T) []byte {
+	bz, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+	return bz
+}
+
+func mustUnmarshalJSON[T any](bz []byte, v *T) {
+	if err := json.Unmarshal(bz, v); err != nil {
+		panic(err)
 	}
 }

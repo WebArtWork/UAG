@@ -1,63 +1,92 @@
 package ugov
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 
+	"cosmossdk.io/core/appmodule"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-
-	abci "github.com/cometbft/cometbft/abci/types"
+	"google.golang.org/grpc"
 
 	"uagd/x/ugov/keeper"
 	"uagd/x/ugov/types"
 )
 
-type AppModuleBasic struct{}
+var (
+	_ module.AppModuleBasic = (*AppModule)(nil)
+	_ module.AppModule      = (*AppModule)(nil)
+	_ module.HasGenesis     = (*AppModule)(nil)
 
-func (AppModuleBasic) Name() string { return types.ModuleName }
-func (AppModuleBasic) RegisterLegacyAminoCodec(_ *codec.LegacyAmino) {}
-func (AppModuleBasic) RegisterInterfaces(_ codec.Types)              {}
+	_ appmodule.AppModule = (*AppModule)(nil)
+)
 
-func (AppModuleBasic) DefaultGenesis(_ codec.JSONCodec) json.RawMessage {
-	bz, _ := json.Marshal(types.DefaultGenesis())
+type AppModule struct {
+	cdc    codec.Codec
+	keeper keeper.Keeper
+}
+
+func NewAppModule(cdc codec.Codec, keeper keeper.Keeper) AppModule {
+	return AppModule{cdc: cdc, keeper: keeper}
+}
+
+func (AppModule) IsAppModule()        {}
+func (AppModule) IsOnePerModuleType() {}
+
+func (AppModule) Name() string { return types.ModuleName }
+
+func (AppModule) RegisterLegacyAminoCodec(*codec.LegacyAmino) {}
+
+func (AppModule) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
+	_ = clientCtx
+	_ = mux
+}
+
+func (AppModule) RegisterInterfaces(registrar codectypes.InterfaceRegistry) {
+	types.RegisterInterfaces(registrar)
+}
+
+func (AppModule) RegisterServices(_ grpc.ServiceRegistrar) error { return nil }
+
+func (AppModule) DefaultGenesis(codec.JSONCodec) json.RawMessage {
+	bz, err := json.Marshal(types.DefaultGenesis())
+	if err != nil {
+		panic(fmt.Errorf("failed to marshal default %s genesis state: %w", types.ModuleName, err))
+	}
 	return bz
 }
 
-func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, _ client.TxEncodingConfig, bz json.RawMessage) error {
+func (AppModule) ValidateGenesis(_ codec.JSONCodec, _ client.TxEncodingConfig, bz json.RawMessage) error {
 	var gs types.GenesisState
-	if err := cdc.UnmarshalJSON(bz, &gs); err != nil {
-		return err
+	if err := json.Unmarshal(bz, &gs); err != nil {
+		return fmt.Errorf("failed to unmarshal %s genesis state: %w", types.ModuleName, err)
 	}
 	return gs.Params.Validate()
 }
 
-func (AppModuleBasic) RegisterGRPCGatewayRoutes(_ client.Context, _ *runtime.ServeMux) {}
-func (AppModuleBasic) GetTxCmd() *client.Command    { return nil }
-func (AppModuleBasic) GetQueryCmd() *client.Command { return nil }
-
-type AppModule struct {
-	AppModuleBasic
-	k keeper.Keeper
-}
-
-func NewAppModule(k keeper.Keeper) AppModule { return AppModule{k: k} }
-
-func (am AppModule) RegisterServices(_ module.Configurator) {
-	// Once proto exists:
-	// types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.k))
-	// types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQueryServer(am.k))
-}
-
-func (am AppModule) InitGenesis(ctx module.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
+func (am AppModule) InitGenesis(ctx sdk.Context, _ codec.JSONCodec, data json.RawMessage) {
 	var gs types.GenesisState
-	cdc.MustUnmarshalJSON(data, &gs)
-	InitGenesis(ctx, am.k, gs)
-	return []abci.ValidatorUpdate{}
+	if err := json.Unmarshal(data, &gs); err != nil {
+		panic(fmt.Errorf("failed to unmarshal %s genesis state: %w", types.ModuleName, err))
+	}
+	InitGenesis(ctx, am.keeper, gs)
 }
 
-func (am AppModule) ExportGenesis(ctx module.Context, cdc codec.JSONCodec) json.RawMessage {
-	gs := ExportGenesis(ctx, am.k)
-	return cdc.MustMarshalJSON(gs)
+func (am AppModule) ExportGenesis(ctx sdk.Context, _ codec.JSONCodec) json.RawMessage {
+	gs := ExportGenesis(ctx, am.keeper)
+	bz, err := json.Marshal(gs)
+	if err != nil {
+		panic(fmt.Errorf("failed to marshal %s genesis state: %w", types.ModuleName, err))
+	}
+	return bz
 }
+
+func (AppModule) ConsensusVersion() uint64 { return 1 }
+
+func (AppModule) BeginBlock(_ context.Context) error { return nil }
+func (AppModule) EndBlock(_ context.Context) error   { return nil }

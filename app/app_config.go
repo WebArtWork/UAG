@@ -8,7 +8,7 @@ import (
 	growthmoduletypes "uagd/x/growth/types"
 	_ "uagd/x/uagd/module"
 	uagdmoduletypes "uagd/x/uagd/types"
-	_ "uagd/x/ugov/module"
+	_ "uagd/x/ugov"
 	ugovmoduletypes "uagd/x/ugov/types"
 
 	runtimev1alpha1 "cosmossdk.io/api/cosmos/app/runtime/v1alpha1"
