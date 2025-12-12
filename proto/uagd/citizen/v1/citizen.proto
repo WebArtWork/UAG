@@ -1,0 +1,21 @@
+syntax = "proto3";
+package uagd.citizen.v1;
+
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "uagd/x/citizen/types";
+
+message CitizenRegion {
+  string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string region_id = 2;
+}
+
+message Params {
+  repeated string registrars = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+message GenesisState {
+  Params params = 1 [(gogoproto.nullable) = false];
+  repeated CitizenRegion entries = 2 [(gogoproto.nullable) = false];
+}
