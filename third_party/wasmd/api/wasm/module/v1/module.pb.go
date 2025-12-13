@@ -1,15 +1,21 @@
 package modulev1
 
 import (
-	"fmt"
+"fmt"
 
-	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
-	_ "google.golang.org/protobuf/reflect/protoreflect"
+wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+_ "google.golang.org/protobuf/reflect/protoreflect"
+
+proto "github.com/cosmos/gogoproto/proto"
 )
 
 // Module is a minimal stand-in for the wasm module configuration proto.
 type Module struct {
-	UploadPermission wasmtypes.AccessConfig `protobuf:"bytes,1,opt,name=upload_permission,json=uploadPermission,proto3" json:"upload_permission,omitempty"`
+UploadPermission wasmtypes.AccessConfig `protobuf:"bytes,1,opt,name=upload_permission,json=uploadPermission,proto3" json:"upload_permission,omitempty"`
+}
+
+func init() {
+proto.RegisterType((*Module)(nil), "cosmwasm.wasm.module.v1.Module")
 }
 
 // Reset implements the proto.Message interface.
