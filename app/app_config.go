@@ -14,6 +14,7 @@ import (
 	ugovmoduletypes "uagd/x/ugov/types"
 
 	wasmmodulev1 "github.com/CosmWasm/wasmd/api/wasm/module/v1"
+	_ "github.com/CosmWasm/wasmd/x/wasm/module" // import for side-effects
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
 	runtimev1alpha1 "cosmossdk.io/api/cosmos/app/runtime/v1alpha1"
