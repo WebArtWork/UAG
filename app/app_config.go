@@ -13,6 +13,10 @@ import (
 	_ "uagd/x/ugov"
 	ugovmoduletypes "uagd/x/ugov/types"
 
+	wasmmodulev1 "github.com/CosmWasm/wasmd/api/wasm/module/v1"
+	_ "github.com/CosmWasm/wasmd/x/wasm/module" // import for side-effects
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+
 	runtimev1alpha1 "cosmossdk.io/api/cosmos/app/runtime/v1alpha1"
 	appv1alpha1 "cosmossdk.io/api/cosmos/app/v1alpha1"
 	authmodulev1 "cosmossdk.io/api/cosmos/auth/module/v1"
@@ -91,6 +95,7 @@ var (
 		{Account: nft.ModuleName},
 		{Account: ibctransfertypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
 		{Account: icatypes.ModuleName},
+		{Account: wasmtypes.ModuleName, Permissions: []string{authtypes.Burner}},
 	}
 
 	// blocked account addresses
@@ -101,6 +106,7 @@ var (
 		stakingtypes.BondedPoolName,
 		stakingtypes.NotBondedPoolName,
 		nft.ModuleName,
+		wasmtypes.ModuleName,
 		// We allow the following module accounts to receive funds:
 		// govtypes.ModuleName
 	}
@@ -116,6 +122,7 @@ var (
 					PreBlockers: []string{
 						upgradetypes.ModuleName,
 						authtypes.ModuleName,
+						wasmtypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/preBlockers
 					},
 					// During begin block slashing happens after distr.BeginBlocker so that
@@ -130,6 +137,7 @@ var (
 						stakingtypes.ModuleName,
 						authz.ModuleName,
 						epochstypes.ModuleName,
+						wasmtypes.ModuleName,
 						// ibc modules
 						ibcexported.ModuleName,
 						// chain modules
@@ -145,6 +153,7 @@ var (
 						stakingtypes.ModuleName,
 						feegrant.ModuleName,
 						group.ModuleName,
+						wasmtypes.ModuleName,
 						// chain modules
 						citizenmoduletypes.ModuleName,
 						fundmoduletypes.ModuleName,
@@ -182,6 +191,7 @@ var (
 						upgradetypes.ModuleName,
 						circuittypes.ModuleName,
 						epochstypes.ModuleName,
+						wasmtypes.ModuleName,
 						// ibc modules
 						ibcexported.ModuleName,
 						ibctransfertypes.ModuleName,
@@ -307,6 +317,13 @@ var (
 			{
 				Name:   ugovmoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&ugovmoduletypes.Module{}),
+			},
+			{
+				Name: wasmtypes.ModuleName,
+				Config: appconfig.WrapAny(&wasmmodulev1.Module{
+					// Enable permissionless code upload for testnets. Other defaults are kept standard.
+					UploadPermission: wasmtypes.AccessConfig{Permission: wasmtypes.AccessTypeEverybody},
+				}),
 			},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},
