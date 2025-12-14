@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"cosmossdk.io/log"
@@ -115,5 +116,18 @@ func TestExecuteFundPlanHappyPath(t *testing.T) {
 	}
 	if stored.ExecutedAtHeight != ctx.BlockHeight() {
 		t.Fatalf("expected executed height %d got %d", ctx.BlockHeight(), stored.ExecutedAtHeight)
+	}
+}
+
+func TestCreatePlanRejectsInvalidJSON(t *testing.T) {
+	k, ctx, _ := setupKeeper(t)
+
+	invalidJSON := []byte(`{"foo":"bar"}`)
+	_, err := k.CreatePlan(ctx, sampleAcc(), sampleAcc(), "title", "desc", types.PRESIDENT_TYPE_NATIONAL, "", invalidJSON)
+	if err == nil {
+		t.Fatalf("expected invalid plan_json error")
+	}
+	if !strings.Contains(err.Error(), "invalid plan_json") {
+		t.Fatalf("unexpected error: %v", err)
 	}
 }
