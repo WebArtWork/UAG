@@ -36,12 +36,6 @@ genesis:
         max_validators: 50
         unbonding_time: "1814400s"          # 21 days
         min_commission_rate: "0.050000000000000000"
-    mint:
-      params:
-        mint_denom: "uuag"
-        inflation_rate_change: "0.000000000000000000"
-        inflation_max: "0.070000000000000000"
-        inflation_min: "0.070000000000000000"
     distribution:
       params:
         community_tax: "0.020000000000000000"
