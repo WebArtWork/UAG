@@ -34,4 +34,9 @@ func getModuleCodec() codec.Codec {
 	return ModuleCdc
 }
 
+// GetFundPlanCodec exposes the JSON/proto codec for fund plan serialization.
+func GetFundPlanCodec() codec.Codec {
+	return getModuleCodec()
+}
+
 func RegisterLegacyAminoCodec(_ *codec.LegacyAmino) {}

@@ -12,6 +12,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/testutil"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	_ "uagd/app" // ensure bech32 prefix init runs in tests
@@ -44,6 +46,7 @@ func FundKeeper(t testing.TB) (fundkeeper.Keeper, context.Context) {
 	addressCodec := addresscodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix())
 	bankKeeper := noOpBankKeeper{}
 	stakingKeeper := noOpStakingKeeper{addrCodec: addressCodec}
+	govAuthority := authtypes.NewModuleAddress(govtypes.ModuleName)
 
 	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
 	storeService := runtime.NewKVStoreService(storeKey)
@@ -55,6 +58,7 @@ func FundKeeper(t testing.TB) (fundkeeper.Keeper, context.Context) {
 		addressCodec,
 		bankKeeper,
 		stakingKeeper,
+		govAuthority,
 	)
 
 	if err := k.Params.Set(ctx, types.DefaultParams()); err != nil {

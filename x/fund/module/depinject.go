@@ -6,7 +6,9 @@ import (
 	"cosmossdk.io/core/store"
 	"cosmossdk.io/depinject"
 	"cosmossdk.io/depinject/appconfig"
-	"github.com/cosmos/cosmos-sdk/codec"
+"github.com/cosmos/cosmos-sdk/codec"
+authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
 	"uagd/x/fund/keeper"
 	"uagd/x/fund/types"
@@ -44,7 +46,12 @@ type ModuleOutputs struct {
 }
 
 func ProvideModule(in ModuleInputs) ModuleOutputs {
-	k := keeper.NewKeeper(in.StoreService, in.Cdc, in.AddressCodec, in.BankKeeper, in.StakingKeeper)
-	m := NewAppModule(in.Cdc, k, in.AccountKeeper, in.BankKeeper)
-	return ModuleOutputs{FundKeeper: k, Module: m}
+authority := authtypes.NewModuleAddress(govtypes.ModuleName)
+if in.Config != nil && in.Config.Authority != "" {
+authority = authtypes.NewModuleAddressOrBech32Address(in.Config.Authority)
+}
+
+k := keeper.NewKeeper(in.StoreService, in.Cdc, in.AddressCodec, in.BankKeeper, in.StakingKeeper, authority)
+m := NewAppModule(in.Cdc, k, in.AccountKeeper, in.BankKeeper)
+return ModuleOutputs{FundKeeper: k, Module: m}
 }

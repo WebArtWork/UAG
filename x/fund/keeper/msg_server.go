@@ -3,8 +3,6 @@ package keeper
 import (
 	"context"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"uagd/x/fund/types"
 )
 
@@ -20,19 +18,5 @@ func NewMsgServerImpl(k Keeper) types.MsgServer {
 }
 
 func (m msgServer) ExecuteFundPlan(ctx context.Context, msg *types.MsgExecuteFundPlan) (*types.MsgExecuteFundPlanResponse, error) {
-	params, err := m.GetParams(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if params.Admin != msg.Authority {
-		return nil, types.ErrUnauthorized
-	}
-	authAddr, err := sdk.AccAddressFromBech32(msg.Authority)
-	if err != nil {
-		return nil, err
-	}
-	if err := m.Keeper.ExecuteFundPlan(ctx, *msg.Plan, authAddr); err != nil {
-		return nil, err
-	}
-	return &types.MsgExecuteFundPlanResponse{}, nil
+	return nil, types.ErrDirectExecDisabled
 }

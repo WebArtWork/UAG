@@ -6,6 +6,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	fundtypes "uagd/x/fund/types"
 	"uagd/x/ugov/types"
 )
 
@@ -98,12 +99,26 @@ func (s MsgServer) ExecuteFundPlan(goCtx context.Context, msg *types.MsgExecuteF
 	if !ok {
 		return nil, fmt.Errorf("plan not found")
 	}
-	if plan.Status != types.PLAN_STATUS_SUBMITTED && plan.Status != types.PLAN_STATUS_DRAFT {
-		return nil, fmt.Errorf("plan must be SUBMITTED (or DRAFT for dev) to execute")
+	if plan.Status == types.PLAN_STATUS_EXECUTED {
+		return nil, fmt.Errorf("plan already executed")
+	}
+	if plan.Status != types.PLAN_STATUS_SUBMITTED {
+		return nil, fmt.Errorf("plan must be SUBMITTED before execution")
 	}
 
-	// TODO: decode plan.PlanJSON -> fundtypes.FundPlan and call:
-	// err := s.fundKeeper.ExecuteFundPlan(ctx, decodedPlan, sdk.MustAccAddressFromBech32(msg.Authority))
+	var fundPlan fundtypes.FundPlan
+	if err := fundtypes.GetFundPlanCodec().UnmarshalJSON(plan.PlanJSON, &fundPlan); err != nil {
+		return nil, fmt.Errorf("invalid stored plan: %w", err)
+	}
+	if fundPlan.Id == 0 {
+		fundPlan.Id = plan.Id
+	}
+	fundPlan.FundAddress = plan.FundAddress
+
+	plan.Status = types.PLAN_STATUS_APPROVED
+	if err := s.fundKeeper.ExecuteFundPlan(ctx, fundPlan, sdk.MustAccAddressFromBech32(msg.Authority)); err != nil {
+		return nil, err
+	}
 
 	plan.Status = types.PLAN_STATUS_EXECUTED
 	plan.ExecutedAtHeight = ctx.BlockHeight()
