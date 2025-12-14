@@ -21,7 +21,6 @@ import (
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/spf13/cast"
@@ -176,19 +175,8 @@ func initAppForTestnet(app *app.App, args valArgs) *app.App {
 
 	// BANK
 	//
-	bondDenom, err := app.StakingKeeper.BondDenom(ctx)
-	handleErr(err)
-
-	defaultCoins := sdk.NewCoins(sdk.NewInt64Coin(bondDenom, 1000000000))
-
-	// Fund local accounts
-	for _, accountStr := range args.accountsToFund {
-		handleErr(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, defaultCoins))
-
-		account, err := app.AuthKeeper.AddressCodec().StringToBytes(accountStr)
-		handleErr(err)
-
-		handleErr(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, account, defaultCoins))
+	if len(args.accountsToFund) > 0 {
+		handleErr(fmt.Errorf("account funding disabled: mint module removed"))
 	}
 
 	return app

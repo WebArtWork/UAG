@@ -30,7 +30,7 @@ UAG is a coordination token whose **usage limits are algorithmically tied to rea
 
 ## Token distribution (hard-coded protocol logic)
 
-All UAG supply (including inflation) is split into **three protocol-owned buckets**:
+All UAG supply is fixed at genesis (no inflation; validators earn fees/gas) and split into **three protocol-owned buckets**:
 
 ### 1. Regional funds – **70%**
 
@@ -106,7 +106,7 @@ On-chain we only store:
 Only special **registrar accounts** (run by the UAG backend and partners) can create or update citizen records.
 This allows:
 
-- inflation rewards to be directed **only to verified citizens**
+- rewards to be directed **only to verified citizens**
 - rewards and programs to be **filtered by region**
 - growth-based logic to reason about “real people, real regions” without leaking PII on-chain.
 
@@ -346,4 +346,4 @@ It is about **making growth measurable, enforceable, and irreversible**.
 
 - ✅ Code > promises
 - ✅ Votes > power
-- ✅ Growth > inflation
+- ✅ Growth > speculation
