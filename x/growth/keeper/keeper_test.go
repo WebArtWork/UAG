@@ -90,3 +90,19 @@ func TestGetEffectiveLimits(t *testing.T) {
 		t.Fatalf("payroll limit not increased")
 	}
 }
+
+func TestRegionOccupation(t *testing.T) {
+	f := initFixture(t)
+	params := types.Params{CurrentPeriod: "2025", Oracle: "", NationalRegionId: "UA"}
+	_ = f.keeper.SetParams(f.ctx, params)
+
+	occ := math.LegacyNewDec(55)
+	if err := f.keeper.SetRegionOccupation(f.ctx, "UA-05", "2025", occ); err != nil {
+		t.Fatalf("set occupation: %v", err)
+	}
+
+	got, found := f.keeper.GetRegionOccupation(f.ctx, "UA-05")
+	if !found || !got.Equal(occ) {
+		t.Fatalf("expected occupation to be stored")
+	}
+}
