@@ -1,9 +1,9 @@
 package keeper
 
 import (
-	"encoding/binary"
-	"encoding/json"
-	"fmt"
+        "encoding/binary"
+        "encoding/json"
+        "fmt"
 
 	corestore "cosmossdk.io/core/store"
 	storetypes "cosmossdk.io/store/types"
@@ -12,6 +12,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
+	fundtypes "uagd/x/fund/types"
 	"uagd/x/ugov/types"
 )
 
@@ -205,8 +206,18 @@ func (k Keeper) CreatePlan(ctx sdk.Context, creator, fundAddr, title, desc strin
 	if err := k.MustBePresident(ctx, creator, role, regionId); err != nil {
 		return 0, err
 	}
-	var tmp any
-	if err := json.Unmarshal(planJSON, &tmp); err != nil {
+	var plan fundtypes.FundPlan
+	if err := fundtypes.GetFundPlanCodec().UnmarshalJSON(planJSON, &plan); err != nil {
+		return 0, fmt.Errorf("invalid plan_json: %w", err)
+	}
+
+	plan.Id = 0
+	plan.FundAddress = fundAddr
+	plan.Title = title
+	plan.Description = desc
+
+	normalizedJSON, err := fundtypes.GetFundPlanCodec().MarshalJSON(&plan)
+	if err != nil {
 		return 0, fmt.Errorf("invalid plan_json: %w", err)
 	}
 
@@ -220,7 +231,7 @@ func (k Keeper) CreatePlan(ctx sdk.Context, creator, fundAddr, title, desc strin
 		Status:          types.PLAN_STATUS_DRAFT,
 		GovProposalId:   0,
 		CreatedAtHeight: ctx.BlockHeight(),
-		PlanJSON:        planJSON,
+		PlanJSON:        normalizedJSON,
 	}
 	k.SetPlan(ctx, sp)
 	return id, nil

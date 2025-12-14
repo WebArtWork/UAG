@@ -12,6 +12,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/testutil"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"uagd/x/fund/keeper"
@@ -20,7 +22,7 @@ import (
 )
 
 type fixture struct {
-	ctx          context.Context
+	ctx          sdk.Context
 	keeper       keeper.Keeper
 	addressCodec address.Codec
 }
@@ -33,8 +35,10 @@ func initFixture(t *testing.T) *fixture {
 	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
 	storeService := runtime.NewKVStoreService(storeKey)
 	ctx := testutil.DefaultContextWithDB(t, storeKey, storetypes.NewTransientStoreKey("transient_fund")).Ctx
+	ctx = ctx.WithContext(sdk.WrapSDKContext(ctx))
 
-	k := keeper.NewKeeper(storeService, encCfg.Codec, addressCodec, mockBankKeeper{}, mockStakingKeeper{validator: stakingValidator(addressCodec)})
+	govAuthority := authtypes.NewModuleAddress(govtypes.ModuleName)
+	k := keeper.NewKeeper(storeService, encCfg.Codec, addressCodec, mockBankKeeper{}, mockStakingKeeper{validator: stakingValidator(addressCodec)}, govAuthority)
 	if err := k.Params.Set(ctx, types.DefaultParams()); err != nil {
 		t.Fatalf("failed to set params: %v", err)
 	}

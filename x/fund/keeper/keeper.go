@@ -10,6 +10,8 @@ import (
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"uagd/x/fund/types"
@@ -23,6 +25,7 @@ type Keeper struct {
 
 	bankKeeper    types.BankKeeper
 	stakingKeeper types.StakingKeeper
+	govAuthority  sdk.AccAddress
 
 	Schema    collections.Schema
 	FundStore collections.Map[string, types.Fund]
@@ -35,7 +38,11 @@ func NewKeeper(
 	addressCodec address.Codec,
 	bankKeeper types.BankKeeper,
 	stakingKeeper types.StakingKeeper,
+	govAuthority sdk.AccAddress,
 ) Keeper {
+	if govAuthority == nil {
+		govAuthority = authtypes.NewModuleAddress(govtypes.ModuleName)
+	}
 	sb := collections.NewSchemaBuilder(storeService)
 	k := Keeper{
 		storeService:  storeService,
@@ -43,6 +50,7 @@ func NewKeeper(
 		addressCodec:  addressCodec,
 		bankKeeper:    bankKeeper,
 		stakingKeeper: stakingKeeper,
+		govAuthority:  govAuthority,
 		FundStore:     collections.NewMap(sb, types.FundKeyPrefix, "funds", collections.StringKey, codec.CollValue[types.Fund](cdc)),
 		Params:        collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 	}
@@ -113,6 +121,16 @@ func (k Keeper) SetParams(ctx context.Context, params types.Params) error {
 	return k.Params.Set(ctx, params)
 }
 
+func (k Keeper) assertGovAuthority(authority sdk.AccAddress) error {
+	if k.govAuthority == nil || k.govAuthority.Empty() {
+		return fmt.Errorf("gov authority not configured")
+	}
+	if !authority.Equals(k.govAuthority) {
+		return types.ErrUnauthorized
+	}
+	return nil
+}
+
 func (k Keeper) ValidateFundPlan(ctx context.Context, plan types.FundPlan) error {
 	fundAddr, err := k.addressCodec.StringToBytes(plan.FundAddress)
 	if err != nil {
@@ -155,6 +173,9 @@ func (k Keeper) ValidateFundPlan(ctx context.Context, plan types.FundPlan) error
 }
 
 func (k Keeper) ExecuteFundPlan(ctx context.Context, plan types.FundPlan, authority sdk.AccAddress) error {
+	if err := k.assertGovAuthority(authority); err != nil {
+		return err
+	}
 	if err := k.ValidateFundPlan(ctx, plan); err != nil {
 		return err
 	}
