@@ -38,6 +38,16 @@ func (noOpStakingKeeper) Delegate(context.Context, sdk.AccAddress, math.Int, sta
 	return math.LegacyZeroDec(), nil
 }
 
+type noOpGrowthKeeper struct{}
+
+func (noOpGrowthKeeper) GetEffectiveLimits(context.Context, types.Fund) (sdk.Coin, sdk.Coin) {
+	return sdk.NewCoin(types.BaseDenom, math.ZeroInt()), sdk.NewCoin(types.BaseDenom, math.ZeroInt())
+}
+
+func (noOpGrowthKeeper) GetRegionOccupation(context.Context, string) (math.LegacyDec, bool) {
+	return math.LegacyZeroDec(), false
+}
+
 // FundKeeper creates a fund Keeper and an in-memory context for tests.
 func FundKeeper(t testing.TB) (fundkeeper.Keeper, context.Context) {
 	t.Helper()
@@ -46,6 +56,7 @@ func FundKeeper(t testing.TB) (fundkeeper.Keeper, context.Context) {
 	addressCodec := addresscodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix())
 	bankKeeper := noOpBankKeeper{}
 	stakingKeeper := noOpStakingKeeper{addrCodec: addressCodec}
+	growthKeeper := noOpGrowthKeeper{}
 	govAuthority := authtypes.NewModuleAddress(govtypes.ModuleName)
 
 	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
@@ -58,6 +69,7 @@ func FundKeeper(t testing.TB) (fundkeeper.Keeper, context.Context) {
 		addressCodec,
 		bankKeeper,
 		stakingKeeper,
+		growthKeeper,
 		govAuthority,
 	)
 

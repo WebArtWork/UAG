@@ -182,12 +182,14 @@ func TestValidateFundPlanOccupationLock(t *testing.T) {
 
 func TestFundTypeGrowthScopes(t *testing.T) {
 	f := initFixture(t)
-	addrStr, _ := f.addressCodec.BytesToString([]byte{5, 5, 5})
+	regionalAddr, _ := f.addressCodec.BytesToString([]byte{5, 5, 5})
+	nationalAddr, _ := f.addressCodec.BytesToString([]byte{6, 6, 6})
+	projectsAddr, _ := f.addressCodec.BytesToString([]byte{7, 7, 7})
 	valAddr := "uagvaloper1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqyrlgyq"
 
-	regional := types.Fund{Address: addrStr, Type: types.FundType_FUND_TYPE_REGION, RegionId: "UA-R1", Active: true}
-	national := types.Fund{Address: addrStr + "n", Type: types.FundType_FUND_TYPE_UKRAINE, Active: true}
-	projects := types.Fund{Address: addrStr + "p", Type: types.FundType_FUND_TYPE_PROJECTS, Active: true}
+	regional := types.Fund{Address: regionalAddr, Type: types.FundType_FUND_TYPE_REGION, RegionId: "UA-R1", Active: true}
+	national := types.Fund{Address: nationalAddr, Type: types.FundType_FUND_TYPE_UKRAINE, Active: true}
+	projects := types.Fund{Address: projectsAddr, Type: types.FundType_FUND_TYPE_PROJECTS, Active: true}
 	_ = f.keeper.SetFund(f.ctx, regional)
 	_ = f.keeper.SetFund(f.ctx, national)
 	_ = f.keeper.SetFund(f.ctx, projects)
