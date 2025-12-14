@@ -10,7 +10,8 @@ const (
 )
 
 var (
-	ParamsKey       = collections.NewPrefix("p_growth")
-	MetricKeyPrefix = collections.NewPrefix("metric")
-	ScoreKeyPrefix  = collections.NewPrefix("score")
+	ParamsKey           = collections.NewPrefix("p_growth")
+	MetricKeyPrefix     = collections.NewPrefix("metric")
+	ScoreKeyPrefix      = collections.NewPrefix("score")
+	OccupationKeyPrefix = collections.NewPrefix("occup")
 )

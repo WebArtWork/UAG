@@ -19,6 +19,11 @@ type StakingKeeper interface {
 	Delegate(ctx context.Context, delAddr sdk.AccAddress, bondAmt math.Int, tokenSrc stakingtypes.BondStatus, validator stakingtypes.Validator, subtractAccount bool) (math.LegacyDec, error)
 }
 
+type GrowthKeeper interface {
+	GetEffectiveLimits(ctx context.Context, fund Fund) (delegationLimit sdk.Coin, payrollLimit sdk.Coin)
+	GetRegionOccupation(ctx context.Context, regionID string) (math.LegacyDec, bool)
+}
+
 type AccountKeeper interface {
 	GetModuleAddress(moduleName string) sdk.AccAddress
 	AddressCodec() address.Codec

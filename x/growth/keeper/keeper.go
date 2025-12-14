@@ -22,6 +22,7 @@ type Keeper struct {
 	Params        collections.Item[types.Params]
 	RegionMetrics collections.Map[collections.Pair[string, string], types.RegionMetric]
 	GrowthScores  collections.Map[collections.Pair[string, string], types.GrowthScore]
+	Occupations   collections.Map[collections.Pair[string, string], sdkmath.LegacyDec]
 }
 
 func NewKeeper(storeService corestore.KVStoreService, cdc codec.Codec) Keeper {
@@ -32,6 +33,7 @@ func NewKeeper(storeService corestore.KVStoreService, cdc codec.Codec) Keeper {
 		Params:        collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 		RegionMetrics: collections.NewMap(sb, types.MetricKeyPrefix, "metrics", collections.PairKeyCodec(collections.StringKey, collections.StringKey), codec.CollValue[types.RegionMetric](cdc)),
 		GrowthScores:  collections.NewMap(sb, types.ScoreKeyPrefix, "scores", collections.PairKeyCodec(collections.StringKey, collections.StringKey), codec.CollValue[types.GrowthScore](cdc)),
+		Occupations:   collections.NewMap(sb, types.OccupationKeyPrefix, "occupations", collections.PairKeyCodec(collections.StringKey, collections.StringKey), sdk.LegacyDecValue),
 	}
 	schema, err := sb.Build()
 	if err != nil {
@@ -117,6 +119,39 @@ func (k Keeper) GetRegionMetricsForPeriod(ctx context.Context, period string) []
 	return metrics
 }
 
+// SetRegionOccupation stores the occupation percentage for a region and period.
+func (k Keeper) SetRegionOccupation(ctx context.Context, regionID, period string, occupation sdkmath.LegacyDec) error {
+	if occupation.IsNegative() {
+		return types.ErrInvalidMetric
+	}
+	return k.Occupations.Set(ctx, collections.Join(regionID, period), occupation)
+}
+
+// GetRegionOccupation returns the occupation percentage for the given region in the current period.
+// If no explicit occupation is stored for the region, it falls back to the national region when available.
+func (k Keeper) GetRegionOccupation(ctx context.Context, regionID string) (sdkmath.LegacyDec, bool) {
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return sdkmath.LegacyZeroDec(), false
+	}
+
+	if params.CurrentPeriod == "" {
+		return sdkmath.LegacyZeroDec(), false
+	}
+
+	if occupation, err := k.Occupations.Get(ctx, collections.Join(regionID, params.CurrentPeriod)); err == nil {
+		return occupation, true
+	}
+
+	if regionID != params.NationalRegionId {
+		if occupation, err := k.Occupations.Get(ctx, collections.Join(params.NationalRegionId, params.CurrentPeriod)); err == nil {
+			return occupation, true
+		}
+	}
+
+	return sdkmath.LegacyZeroDec(), false
+}
+
 func (k Keeper) ComputeGrowthScore(metric types.RegionMetric) types.GrowthScore {
 	tax := mustDec(metric.TaxIndex)
 	gdp := mustDec(metric.GdpIndex)
@@ -165,6 +200,7 @@ func (k Keeper) GetEffectiveLimits(ctx context.Context, fund fundtypes.Fund) (de
 	if fund.Type == fundtypes.FundType_FUND_TYPE_REGION && fund.RegionId != "" {
 		regionID = fund.RegionId
 	}
+	// Ukraine-level and projects funds default to the national growth scope to reflect country-wide dynamics.
 
 	delegationMultiplier := sdkmath.LegacyOneDec()
 	payrollMultiplier := sdkmath.LegacyOneDec()

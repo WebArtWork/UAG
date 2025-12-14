@@ -3,14 +3,14 @@ module uagd
 go 1.24.1
 
 replace (
-        // fix upstream GHSA-h395-qcrw-5vmq vulnerability.
-        github.com/gin-gonic/gin => github.com/gin-gonic/gin v1.9.1
-        // replace broken goleveldb
-        github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
-        // replace broken vanity url
-        nhooyr.io/websocket => github.com/coder/websocket v1.8.7
-        // use a local stub for the wasm module to satisfy builds without downloading
-        github.com/CosmWasm/wasmd => ./third_party/wasmd
+	// use a local stub for the wasm module to satisfy builds without downloading
+	github.com/CosmWasm/wasmd => ./third_party/wasmd
+	// fix upstream GHSA-h395-qcrw-5vmq vulnerability.
+	github.com/gin-gonic/gin => github.com/gin-gonic/gin v1.9.1
+	// replace broken goleveldb
+	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
+	// replace broken vanity url
+	nhooyr.io/websocket => github.com/coder/websocket v1.8.7
 )
 
 require (
@@ -29,15 +29,14 @@ require (
 	cosmossdk.io/x/feegrant v0.1.1
 	cosmossdk.io/x/nft v0.1.0
 	cosmossdk.io/x/upgrade v0.2.0
+	github.com/CosmWasm/wasmd v0.61.6
 	github.com/cometbft/cometbft v0.38.19
-github.com/cosmos/cosmos-db v1.1.3
-github.com/cosmos/cosmos-proto v1.0.0-beta.5
-github.com/cosmos/cosmos-sdk v0.53.4
-github.com/cosmos/gogoproto v1.7.0
-github.com/cosmos/ibc-go/v10 v10.4.0
-        github.com/CosmWasm/wasmd v0.61.6
-github.com/golang/protobuf v1.5.4
-	github.com/gorilla/mux v1.8.1
+	github.com/cosmos/cosmos-db v1.1.3
+	github.com/cosmos/cosmos-proto v1.0.0-beta.5
+	github.com/cosmos/cosmos-sdk v0.53.4
+	github.com/cosmos/gogoproto v1.7.0
+	github.com/cosmos/ibc-go/v10 v10.4.0
+	github.com/golang/protobuf v1.5.4
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/spf13/cast v1.9.2
 	github.com/spf13/cobra v1.10.1
@@ -232,6 +231,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
 	github.com/gordonklaus/ineffassign v0.1.0 // indirect
 	github.com/gorilla/handlers v1.5.2 // indirect
+	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/gostaticanalysis/analysisutil v0.7.1 // indirect
 	github.com/gostaticanalysis/comment v1.5.0 // indirect

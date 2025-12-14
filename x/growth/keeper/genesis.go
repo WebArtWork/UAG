@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
+
 	"uagd/x/growth/types"
 )
 
@@ -27,6 +29,18 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 			continue
 		}
 		if err := k.SetGrowthScore(ctx, *s); err != nil {
+			return err
+		}
+	}
+	for _, o := range genState.OccupationList {
+		if o == nil {
+			continue
+		}
+		dec, err := sdkmath.LegacyNewDecFromStr(o.Occupation)
+		if err != nil {
+			return err
+		}
+		if err := k.SetRegionOccupation(ctx, o.RegionId, o.Period, dec); err != nil {
 			return err
 		}
 	}
@@ -62,5 +76,26 @@ func (k Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error) 
 		}
 	}
 
-	return &types.GenesisState{Params: &params, Metrics: metrics, Scores: scores}, nil
+	occupations := []*types.Occupation{}
+	occIter, err := k.Occupations.Iterate(ctx, nil)
+	if err == nil {
+		defer occIter.Close()
+		for ; occIter.Valid(); occIter.Next() {
+			key, kErr := occIter.Key()
+			if kErr != nil {
+				continue
+			}
+			val, vErr := occIter.Value()
+			if vErr != nil {
+				continue
+			}
+			occupations = append(occupations, &types.Occupation{
+				RegionId:   key.K1(),
+				Period:     key.K2(),
+				Occupation: val.String(),
+			})
+		}
+	}
+
+	return &types.GenesisState{Params: &params, Metrics: metrics, Scores: scores, OccupationList: occupations}, nil
 }

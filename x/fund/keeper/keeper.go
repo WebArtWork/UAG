@@ -25,6 +25,7 @@ type Keeper struct {
 
 	bankKeeper    types.BankKeeper
 	stakingKeeper types.StakingKeeper
+	growthKeeper  types.GrowthKeeper
 	govAuthority  sdk.AccAddress
 
 	Schema    collections.Schema
@@ -38,6 +39,7 @@ func NewKeeper(
 	addressCodec address.Codec,
 	bankKeeper types.BankKeeper,
 	stakingKeeper types.StakingKeeper,
+	growthKeeper types.GrowthKeeper,
 	govAuthority sdk.AccAddress,
 ) Keeper {
 	if govAuthority == nil {
@@ -50,6 +52,7 @@ func NewKeeper(
 		addressCodec:  addressCodec,
 		bankKeeper:    bankKeeper,
 		stakingKeeper: stakingKeeper,
+		growthKeeper:  growthKeeper,
 		govAuthority:  govAuthority,
 		FundStore:     collections.NewMap(sb, types.FundKeyPrefix, "funds", collections.StringKey, codec.CollValue[types.Fund](cdc)),
 		Params:        collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
@@ -143,6 +146,18 @@ func (k Keeper) ValidateFundPlan(ctx context.Context, plan types.FundPlan) error
 	if !fund.Active {
 		return types.ErrFundInactive
 	}
+
+	// Regional occupation lock: if a region is more than 50% occupied, no outflows are allowed.
+	if fund.Type == types.FundType_FUND_TYPE_REGION {
+		occupation, found := k.growthKeeper.GetRegionOccupation(ctx, fund.RegionId)
+		if found {
+			if occupation.GT(sdkmath.LegacyNewDec(50)) {
+				return types.ErrRegionLocked
+			}
+		}
+	}
+
+	delegationLimit, payrollLimit := k.growthKeeper.GetEffectiveLimits(ctx, fund)
 	totalDelegations := sdkmath.ZeroInt()
 	totalPayouts := sdkmath.ZeroInt()
 	for _, d := range plan.Delegations {
@@ -163,10 +178,10 @@ func (k Keeper) ValidateFundPlan(ctx context.Context, plan types.FundPlan) error
 		}
 		totalPayouts = totalPayouts.Add(p.Amount.Amount)
 	}
-	if fund.BaseDelegationLimit != nil && fund.BaseDelegationLimit.Amount.IsPositive() && totalDelegations.GT(fund.BaseDelegationLimit.Amount) {
+	if delegationLimit.Amount.IsPositive() && totalDelegations.GT(delegationLimit.Amount) {
 		return types.ErrDelegationLimit
 	}
-	if fund.BasePayrollLimit != nil && fund.BasePayrollLimit.Amount.IsPositive() && totalPayouts.GT(fund.BasePayrollLimit.Amount) {
+	if payrollLimit.Amount.IsPositive() && totalPayouts.GT(payrollLimit.Amount) {
 		return types.ErrPayrollLimit
 	}
 	return nil

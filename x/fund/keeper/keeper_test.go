@@ -25,6 +25,7 @@ type fixture struct {
 	ctx          sdk.Context
 	keeper       keeper.Keeper
 	addressCodec address.Codec
+	growth       *mockGrowthKeeper
 }
 
 func initFixture(t *testing.T) *fixture {
@@ -38,12 +39,16 @@ func initFixture(t *testing.T) *fixture {
 	ctx = ctx.WithContext(sdk.WrapSDKContext(ctx))
 
 	govAuthority := authtypes.NewModuleAddress(govtypes.ModuleName)
-	k := keeper.NewKeeper(storeService, encCfg.Codec, addressCodec, mockBankKeeper{}, mockStakingKeeper{validator: stakingValidator(addressCodec)}, govAuthority)
+	growth := &mockGrowthKeeper{
+		delegationLimit: sdk.NewInt64Coin(types.BaseDenom, 1_000_000),
+		payrollLimit:    sdk.NewInt64Coin(types.BaseDenom, 1_000_000),
+	}
+	k := keeper.NewKeeper(storeService, encCfg.Codec, addressCodec, mockBankKeeper{}, mockStakingKeeper{validator: stakingValidator(addressCodec)}, growth, govAuthority)
 	if err := k.Params.Set(ctx, types.DefaultParams()); err != nil {
 		t.Fatalf("failed to set params: %v", err)
 	}
 
-	return &fixture{ctx: ctx, keeper: k, addressCodec: addressCodec}
+	return &fixture{ctx: ctx, keeper: k, addressCodec: addressCodec, growth: growth}
 }
 
 func stakingValidator(accCodec address.Codec) stakingtypes.Validator {
@@ -73,6 +78,23 @@ func (m mockStakingKeeper) GetValidator(context.Context, sdk.ValAddress) (stakin
 
 func (mockStakingKeeper) Delegate(context.Context, sdk.AccAddress, math.Int, stakingtypes.BondStatus, stakingtypes.Validator, bool) (math.LegacyDec, error) {
 	return math.LegacyZeroDec(), nil
+}
+
+type mockGrowthKeeper struct {
+	delegationLimit sdk.Coin
+	payrollLimit    sdk.Coin
+	occupation      math.LegacyDec
+	occupationFound bool
+	lastFund        types.Fund
+}
+
+func (m *mockGrowthKeeper) GetEffectiveLimits(_ context.Context, fund types.Fund) (sdk.Coin, sdk.Coin) {
+	m.lastFund = fund
+	return m.delegationLimit, m.payrollLimit
+}
+
+func (m *mockGrowthKeeper) GetRegionOccupation(context.Context, string) (math.LegacyDec, bool) {
+	return m.occupation, m.occupationFound
 }
 
 func TestSetAndGetFund(t *testing.T) {
@@ -106,4 +128,90 @@ func TestValidateFundPlan(t *testing.T) {
 		t.Fatalf("expected plan valid: %v", err)
 	}
 
+}
+
+func TestValidateFundPlanEffectiveLimits(t *testing.T) {
+	f := initFixture(t)
+	addrStr, _ := f.addressCodec.BytesToString([]byte{7, 7, 7})
+	valAddr := "uagvaloper1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqyrlgyq"
+	fund := types.Fund{Address: addrStr, Type: types.FundType_FUND_TYPE_REGION, Active: true}
+	_ = f.keeper.SetFund(f.ctx, fund)
+
+	delegationAmount := sdk.NewCoin(types.BaseDenom, math.NewInt(60))
+	payoutAmount := sdk.NewCoin(types.BaseDenom, math.NewInt(40))
+	plan := types.FundPlan{
+		FundAddress: addrStr,
+		Delegations: []*types.FundDelegation{{ValidatorAddress: valAddr, Amount: &delegationAmount}},
+		Payouts:     []*types.FundPayout{{RecipientAddress: addrStr, Amount: &payoutAmount}},
+	}
+
+	// Tighten limits and expect failure.
+	f.growth.delegationLimit = sdk.NewInt64Coin(types.BaseDenom, 50)
+	if err := f.keeper.ValidateFundPlan(f.ctx, plan); err == nil {
+		t.Fatalf("expected delegation limit enforcement")
+	}
+
+	// Expand limits and expect pass.
+	f.growth.delegationLimit = sdk.NewInt64Coin(types.BaseDenom, 100)
+	if err := f.keeper.ValidateFundPlan(f.ctx, plan); err != nil {
+		t.Fatalf("expected plan valid with increased limit: %v", err)
+	}
+}
+
+func TestValidateFundPlanOccupationLock(t *testing.T) {
+	f := initFixture(t)
+	addrStr, _ := f.addressCodec.BytesToString([]byte{8, 8, 8})
+	valAddr := "uagvaloper1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqyrlgyq"
+	fund := types.Fund{Address: addrStr, Type: types.FundType_FUND_TYPE_REGION, RegionId: "UA-TEST", Active: true}
+	_ = f.keeper.SetFund(f.ctx, fund)
+
+	delegationAmount := sdk.NewCoin(types.BaseDenom, math.NewInt(10))
+	plan := types.FundPlan{FundAddress: addrStr, Delegations: []*types.FundDelegation{{ValidatorAddress: valAddr, Amount: &delegationAmount}}}
+
+	f.growth.occupation = math.LegacyNewDec(60)
+	f.growth.occupationFound = true
+	if err := f.keeper.ValidateFundPlan(f.ctx, plan); err != types.ErrRegionLocked {
+		t.Fatalf("expected occupation lock, got %v", err)
+	}
+
+	f.growth.occupation = math.LegacyNewDec(40)
+	if err := f.keeper.ValidateFundPlan(f.ctx, plan); err != nil {
+		t.Fatalf("expected unlocked region to pass: %v", err)
+	}
+}
+
+func TestFundTypeGrowthScopes(t *testing.T) {
+	f := initFixture(t)
+	regionalAddr, _ := f.addressCodec.BytesToString([]byte{5, 5, 5})
+	nationalAddr, _ := f.addressCodec.BytesToString([]byte{6, 6, 6})
+	projectsAddr, _ := f.addressCodec.BytesToString([]byte{7, 7, 7})
+	valAddr := "uagvaloper1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqyrlgyq"
+
+	regional := types.Fund{Address: regionalAddr, Type: types.FundType_FUND_TYPE_REGION, RegionId: "UA-R1", Active: true}
+	national := types.Fund{Address: nationalAddr, Type: types.FundType_FUND_TYPE_UKRAINE, Active: true}
+	projects := types.Fund{Address: projectsAddr, Type: types.FundType_FUND_TYPE_PROJECTS, Active: true}
+	_ = f.keeper.SetFund(f.ctx, regional)
+	_ = f.keeper.SetFund(f.ctx, national)
+	_ = f.keeper.SetFund(f.ctx, projects)
+
+	delegationAmount := sdk.NewCoin(types.BaseDenom, math.NewInt(1))
+	plan := types.FundPlan{Delegations: []*types.FundDelegation{{ValidatorAddress: valAddr, Amount: &delegationAmount}}}
+
+	plan.FundAddress = regional.Address
+	_ = f.keeper.ValidateFundPlan(f.ctx, plan)
+	if f.growth.lastFund.RegionId != regional.RegionId || f.growth.lastFund.Type != regional.Type {
+		t.Fatalf("expected regional limits lookup")
+	}
+
+	plan.FundAddress = national.Address
+	_ = f.keeper.ValidateFundPlan(f.ctx, plan)
+	if f.growth.lastFund.Type != national.Type {
+		t.Fatalf("expected national scope for ukraine fund")
+	}
+
+	plan.FundAddress = projects.Address
+	_ = f.keeper.ValidateFundPlan(f.ctx, plan)
+	if f.growth.lastFund.Type != projects.Type {
+		t.Fatalf("expected projects fund to use its own scope")
+	}
 }

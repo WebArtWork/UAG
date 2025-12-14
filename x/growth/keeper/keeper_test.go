@@ -90,3 +90,65 @@ func TestGetEffectiveLimits(t *testing.T) {
 		t.Fatalf("payroll limit not increased")
 	}
 }
+
+func TestRegionOccupation(t *testing.T) {
+	f := initFixture(t)
+	params := types.Params{CurrentPeriod: "2025", Oracle: "", NationalRegionId: "UA"}
+	_ = f.keeper.SetParams(f.ctx, params)
+
+	occ := math.LegacyNewDec(55)
+	if err := f.keeper.SetRegionOccupation(f.ctx, "UA-05", "2025", occ); err != nil {
+		t.Fatalf("set occupation: %v", err)
+	}
+
+	got, found := f.keeper.GetRegionOccupation(f.ctx, "UA-05")
+	if !found || !got.Equal(occ) {
+		t.Fatalf("expected occupation to be stored")
+	}
+}
+
+func TestGenesisOccupationsRoundTrip(t *testing.T) {
+	encCfg := moduletestutil.MakeTestEncodingConfig(growthmodule.AppModule{})
+
+	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
+	storeService := runtime.NewKVStoreService(storeKey)
+	ctx := testutil.DefaultContextWithDB(t, storeKey, storetypes.NewTransientStoreKey("transient_growth_genesis_1")).Ctx
+
+	k := keeper.NewKeeper(storeService, encCfg.Codec)
+	params := types.Params{CurrentPeriod: "2025", Oracle: "", NationalRegionId: "UA"}
+	if err := k.SetParams(ctx, params); err != nil {
+		t.Fatalf("set params: %v", err)
+	}
+
+	regionOcc := math.LegacyMustNewDecFromStr("0.55")
+	nationalOcc := math.LegacyMustNewDecFromStr("0.75")
+	if err := k.SetRegionOccupation(ctx, "UA-05", "2025", regionOcc); err != nil {
+		t.Fatalf("set region occupation: %v", err)
+	}
+	if err := k.SetRegionOccupation(ctx, params.NationalRegionId, "2025", nationalOcc); err != nil {
+		t.Fatalf("set national occupation: %v", err)
+	}
+
+	gen, err := k.ExportGenesis(ctx)
+	if err != nil {
+		t.Fatalf("export genesis: %v", err)
+	}
+
+	storeKey2 := storetypes.NewKVStoreKey(types.StoreKey)
+	storeService2 := runtime.NewKVStoreService(storeKey2)
+	ctx2 := testutil.DefaultContextWithDB(t, storeKey2, storetypes.NewTransientStoreKey("transient_growth_genesis_2")).Ctx
+	k2 := keeper.NewKeeper(storeService2, encCfg.Codec)
+
+	if err := k2.InitGenesis(ctx2, *gen); err != nil {
+		t.Fatalf("init genesis: %v", err)
+	}
+
+	gotRegion, foundRegion := k2.GetRegionOccupation(ctx2, "UA-05")
+	if !foundRegion || !gotRegion.Equal(regionOcc) {
+		t.Fatalf("expected region occupation to round-trip")
+	}
+	gotNational, foundNational := k2.GetRegionOccupation(ctx2, params.NationalRegionId)
+	if !foundNational || !gotNational.Equal(nationalOcc) {
+		t.Fatalf("expected national occupation to round-trip")
+	}
+}
