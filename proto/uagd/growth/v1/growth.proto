@@ -25,6 +25,13 @@ message GrowthScore {
   string payroll_multiplier = 5 [(cosmos_proto.scalar) = "cosmos.Dec", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
 }
 
+// Occupation stores the occupation percentage for a region and period.
+message Occupation {
+  string region_id = 1;
+  string period = 2;
+  string occupation = 3 [(cosmos_proto.scalar) = "cosmos.Dec", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+}
+
 // Params defines module parameters.
 message Params {
   string current_period = 1;
@@ -37,4 +44,5 @@ message GenesisState {
   Params params = 1 [(gogoproto.nullable) = false];
   repeated RegionMetric metrics = 2 [(gogoproto.nullable) = false];
   repeated GrowthScore scores = 3 [(gogoproto.nullable) = false];
+  repeated Occupation occupation_list = 4 [(gogoproto.nullable) = false];
 }

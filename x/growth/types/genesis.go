@@ -10,9 +10,10 @@ import (
 func DefaultGenesis() *GenesisState {
 	p := DefaultParams()
 	return &GenesisState{
-		Params:  &p,
-		Metrics: []*RegionMetric{},
-		Scores:  []*GrowthScore{},
+		Params:         &p,
+		Metrics:        []*RegionMetric{},
+		Scores:         []*GrowthScore{},
+		OccupationList: []*Occupation{},
 	}
 }
 
@@ -31,6 +32,11 @@ func (gs GenesisState) Validate() error {
 	}
 	for _, s := range gs.Scores {
 		if err := ValidateGrowthScore(s); err != nil {
+			return err
+		}
+	}
+	for _, o := range gs.OccupationList {
+		if err := ValidateOccupation(o); err != nil {
 			return err
 		}
 	}
@@ -85,6 +91,27 @@ func ValidateGrowthScore(s *GrowthScore) error {
 	}
 	if _, err := sdkmath.LegacyNewDecFromStr(s.PayrollMultiplier); err != nil {
 		return err
+	}
+	return nil
+}
+
+// ValidateOccupation ensures an occupation entry is well-formed.
+func ValidateOccupation(o *Occupation) error {
+	if o == nil {
+		return fmt.Errorf("occupation is required")
+	}
+	if o.RegionId == "" {
+		return fmt.Errorf("region id required")
+	}
+	if o.Period == "" {
+		return fmt.Errorf("period required")
+	}
+	dec, err := sdkmath.LegacyNewDecFromStr(o.Occupation)
+	if err != nil {
+		return err
+	}
+	if dec.IsNegative() {
+		return ErrInvalidMetric
 	}
 	return nil
 }

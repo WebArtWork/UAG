@@ -178,6 +178,67 @@ func (x *GrowthScore) GetPayrollMultiplier() string {
 	return ""
 }
 
+// Occupation stores the occupation percentage for a region and period.
+type Occupation struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RegionId      string                 `protobuf:"bytes,1,opt,name=region_id,json=regionId,proto3" json:"region_id,omitempty"`
+	Period        string                 `protobuf:"bytes,2,opt,name=period,proto3" json:"period,omitempty"`
+	Occupation    string                 `protobuf:"bytes,3,opt,name=occupation,proto3" json:"occupation,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Occupation) Reset() {
+	*x = Occupation{}
+	mi := &file_uagd_growth_v1_growth_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Occupation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Occupation) ProtoMessage() {}
+
+func (x *Occupation) ProtoReflect() protoreflect.Message {
+	mi := &file_uagd_growth_v1_growth_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Occupation.ProtoReflect.Descriptor instead.
+func (*Occupation) Descriptor() ([]byte, []int) {
+	return file_uagd_growth_v1_growth_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Occupation) GetRegionId() string {
+	if x != nil {
+		return x.RegionId
+	}
+	return ""
+}
+
+func (x *Occupation) GetPeriod() string {
+	if x != nil {
+		return x.Period
+	}
+	return ""
+}
+
+func (x *Occupation) GetOccupation() string {
+	if x != nil {
+		return x.Occupation
+	}
+	return ""
+}
+
 // Params defines module parameters.
 type Params struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
@@ -190,7 +251,7 @@ type Params struct {
 
 func (x *Params) Reset() {
 	*x = Params{}
-	mi := &file_uagd_growth_v1_growth_proto_msgTypes[2]
+	mi := &file_uagd_growth_v1_growth_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -202,7 +263,7 @@ func (x *Params) String() string {
 func (*Params) ProtoMessage() {}
 
 func (x *Params) ProtoReflect() protoreflect.Message {
-	mi := &file_uagd_growth_v1_growth_proto_msgTypes[2]
+	mi := &file_uagd_growth_v1_growth_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -215,7 +276,7 @@ func (x *Params) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Params.ProtoReflect.Descriptor instead.
 func (*Params) Descriptor() ([]byte, []int) {
-	return file_uagd_growth_v1_growth_proto_rawDescGZIP(), []int{2}
+	return file_uagd_growth_v1_growth_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Params) GetCurrentPeriod() string {
@@ -241,17 +302,18 @@ func (x *Params) GetNationalRegionId() string {
 
 // GenesisState defines the growth module's genesis state.
 type GenesisState struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Params        *Params                `protobuf:"bytes,1,opt,name=params,proto3" json:"params,omitempty"`
-	Metrics       []*RegionMetric        `protobuf:"bytes,2,rep,name=metrics,proto3" json:"metrics,omitempty"`
-	Scores        []*GrowthScore         `protobuf:"bytes,3,rep,name=scores,proto3" json:"scores,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Params         *Params                `protobuf:"bytes,1,opt,name=params,proto3" json:"params,omitempty"`
+	Metrics        []*RegionMetric        `protobuf:"bytes,2,rep,name=metrics,proto3" json:"metrics,omitempty"`
+	Scores         []*GrowthScore         `protobuf:"bytes,3,rep,name=scores,proto3" json:"scores,omitempty"`
+	OccupationList []*Occupation          `protobuf:"bytes,4,rep,name=occupation_list,json=occupationList,proto3" json:"occupation_list,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *GenesisState) Reset() {
 	*x = GenesisState{}
-	mi := &file_uagd_growth_v1_growth_proto_msgTypes[3]
+	mi := &file_uagd_growth_v1_growth_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -263,7 +325,7 @@ func (x *GenesisState) String() string {
 func (*GenesisState) ProtoMessage() {}
 
 func (x *GenesisState) ProtoReflect() protoreflect.Message {
-	mi := &file_uagd_growth_v1_growth_proto_msgTypes[3]
+	mi := &file_uagd_growth_v1_growth_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -276,7 +338,7 @@ func (x *GenesisState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenesisState.ProtoReflect.Descriptor instead.
 func (*GenesisState) Descriptor() ([]byte, []int) {
-	return file_uagd_growth_v1_growth_proto_rawDescGZIP(), []int{3}
+	return file_uagd_growth_v1_growth_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GenesisState) GetParams() *Params {
@@ -300,37 +362,17 @@ func (x *GenesisState) GetScores() []*GrowthScore {
 	return nil
 }
 
+func (x *GenesisState) GetOccupationList() []*Occupation {
+	if x != nil {
+		return x.OccupationList
+	}
+	return nil
+}
+
 var File_uagd_growth_v1_growth_proto protoreflect.FileDescriptor
 
 const file_uagd_growth_v1_growth_proto_rawDesc = "" +
-	"\n" +
-	"\x1buagd/growth/v1/growth.proto\x12\x0euagd.growth.v1\x1a\x19cosmos_proto/cosmos.proto\x1a\x14gogoproto/gogo.proto\"\xdc\x02\n" +
-	"\fRegionMetric\x12\x1b\n" +
-	"\tregion_id\x18\x01 \x01(\tR\bregionId\x12\x16\n" +
-	"\x06period\x18\x02 \x01(\tR\x06period\x12Y\n" +
-	"\ttax_index\x18\x03 \x01(\tB<\xc8\xde\x1f\x00\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.DecҴ-\n" +
-	"cosmos.DecR\btaxIndex\x12Y\n" +
-	"\tgdp_index\x18\x04 \x01(\tB<\xc8\xde\x1f\x00\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.DecҴ-\n" +
-	"cosmos.DecR\bgdpIndex\x12a\n" +
-	"\rexports_index\x18\x05 \x01(\tB<\xc8\xde\x1f\x00\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.DecҴ-\n" +
-	"cosmos.DecR\fexportsIndex\"\xf6\x02\n" +
-	"\vGrowthScore\x12\x1b\n" +
-	"\tregion_id\x18\x01 \x01(\tR\bregionId\x12\x16\n" +
-	"\x06period\x18\x02 \x01(\tR\x06period\x12R\n" +
-	"\x05score\x18\x03 \x01(\tB<\xc8\xde\x1f\x00\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.DecҴ-\n" +
-	"cosmos.DecR\x05score\x12q\n" +
-	"\x15delegation_multiplier\x18\x04 \x01(\tB<\xc8\xde\x1f\x00\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.DecҴ-\n" +
-	"cosmos.DecR\x14delegationMultiplier\x12k\n" +
-	"\x12payroll_multiplier\x18\x05 \x01(\tB<\xc8\xde\x1f\x00\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.DecҴ-\n" +
-	"cosmos.DecR\x11payrollMultiplier\"\x8f\x01\n" +
-	"\x06Params\x12%\n" +
-	"\x0ecurrent_period\x18\x01 \x01(\tR\rcurrentPeriod\x120\n" +
-	"\x06oracle\x18\x02 \x01(\tB\x18Ҵ-\x14cosmos.AddressStringR\x06oracle\x12,\n" +
-	"\x12national_region_id\x18\x03 \x01(\tR\x10nationalRegionId\"\xbd\x01\n" +
-	"\fGenesisState\x124\n" +
-	"\x06params\x18\x01 \x01(\v2\x16.uagd.growth.v1.ParamsB\x04\xc8\xde\x1f\x00R\x06params\x12<\n" +
-	"\ametrics\x18\x02 \x03(\v2\x1c.uagd.growth.v1.RegionMetricB\x04\xc8\xde\x1f\x00R\ametrics\x129\n" +
-	"\x06scores\x18\x03 \x03(\v2\x1b.uagd.growth.v1.GrowthScoreB\x04\xc8\xde\x1f\x00R\x06scoresB\x15Z\x13uagd/x/growth/typesb\x06proto3"
+	"\n\x1buagd/growth/v1/growth.proto\x12\x0euagd.growth.v1\x1a\x19cosmos_proto/cosmos.proto\x1a\x14gogoproto/gogo.proto\"\xdc\x02\n\fRegionMetric\x12\x1b\n\tregion_id\x18\x01 \x01(\tR\bregionId\x12\x16\n\x06period\x18\x02 \x01(\tR\x06period\x12Y\n\ttax_index\x18\x03 \x01(\tB<\xc8\xde\x1f\x00\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.DecҴ-\ncosmos.DecR\btaxIndex\x12Y\n\tgdp_index\x18\x04 \x01(\tB<\xc8\xde\x1f\x00\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.DecҴ-\ncosmos.DecR\bgdpIndex\x12a\n\rexports_index\x18\x05 \x01(\tB<\xc8\xde\x1f\x00\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.DecҴ-\ncosmos.DecR\fexportsIndex\"\xf6\x02\n\vGrowthScore\x12\x1b\n\tregion_id\x18\x01 \x01(\tR\bregionId\x12\x16\n\x06period\x18\x02 \x01(\tR\x06period\x12R\n\x05score\x18\x03 \x01(\tB<\xc8\xde\x1f\x00\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.DecҴ-\ncosmos.DecR\x05score\x12q\n\x15delegation_multiplier\x18\x04 \x01(\tB<\xc8\xde\x1f\x00\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.DecҴ-\ncosmos.DecR\x14delegationMultiplier\x12k\n\x12payroll_multiplier\x18\x05 \x01(\tB<\xc8\xde\x1f\x00\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.DecҴ-\ncosmos.DecR\x11payrollMultiplier\"\x81\x01\n\nOccupation\x12\x11\n\tregion_id\x18\x01 \x01(\t\x12\x0e\n\x06period\x18\x02 \x01(\t\x12P\n\noccupation\x18\x03 \x01(\tB<\xc8\xde\x1f\x00\xda\xde\x1f&github.com/cosmos/cosmos-sdk/types.DecҴ-\ncosmos.Dec\"\x8f\x01\n\x06Params\x12%\n\x0ecurrent_period\x18\x01 \x01(\tR\rcurrentPeriod\x120\n\x06oracle\x18\x02 \x01(\tB\x18Ҵ-\x14cosmos.AddressStringR\x06oracle\x12,\n\x12national_region_id\x18\x03 \x01(\tR\x10nationalRegionId\"\xf8\x01\n\fGenesisState\x124\n\x06params\x18\x01 \x01(\v2\x16.uagd.growth.v1.ParamsB\x04\xc8\xde\x1f\x00R\x06params\x12<\n\ametrics\x18\x02 \x03(\v2\x1c.uagd.growth.v1.RegionMetricB\x04\xc8\xde\x1f\x00R\ametrics\x129\n\x06scores\x18\x03 \x03(\v2\x1b.uagd.growth.v1.GrowthScoreB\x04\xc8\xde\x1f\x00R\x06scores\x129\n\x0foccupation_list\x18\x04 \x03(\v2\x1a.uagd.growth.v1.OccupationB\x04\xc8\xde\x1f\x00B\x15Z\x13uagd/x/growth/typesb\x06proto3"
 
 var (
 	file_uagd_growth_v1_growth_proto_rawDescOnce sync.Once
@@ -344,22 +386,24 @@ func file_uagd_growth_v1_growth_proto_rawDescGZIP() []byte {
 	return file_uagd_growth_v1_growth_proto_rawDescData
 }
 
-var file_uagd_growth_v1_growth_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_uagd_growth_v1_growth_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_uagd_growth_v1_growth_proto_goTypes = []any{
 	(*RegionMetric)(nil), // 0: uagd.growth.v1.RegionMetric
 	(*GrowthScore)(nil),  // 1: uagd.growth.v1.GrowthScore
-	(*Params)(nil),       // 2: uagd.growth.v1.Params
-	(*GenesisState)(nil), // 3: uagd.growth.v1.GenesisState
+	(*Occupation)(nil),   // 2: uagd.growth.v1.Occupation
+	(*Params)(nil),       // 3: uagd.growth.v1.Params
+	(*GenesisState)(nil), // 4: uagd.growth.v1.GenesisState
 }
 var file_uagd_growth_v1_growth_proto_depIdxs = []int32{
-	2, // 0: uagd.growth.v1.GenesisState.params:type_name -> uagd.growth.v1.Params
+	3, // 0: uagd.growth.v1.GenesisState.params:type_name -> uagd.growth.v1.Params
 	0, // 1: uagd.growth.v1.GenesisState.metrics:type_name -> uagd.growth.v1.RegionMetric
 	1, // 2: uagd.growth.v1.GenesisState.scores:type_name -> uagd.growth.v1.GrowthScore
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	2, // 3: uagd.growth.v1.GenesisState.occupation_list:type_name -> uagd.growth.v1.Occupation
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_uagd_growth_v1_growth_proto_init() }
@@ -373,7 +417,7 @@ func file_uagd_growth_v1_growth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_uagd_growth_v1_growth_proto_rawDesc), len(file_uagd_growth_v1_growth_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
