@@ -9,41 +9,34 @@ import (
 	"uagd/x/ugov/types"
 )
 
-// NOTE:
-// Your current ugov keeper code references proto types that don't exist in your generated ugov `types`
-// (e.g. types.President, types.StoredFundPlan). Until the ugov protos are aligned, we keep the
-// query server compiling by returning Unimplemented.
-//
-// Once you confirm the real message names in proto, we’ll wire storage + real responses.
+type QueryServer struct{ Keeper }
 
-var _ types.QueryServer = Keeper{}
+func NewQueryServer(k Keeper) *QueryServer { return &QueryServer{Keeper: k} }
 
-func (k Keeper) Params(ctx context.Context, req *types.QueryParamsRequest) (*types.QueryParamsResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
+var _ types.QueryServer = QueryServer{}
+
+func (q QueryServer) Plan(ctx context.Context, req *types.QueryPlanRequest) (*types.QueryPlanResponse, error) {
+	if req == nil || req.Id == 0 {
+		return nil, status.Error(codes.InvalidArgument, "id required")
 	}
-	params, err := k.GetParams(ctx)
-	if err != nil {
-		return nil, err
+
+	planVal, found := q.GetPlan(ctx, req.Id)
+	if !found {
+		return nil, status.Error(codes.NotFound, "plan not found")
 	}
-	return &types.QueryParamsResponse{Params: params}, nil
+
+	plan := planVal // create addressable copy
+	return &types.QueryPlanResponse{Plan: &plan}, nil
 }
 
-// If your proto defines other queries (presidents/plans/etc), keep them compiling as stubs.
-// Replace these method signatures to match exactly what `types.QueryServer` requires in your repo.
+func (q QueryServer) Plans(ctx context.Context, _ *types.QueryPlansRequest) (*types.QueryPlansResponse, error) {
+	vals := q.GetAllPlans(ctx)
 
-func (k Keeper) President(ctx context.Context, req *types.QueryPresidentRequest) (*types.QueryPresidentResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "ugov: President query not implemented yet (proto/types mismatch)")
-}
+	out := make([]*types.Plan, 0, len(vals))
+	for i := range vals {
+		p := vals[i] // addressable copy per iteration index
+		out = append(out, &p)
+	}
 
-func (k Keeper) Presidents(ctx context.Context, req *types.QueryPresidentsRequest) (*types.QueryPresidentsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "ugov: Presidents query not implemented yet (proto/types mismatch)")
-}
-
-func (k Keeper) FundPlan(ctx context.Context, req *types.QueryFundPlanRequest) (*types.QueryFundPlanResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "ugov: FundPlan query not implemented yet (proto/types mismatch)")
-}
-
-func (k Keeper) FundPlans(ctx context.Context, req *types.QueryFundPlansRequest) (*types.QueryFundPlansResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "ugov: FundPlans query not implemented yet (proto/types mismatch)")
+	return &types.QueryPlansResponse{Plans: out}, nil
 }

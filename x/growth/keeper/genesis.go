@@ -3,33 +3,34 @@ package keeper
 import (
 	"context"
 
+	"cosmossdk.io/collections"
+	sdkmath "cosmossdk.io/math"
+
 	"uagd/x/growth/types"
 )
 
 func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) error {
-	// Params is a VALUE (not *Params) in SDK v0.53 proto output.
-	if err := k.Params.Set(ctx, genState.Params); err != nil {
+	if err := k.SetParams(ctx, genState.Params); err != nil {
 		return err
 	}
 
-	// RegionMetrics / GrowthScores / Occupations should be VALUE slices (not []*T).
-	for _, m := range genState.RegionMetrics {
-		// m is value, never nil; store as-is
+	// Store metrics
+	for _, m := range genState.Metrics {
 		if err := k.SetRegionMetric(ctx, m); err != nil {
 			return err
 		}
 	}
 
-	for _, s := range genState.GrowthScores {
+	// Store scores
+	for _, s := range genState.Scores {
 		if err := k.SetGrowthScore(ctx, s); err != nil {
 			return err
 		}
 	}
 
-	for _, o := range genState.Occupations {
-		// IMPORTANT: o.Occupation is already sdkmath.LegacyDec (value) in v0.53.
-		// Do not parse from string.
-		if err := k.SetRegionOccupation(ctx, o.RegionId, o.Occupation); err != nil {
+	// Store occupations
+	for _, o := range genState.OccupationList {
+		if err := k.SetRegionOccupation(ctx, o.RegionId, o.Period, o.Occupation); err != nil {
 			return err
 		}
 	}
@@ -38,21 +39,73 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 }
 
 func (k Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error) {
-	params, err := k.Params.Get(ctx)
+	params, err := k.GetParams(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	metrics := k.GetAllRegionMetrics(ctx)
-	scores := k.GetAllGrowthScores(ctx)
+	metrics := make([]types.RegionMetric, 0)
+	{
+		it, err := k.RegionMetrics.Iterate(ctx, nil)
+		if err == nil {
+			defer it.Close()
+			for ; it.Valid(); it.Next() {
+				v, err := it.Value()
+				if err == nil {
+					metrics = append(metrics, v)
+				}
+			}
+		}
+	}
 
-	// Occupations might be stored as a map in keeper; export as []types.Occupation.
-	occupations := k.GetAllOccupations(ctx)
+	scores := make([]types.GrowthScore, 0)
+	{
+		it, err := k.GrowthScores.Iterate(ctx, nil)
+		if err == nil {
+			defer it.Close()
+			for ; it.Valid(); it.Next() {
+				v, err := it.Value()
+				if err == nil {
+					scores = append(scores, v)
+				}
+			}
+		}
+	}
+
+	occupationList := make([]types.Occupation, 0)
+	{
+		it, err := k.Occupations.Iterate(ctx, nil)
+		if err == nil {
+			defer it.Close()
+			for ; it.Valid(); it.Next() {
+				key, err := it.Key()
+				if err != nil {
+					continue
+				}
+				valStr, err := it.Value()
+				if err != nil {
+					continue
+				}
+				dec, err := sdkmath.LegacyNewDecFromStr(valStr)
+				if err != nil {
+					continue
+				}
+
+				occupationList = append(occupationList, types.Occupation{
+					RegionId:   key.K1(),
+					Period:     key.K2(),
+					Occupation: dec,
+				})
+			}
+		}
+	}
+
+	_ = collections.Pair[string, string]{}
 
 	return &types.GenesisState{
-		Params:        params,
-		RegionMetrics: metrics,
-		GrowthScores:  scores,
-		Occupations:   occupations,
+		Params:         params,
+		Metrics:        metrics,
+		Scores:         scores,
+		OccupationList: occupationList,
 	}, nil
 }

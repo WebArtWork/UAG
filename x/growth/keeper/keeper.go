@@ -2,8 +2,10 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 
 	"cosmossdk.io/collections"
+	"cosmossdk.io/core/address"
 	corestore "cosmossdk.io/core/store"
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -16,25 +18,67 @@ import (
 type Keeper struct {
 	storeService corestore.KVStoreService
 	cdc          codec.Codec
+	addressCodec address.Codec
 	types.UnimplementedQueryServer
 
-	Schema        collections.Schema
-	Params        collections.Item[types.Params]
+	Schema collections.Schema
+
+	Params collections.Item[types.Params]
+
+	// Metrics keyed by (region_id, period)
 	RegionMetrics collections.Map[collections.Pair[string, string], types.RegionMetric]
-	GrowthScores  collections.Map[collections.Pair[string, string], types.GrowthScore]
-	Occupations   collections.Map[collections.Pair[string, string], sdkmath.LegacyDec]
+
+	// Scores keyed by region_id (period-specific logic can be added later)
+	GrowthScores collections.Map[string, types.GrowthScore]
+
+	// Occupations keyed by (region_id, period) -> stored as STRING (decimal) to avoid missing LegacyDec codec.
+	Occupations collections.Map[collections.Pair[string, string], string]
 }
 
-func NewKeeper(storeService corestore.KVStoreService, cdc codec.Codec) Keeper {
+func NewKeeper(
+	storeService corestore.KVStoreService,
+	cdc codec.Codec,
+	addressCodec address.Codec,
+) Keeper {
 	sb := collections.NewSchemaBuilder(storeService)
+
 	k := Keeper{
-		storeService:  storeService,
-		cdc:           cdc,
-		Params:        collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
-		RegionMetrics: collections.NewMap(sb, types.MetricKeyPrefix, "metrics", collections.PairKeyCodec(collections.StringKey, collections.StringKey), codec.CollValue[types.RegionMetric](cdc)),
-		GrowthScores:  collections.NewMap(sb, types.ScoreKeyPrefix, "scores", collections.PairKeyCodec(collections.StringKey, collections.StringKey), codec.CollValue[types.GrowthScore](cdc)),
-		Occupations:   collections.NewMap(sb, types.OccupationKeyPrefix, "occupations", collections.PairKeyCodec(collections.StringKey, collections.StringKey), sdk.LegacyDecValue),
+		storeService: storeService,
+		cdc:          cdc,
+		addressCodec: addressCodec,
+
+		Params: collections.NewItem(
+			sb,
+			types.ParamsKey,
+			"params",
+			codec.CollValue[types.Params](cdc),
+		),
+
+		RegionMetrics: collections.NewMap(
+			sb,
+			types.RegionMetricKeyPrefix,
+			"region_metrics",
+			collections.PairKeyCodec(collections.StringKey, collections.StringKey),
+			codec.CollValue[types.RegionMetric](cdc),
+		),
+
+		GrowthScores: collections.NewMap(
+			sb,
+			types.GrowthScoreKeyPrefix,
+			"growth_scores",
+			collections.StringKey,
+			codec.CollValue[types.GrowthScore](cdc),
+		),
+
+		Occupations: collections.NewMap(
+			sb,
+			types.OccupationKeyPrefix,
+			"occupations",
+			collections.PairKeyCodec(collections.StringKey, collections.StringKey),
+			collections.StringValue,
+		),
 	}
+
 	schema, err := sb.Build()
 	if err != nil {
 		panic(err)
@@ -43,220 +87,92 @@ func NewKeeper(storeService corestore.KVStoreService, cdc codec.Codec) Keeper {
 	return k
 }
 
-func (k Keeper) SetParams(ctx context.Context, params types.Params) error {
-	if err := params.Validate(); err != nil {
-		return err
-	}
-	return k.Params.Set(ctx, params)
+func (k Keeper) SetParams(ctx context.Context, p types.Params) error {
+	return k.Params.Set(ctx, p)
 }
 
 func (k Keeper) GetParams(ctx context.Context) (types.Params, error) {
-	return k.Params.Get(ctx)
+	p, err := k.Params.Get(ctx)
+	if err != nil {
+		return types.Params{}, err
+	}
+	return p, nil
 }
 
 func (k Keeper) SetRegionMetric(ctx context.Context, metric types.RegionMetric) error {
-	if err := types.ValidateRegionMetric(&metric); err != nil {
+	// FIX: validator expects VALUE not *VALUE
+	if err := types.ValidateRegionMetric(metric); err != nil {
 		return err
 	}
-	if err := k.RegionMetrics.Set(ctx, collections.Join(metric.RegionId, metric.Period), metric); err != nil {
-		return err
-	}
-	score := k.ComputeGrowthScore(metric)
-	return k.SetGrowthScore(ctx, score)
+	key := collections.Join(metric.RegionId, metric.Period)
+	return k.RegionMetrics.Set(ctx, key, metric)
 }
 
 func (k Keeper) GetRegionMetric(ctx context.Context, regionID, period string) (types.RegionMetric, bool) {
-	metric, err := k.RegionMetrics.Get(ctx, collections.Join(regionID, period))
+	key := collections.Join(regionID, period)
+	v, err := k.RegionMetrics.Get(ctx, key)
 	if err != nil {
 		return types.RegionMetric{}, false
 	}
-	return metric, true
-}
-
-func (k Keeper) GetRegionMetricsForRegion(ctx context.Context, regionID string) []types.RegionMetric {
-	var metrics []types.RegionMetric
-	iterator, err := k.RegionMetrics.Iterate(ctx, nil)
-	if err != nil {
-		return metrics
-	}
-	defer iterator.Close()
-	for ; iterator.Valid(); iterator.Next() {
-		key, err := iterator.Key()
-		if err != nil {
-			continue
-		}
-		if key.K1() != regionID {
-			continue
-		}
-		value, err := iterator.Value()
-		if err == nil {
-			metrics = append(metrics, value)
-		}
-	}
-	return metrics
-}
-
-func (k Keeper) GetRegionMetricsForPeriod(ctx context.Context, period string) []types.RegionMetric {
-	var metrics []types.RegionMetric
-	iterator, err := k.RegionMetrics.Iterate(ctx, nil)
-	if err != nil {
-		return metrics
-	}
-	defer iterator.Close()
-	for ; iterator.Valid(); iterator.Next() {
-		key, err := iterator.Key()
-		if err != nil {
-			continue
-		}
-		if key.K2() != period {
-			continue
-		}
-		value, err := iterator.Value()
-		if err == nil {
-			metrics = append(metrics, value)
-		}
-	}
-	return metrics
-}
-
-// SetRegionOccupation stores the occupation percentage for a region and period.
-func (k Keeper) SetRegionOccupation(ctx context.Context, regionID, period string, occupation sdkmath.LegacyDec) error {
-	if occupation.IsNegative() {
-		return types.ErrInvalidMetric
-	}
-	return k.Occupations.Set(ctx, collections.Join(regionID, period), occupation)
-}
-
-// GetRegionOccupation returns the occupation percentage for the given region in the current period.
-// If no explicit occupation is stored for the region, it falls back to the national region when available.
-func (k Keeper) GetRegionOccupation(ctx context.Context, regionID string) (sdkmath.LegacyDec, bool) {
-	params, err := k.GetParams(ctx)
-	if err != nil {
-		return sdkmath.LegacyZeroDec(), false
-	}
-
-	if params.CurrentPeriod == "" {
-		return sdkmath.LegacyZeroDec(), false
-	}
-
-	if occupation, err := k.Occupations.Get(ctx, collections.Join(regionID, params.CurrentPeriod)); err == nil {
-		return occupation, true
-	}
-
-	if regionID != params.NationalRegionId {
-		if occupation, err := k.Occupations.Get(ctx, collections.Join(params.NationalRegionId, params.CurrentPeriod)); err == nil {
-			return occupation, true
-		}
-	}
-
-	return sdkmath.LegacyZeroDec(), false
-}
-
-func (k Keeper) ComputeGrowthScore(metric types.RegionMetric) types.GrowthScore {
-	tax := mustDec(metric.TaxIndex)
-	gdp := mustDec(metric.GdpIndex)
-	exports := mustDec(metric.ExportsIndex)
-
-	score := tax.Add(gdp).Add(exports).QuoInt64(3)
-	score = clampDec(score, sdkmath.LegacyZeroDec(), sdkmath.LegacyNewDec(2))
-	base := sdkmath.LegacyMustNewDecFromStr("0.5")
-	delegationMultiplier := clampDec(base.Add(score), sdkmath.LegacyZeroDec(), sdkmath.LegacyNewDec(3))
-	payrollMultiplier := clampDec(base.Add(score), sdkmath.LegacyZeroDec(), sdkmath.LegacyNewDec(3))
-
-	return types.GrowthScore{
-		RegionId:             metric.RegionId,
-		Period:               metric.Period,
-		Score:                score.String(),
-		DelegationMultiplier: delegationMultiplier.String(),
-		PayrollMultiplier:    payrollMultiplier.String(),
-	}
+	return v, true
 }
 
 func (k Keeper) SetGrowthScore(ctx context.Context, score types.GrowthScore) error {
-	if err := types.ValidateGrowthScore(&score); err != nil {
+	// FIX: validator expects VALUE not *VALUE
+	if err := types.ValidateGrowthScore(score); err != nil {
 		return err
 	}
-	return k.GrowthScores.Set(ctx, collections.Join(score.RegionId, score.Period), score)
+	return k.GrowthScores.Set(ctx, score.RegionId, score)
 }
 
-func (k Keeper) GetGrowthScore(ctx context.Context, regionID, period string) (types.GrowthScore, bool) {
-	score, err := k.GrowthScores.Get(ctx, collections.Join(regionID, period))
+func (k Keeper) GetGrowthScore(ctx context.Context, regionID string) (types.GrowthScore, bool) {
+	v, err := k.GrowthScores.Get(ctx, regionID)
 	if err != nil {
 		return types.GrowthScore{}, false
 	}
-	return score, true
+	return v, true
 }
 
-// GetEffectiveLimits returns base fund limits multiplied by growth multipliers for the current period.
-// Intended integration: x/fund keeper should call this helper when validating fund plans instead of using
-// static base limits directly.
+func (k Keeper) SetRegionOccupation(ctx context.Context, regionID, period string, occ sdkmath.LegacyDec) error {
+	if regionID == "" || period == "" {
+		return fmt.Errorf("region_id and period required")
+	}
+	key := collections.Join(regionID, period)
+	// store as string
+	return k.Occupations.Set(ctx, key, occ.String())
+}
+
+func (k Keeper) GetRegionOccupation(ctx context.Context, regionID, period string) (sdkmath.LegacyDec, bool) {
+	key := collections.Join(regionID, period)
+	s, err := k.Occupations.Get(ctx, key)
+	if err != nil {
+		return sdkmath.LegacyDec{}, false
+	}
+	v, err := sdkmath.LegacyNewDecFromStr(s)
+	if err != nil {
+		return sdkmath.LegacyDec{}, false
+	}
+	return v, true
+}
+
+// Used by fund module: keep stable signature.
 func (k Keeper) GetEffectiveLimits(ctx context.Context, fund fundtypes.Fund) (delegationLimit sdk.Coin, payrollLimit sdk.Coin) {
-	params, err := k.GetParams(ctx)
-	if err != nil {
-		return baseDelegationLimitOrZero(fund), basePayrollLimitOrZero(fund)
+	// Defaults: unlimited (0). You can wire real base caps from Params later.
+	baseDelegation := sdk.NewCoin(fundtypes.BaseDenom, sdkmath.NewInt(0))
+	basePayroll := sdk.NewCoin(fundtypes.BaseDenom, sdkmath.NewInt(0))
+
+	score, found := k.GetGrowthScore(ctx, fund.RegionId)
+	if !found {
+		return baseDelegation, basePayroll
 	}
 
-	regionID := params.NationalRegionId
-	if fund.Type == fundtypes.FundType_FUND_TYPE_REGION && fund.RegionId != "" {
-		regionID = fund.RegionId
+	// Multipliers are LegacyDec VALUE already (don’t parse strings).
+	if baseDelegation.Amount.IsPositive() {
+		baseDelegation = sdk.NewCoin(baseDelegation.Denom, score.DelegationMultiplier.MulInt(baseDelegation.Amount).TruncateInt())
 	}
-	// Ukraine-level and projects funds default to the national growth scope to reflect country-wide dynamics.
-
-	delegationMultiplier := sdkmath.LegacyOneDec()
-	payrollMultiplier := sdkmath.LegacyOneDec()
-	if score, found := k.GetGrowthScore(ctx, regionID, params.CurrentPeriod); found {
-		if dm, err := sdkmath.LegacyNewDecFromStr(score.DelegationMultiplier); err == nil {
-			delegationMultiplier = dm
-		}
-		if pm, err := sdkmath.LegacyNewDecFromStr(score.PayrollMultiplier); err == nil {
-			payrollMultiplier = pm
-		}
+	if basePayroll.Amount.IsPositive() {
+		basePayroll = sdk.NewCoin(basePayroll.Denom, score.PayrollMultiplier.MulInt(basePayroll.Amount).TruncateInt())
 	}
 
-	baseDelegation := baseDelegationLimitOrZero(fund)
-	if baseDelegation.Denom == "" {
-		baseDelegation.Denom = fundtypes.BaseDenom
-	}
-	basePayroll := basePayrollLimitOrZero(fund)
-	if basePayroll.Denom == "" {
-		basePayroll.Denom = fundtypes.BaseDenom
-	}
-
-	delegationAmount := sdkmath.LegacyNewDecFromInt(baseDelegation.Amount).Mul(delegationMultiplier).TruncateInt()
-	payrollAmount := sdkmath.LegacyNewDecFromInt(basePayroll.Amount).Mul(payrollMultiplier).TruncateInt()
-
-	return sdk.NewCoin(baseDelegation.Denom, delegationAmount), sdk.NewCoin(basePayroll.Denom, payrollAmount)
-}
-
-func mustDec(v string) sdkmath.LegacyDec {
-	dec, err := sdkmath.LegacyNewDecFromStr(v)
-	if err != nil {
-		panic(err)
-	}
-	return dec
-}
-
-func clampDec(value, min, max sdkmath.LegacyDec) sdkmath.LegacyDec {
-	if value.LT(min) {
-		return min
-	}
-	if value.GT(max) {
-		return max
-	}
-	return value
-}
-
-// Base limit helpers when fund module has nil coins.
-func baseDelegationLimitOrZero(f fundtypes.Fund) sdk.Coin {
-	if f.BaseDelegationLimit == nil {
-		return sdk.NewCoin(fundtypes.BaseDenom, sdkmath.ZeroInt())
-	}
-	return *f.BaseDelegationLimit
-}
-
-func basePayrollLimitOrZero(f fundtypes.Fund) sdk.Coin {
-	if f.BasePayrollLimit == nil {
-		return sdk.NewCoin(fundtypes.BaseDenom, sdkmath.ZeroInt())
-	}
-	return *f.BasePayrollLimit
+	return baseDelegation, basePayroll
 }

@@ -6,7 +6,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	fundtypes "uagd/x/fund/types"
 	"uagd/x/ugov/types"
 )
 
@@ -14,122 +13,131 @@ type MsgServer struct{ Keeper }
 
 func NewMsgServerImpl(k Keeper) *MsgServer { return &MsgServer{Keeper: k} }
 
-func (s MsgServer) SetPresident(goCtx context.Context, msg *types.MsgSetPresident) (*types.President, error) {
+var _ types.MsgServer = MsgServer{}
+
+func (s MsgServer) CreatePlan(goCtx context.Context, msg *types.MsgCreatePlan) (*types.MsgCreatePlanResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+
 	if err := msg.ValidateBasic(); err != nil {
 		return nil, err
 	}
-	if err := s.Keeper.MustBeAdmin(ctx, msg.Authority); err != nil {
+
+	id := s.getNextPlanID(ctx)
+	plan := types.Plan{
+		Id:          id,
+		Creator:     msg.Creator,
+		FundAddress: msg.FundAddress,
+		Title:       msg.Title,
+		Description: msg.Description,
+		Status:      types.PlanStatus_PLAN_STATUS_DRAFT,
+		Plan:        msg.Plan,
+		ProposalId:  0,
+	}
+
+	if err := s.SetPlan(ctx, plan); err != nil {
+		return nil, err
+	}
+	if err := s.bumpNextPlanID(ctx, id+1); err != nil {
 		return nil, err
 	}
 
-	p := types.President{
-		RoleType:    msg.RoleType,
-		RegionId:    msg.RegionId,
-		Address:     msg.Address,
-		Active:      true,
-		SinceHeight: ctx.BlockHeight(),
-	}
-	s.Keeper.SetPresident(ctx, p)
-
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent("ugov.president_set",
-			sdk.NewAttribute("role_type", fmt.Sprintf("%d", msg.RoleType)),
-			sdk.NewAttribute("region_id", msg.RegionId),
-			sdk.NewAttribute("address", msg.Address),
-		),
-	)
-	return &p, nil
+	return &types.MsgCreatePlanResponse{Id: id}, nil
 }
 
-func (s MsgServer) CreateFundPlan(goCtx context.Context, msg *types.MsgCreateFundPlan) (*types.StoredFundPlan, error) {
+func (s MsgServer) UpdatePlan(goCtx context.Context, msg *types.MsgUpdatePlan) (*types.MsgUpdatePlanResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+
 	if err := msg.ValidateBasic(); err != nil {
 		return nil, err
 	}
 
-	// TODO: replace with fund->region mapping from x/fund.
-	role := types.PRESIDENT_TYPE_NATIONAL
-	regionId := ""
+	plan, found := s.GetPlan(ctx, msg.Id)
+	if !found {
+		return nil, fmt.Errorf("plan not found")
+	}
+	if plan.Creator != msg.Creator {
+		return nil, fmt.Errorf("only creator can update plan")
+	}
+	if plan.Status != types.PlanStatus_PLAN_STATUS_DRAFT {
+		return nil, fmt.Errorf("plan must be DRAFT to update")
+	}
 
-	id, err := s.Keeper.CreatePlan(ctx, msg.Creator, msg.FundAddress, msg.Title, msg.Description, role, regionId, msg.PlanJSON)
+	plan.Title = msg.Title
+	plan.Description = msg.Description
+	plan.Plan = msg.Plan
+
+	if err := s.SetPlan(ctx, plan); err != nil {
+		return nil, err
+	}
+
+	return &types.MsgUpdatePlanResponse{}, nil
+}
+
+func (s MsgServer) SubmitPlan(goCtx context.Context, msg *types.MsgSubmitPlan) (*types.MsgSubmitPlanResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	if err := msg.ValidateBasic(); err != nil {
+		return nil, err
+	}
+
+	plan, found := s.GetPlan(ctx, msg.Id)
+	if !found {
+		return nil, fmt.Errorf("plan not found")
+	}
+	if plan.Creator != msg.Creator {
+		return nil, fmt.Errorf("only creator can submit plan")
+	}
+	if plan.Status != types.PlanStatus_PLAN_STATUS_DRAFT {
+		return nil, fmt.Errorf("plan must be DRAFT to submit")
+	}
+
+	plan.Status = types.PlanStatus_PLAN_STATUS_SUBMITTED
+	plan.ProposalId = msg.ProposalId
+
+	if err := s.SetPlan(ctx, plan); err != nil {
+		return nil, err
+	}
+
+	return &types.MsgSubmitPlanResponse{}, nil
+}
+
+func (s MsgServer) ExecuteFundPlan(goCtx context.Context, msg *types.MsgExecuteFundPlan) (*types.MsgExecuteFundPlanResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	if err := msg.ValidateBasic(); err != nil {
+		return nil, err
+	}
+
+	params, err := s.GetParams(ctx)
 	if err != nil {
 		return nil, err
 	}
-
-	p, _ := s.Keeper.GetPlan(ctx, id)
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent("ugov.plan_created",
-			sdk.NewAttribute("plan_id", fmt.Sprintf("%d", id)),
-			sdk.NewAttribute("fund_address", msg.FundAddress),
-			sdk.NewAttribute("creator", msg.Creator),
-		),
-	)
-	return &p, nil
-}
-
-// Placeholder: in gov v1, you normally submit proposals via gov CLI with messages.
-func (s MsgServer) SubmitFundPlanAsProposal(goCtx context.Context, msg *types.MsgSubmitFundPlanAsProposal) (*types.StoredFundPlan, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	if err := msg.ValidateBasic(); err != nil {
-		return nil, err
+	if params.Authority != "" && params.Authority != msg.Authority {
+		return nil, fmt.Errorf("unauthorized: expected authority %s", params.Authority)
 	}
 
-	if err := s.Keeper.MustBePresident(ctx, msg.Creator, types.PRESIDENT_TYPE_NATIONAL, ""); err != nil {
-		return nil, err
-	}
-
-	if err := s.Keeper.MarkSubmitted(ctx, msg.PlanId, 0); err != nil {
-		return nil, err
-	}
-	p, _ := s.Keeper.GetPlan(ctx, msg.PlanId)
-	return &p, nil
-}
-
-func (s MsgServer) ExecuteFundPlan(goCtx context.Context, msg *types.MsgExecuteFundPlan) (*types.StoredFundPlan, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	if err := msg.ValidateBasic(); err != nil {
-		return nil, err
-	}
-	if err := s.Keeper.MustBeGovAuthority(msg.Authority); err != nil {
-		return nil, err
-	}
-
-	plan, ok := s.Keeper.GetPlan(ctx, msg.PlanId)
-	if !ok {
+	plan, found := s.GetPlan(ctx, msg.PlanId)
+	if !found {
 		return nil, fmt.Errorf("plan not found")
 	}
-	if plan.Status == types.PLAN_STATUS_EXECUTED {
-		return nil, fmt.Errorf("plan already executed")
-	}
-	if plan.Status != types.PLAN_STATUS_SUBMITTED {
-		return nil, fmt.Errorf("plan must be SUBMITTED before execution")
+	if plan.Status != types.PlanStatus_PLAN_STATUS_SUBMITTED {
+		return nil, fmt.Errorf("plan must be SUBMITTED to execute")
 	}
 
-	var fundPlan fundtypes.FundPlan
-	if err := fundtypes.GetFundPlanCodec().UnmarshalJSON(plan.PlanJSON, &fundPlan); err != nil {
-		return nil, fmt.Errorf("invalid stored plan: %w", err)
-	}
-	if fundPlan.Id == 0 {
-		fundPlan.Id = plan.Id
-	}
-	fundPlan.FundAddress = plan.FundAddress
+	authorityAddr := sdk.MustAccAddressFromBech32(msg.Authority)
 
-	plan.Status = types.PLAN_STATUS_APPROVED
-	if err := s.fundKeeper.ExecuteFundPlan(ctx, fundPlan, sdk.MustAccAddressFromBech32(msg.Authority)); err != nil {
+	// Ensure fund address is carried (just in case)
+	fp := plan.Plan
+	fp.FundAddress = plan.FundAddress
+
+	if err := s.fundKeeper.ExecuteFundPlan(ctx, fp, authorityAddr); err != nil {
 		return nil, err
 	}
 
-	plan.Status = types.PLAN_STATUS_EXECUTED
-	plan.ExecutedAtHeight = ctx.BlockHeight()
-	s.Keeper.SetPlan(ctx, plan)
+	plan.Status = types.PlanStatus_PLAN_STATUS_EXECUTED
+	if err := s.SetPlan(ctx, plan); err != nil {
+		return nil, err
+	}
 
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent("ugov.plan_executed",
-			sdk.NewAttribute("plan_id", fmt.Sprintf("%d", plan.Id)),
-			sdk.NewAttribute("fund_address", plan.FundAddress),
-		),
-	)
-
-	return &plan, nil
+	return &types.MsgExecuteFundPlanResponse{}, nil
 }
