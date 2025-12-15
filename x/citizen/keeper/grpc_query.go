@@ -18,10 +18,12 @@ func (k Keeper) RegionByAddress(ctx context.Context, req *types.QueryRegionByAdd
 	if _, err := k.addressCodec.StringToBytes(req.Address); err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid address")
 	}
+
 	region, found := k.GetRegionByString(ctx, req.Address)
 	if !found {
 		return nil, status.Error(codes.NotFound, "region not found")
 	}
+
 	return &types.QueryRegionByAddressResponse{RegionId: region}, nil
 }
 
@@ -41,5 +43,7 @@ func (k Keeper) Params(ctx context.Context, req *types.QueryParamsRequest) (*typ
 	if err != nil {
 		return nil, err
 	}
-	return &types.QueryParamsResponse{Params: &params}, nil
+
+	// QueryParamsResponse.Params is a VALUE (not *Params).
+	return &types.QueryParamsResponse{Params: params}, nil
 }

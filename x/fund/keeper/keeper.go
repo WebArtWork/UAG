@@ -42,9 +42,11 @@ func NewKeeper(
 	growthKeeper types.GrowthKeeper,
 	govAuthority sdk.AccAddress,
 ) Keeper {
+	// sdk.AccAddress is []byte, so nil can happen. Default to gov module authority.
 	if govAuthority == nil {
 		govAuthority = authtypes.NewModuleAddress(govtypes.ModuleName)
 	}
+
 	sb := collections.NewSchemaBuilder(storeService)
 	k := Keeper{
 		storeService:  storeService,
@@ -57,6 +59,7 @@ func NewKeeper(
 		FundStore:     collections.NewMap(sb, types.FundKeyPrefix, "funds", collections.StringKey, codec.CollValue[types.Fund](cdc)),
 		Params:        collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 	}
+
 	schema, err := sb.Build()
 	if err != nil {
 		panic(err)
@@ -92,6 +95,7 @@ func (k Keeper) GetAllFunds(ctx context.Context) []types.Fund {
 		return funds
 	}
 	defer iterator.Close()
+
 	for ; iterator.Valid(); iterator.Next() {
 		fund, err := iterator.Value()
 		if err == nil {
@@ -150,34 +154,44 @@ func (k Keeper) ValidateFundPlan(ctx context.Context, plan types.FundPlan) error
 	// Regional occupation lock: if a region is more than 50% occupied, no outflows are allowed.
 	if fund.Type == types.FundType_FUND_TYPE_REGION {
 		occupation, found := k.growthKeeper.GetRegionOccupation(ctx, fund.RegionId)
-		if found {
-			if occupation.GT(sdkmath.LegacyNewDec(50)) {
-				return types.ErrRegionLocked
-			}
+		if found && occupation.GT(sdkmath.LegacyNewDec(50)) {
+			return types.ErrRegionLocked
 		}
 	}
 
 	delegationLimit, payrollLimit := k.growthKeeper.GetEffectiveLimits(ctx, fund)
+
 	totalDelegations := sdkmath.ZeroInt()
 	totalPayouts := sdkmath.ZeroInt()
+
 	for _, d := range plan.Delegations {
-		if d == nil || d.Amount == nil {
-			return fmt.Errorf("delegation entry invalid")
+		// FundDelegation is a VALUE type (not *FundDelegation).
+		if d.ValidatorAddress == "" {
+			return fmt.Errorf("delegation validator_address is required")
+		}
+		if !d.Amount.IsValid() || d.Amount.IsZero() {
+			return fmt.Errorf("delegation amount invalid")
 		}
 		if d.Amount.Denom != types.BaseDenom {
 			return types.ErrInvalidDenom
 		}
 		totalDelegations = totalDelegations.Add(d.Amount.Amount)
 	}
+
 	for _, p := range plan.Payouts {
-		if p == nil || p.Amount == nil {
-			return fmt.Errorf("payout entry invalid")
+		// FundPayout is a VALUE type (not *FundPayout).
+		if p.RecipientAddress == "" {
+			return fmt.Errorf("payout recipient_address is required")
+		}
+		if !p.Amount.IsValid() || p.Amount.IsZero() {
+			return fmt.Errorf("payout amount invalid")
 		}
 		if p.Amount.Denom != types.BaseDenom {
 			return types.ErrInvalidDenom
 		}
 		totalPayouts = totalPayouts.Add(p.Amount.Amount)
 	}
+
 	if delegationLimit.Amount.IsPositive() && totalDelegations.GT(delegationLimit.Amount) {
 		return types.ErrDelegationLimit
 	}
@@ -194,6 +208,7 @@ func (k Keeper) ExecuteFundPlan(ctx context.Context, plan types.FundPlan, author
 	if err := k.ValidateFundPlan(ctx, plan); err != nil {
 		return err
 	}
+
 	fundAddr, err := k.addressCodec.StringToBytes(plan.FundAddress)
 	if err != nil {
 		return err
@@ -201,31 +216,43 @@ func (k Keeper) ExecuteFundPlan(ctx context.Context, plan types.FundPlan, author
 	fundAcc := sdk.AccAddress(fundAddr)
 
 	for _, del := range plan.Delegations {
-		if del == nil || del.Amount == nil {
-			return fmt.Errorf("delegation entry invalid")
+		if del.ValidatorAddress == "" {
+			return fmt.Errorf("delegation validator_address is required")
 		}
+		if !del.Amount.IsValid() || del.Amount.IsZero() {
+			return fmt.Errorf("delegation amount invalid")
+		}
+
 		valAddr, err := k.stakingKeeper.ValidatorAddressCodec().StringToBytes(del.ValidatorAddress)
 		if err != nil {
 			return err
 		}
+
 		validator, err := k.stakingKeeper.GetValidator(ctx, sdk.ValAddress(valAddr))
 		if err != nil {
 			return err
 		}
+
 		if _, err := k.stakingKeeper.Delegate(ctx, fundAcc, del.Amount.Amount, stakingtypes.Unbonded, validator, true); err != nil {
 			return err
 		}
 	}
 
 	for _, payout := range plan.Payouts {
-		if payout == nil || payout.Amount == nil {
-			return fmt.Errorf("payout entry invalid")
+		if payout.RecipientAddress == "" {
+			return fmt.Errorf("payout recipient_address is required")
 		}
+		if !payout.Amount.IsValid() || payout.Amount.IsZero() {
+			return fmt.Errorf("payout amount invalid")
+		}
+
 		toAddr, err := k.addressCodec.StringToBytes(payout.RecipientAddress)
 		if err != nil {
 			return err
 		}
-		if err := k.bankKeeper.SendCoins(ctx, fundAcc, sdk.AccAddress(toAddr), sdk.NewCoins(*payout.Amount)); err != nil {
+
+		// payout.Amount is a VALUE type (not *Coin).
+		if err := k.bankKeeper.SendCoins(ctx, fundAcc, sdk.AccAddress(toAddr), sdk.NewCoins(payout.Amount)); err != nil {
 			return err
 		}
 	}
@@ -238,5 +265,6 @@ func (k Keeper) ExecuteFundPlan(ctx context.Context, plan types.FundPlan, author
 			sdk.NewAttribute("plan_id", fmt.Sprintf("%d", plan.Id)),
 		),
 	)
+
 	return nil
 }

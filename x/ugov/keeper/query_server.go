@@ -2,60 +2,48 @@ package keeper
 
 import (
 	"context"
-	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"uagd/x/ugov/types"
 )
 
-type QueryServer struct{ Keeper }
+// NOTE:
+// Your current ugov keeper code references proto types that don't exist in your generated ugov `types`
+// (e.g. types.President, types.StoredFundPlan). Until the ugov protos are aligned, we keep the
+// query server compiling by returning Unimplemented.
+//
+// Once you confirm the real message names in proto, we’ll wire storage + real responses.
 
-func NewQueryServer(k Keeper) QueryServer { return QueryServer{Keeper: k} }
+var _ types.QueryServer = Keeper{}
 
-type QueryPresidentRequest struct {
-	RoleType types.PresidentRoleType `json:"role_type"`
-	RegionId string                  `json:"region_id"`
-}
-type QueryPresidentResponse struct {
-	President *types.President `json:"president"`
-}
-
-func (q QueryServer) President(goCtx context.Context, req *QueryPresidentRequest) (*QueryPresidentResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	p, ok := q.Keeper.GetPresident(ctx, req.RoleType, req.RegionId)
-	if !ok {
-		return &QueryPresidentResponse{President: nil}, nil
+func (k Keeper) Params(ctx context.Context, req *types.QueryParamsRequest) (*types.QueryParamsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
-	return &QueryPresidentResponse{President: &p}, nil
-}
-
-type QueryPresidentsRequest struct{}
-type QueryPresidentsResponse struct {
-	Presidents []types.President `json:"presidents"`
-}
-
-func (q QueryServer) Presidents(goCtx context.Context, _ *QueryPresidentsRequest) (*QueryPresidentsResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	return &QueryPresidentsResponse{Presidents: q.Keeper.GetAllPresidents(ctx)}, nil
-}
-
-type QueryFundPlanRequest struct{ PlanId uint64 `json:"plan_id"` }
-type QueryFundPlanResponse struct{ Plan *types.StoredFundPlan `json:"plan"` }
-
-func (q QueryServer) FundPlan(goCtx context.Context, req *QueryFundPlanRequest) (*QueryFundPlanResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	p, ok := q.Keeper.GetPlan(ctx, req.PlanId)
-	if !ok {
-		return nil, fmt.Errorf("plan not found")
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return nil, err
 	}
-	return &QueryFundPlanResponse{Plan: &p}, nil
+	return &types.QueryParamsResponse{Params: params}, nil
 }
 
-type QueryFundPlansByStatusRequest struct{ Status types.FundPlanStatus `json:"status"` }
-type QueryFundPlansByStatusResponse struct{ Plans []types.StoredFundPlan `json:"plans"` }
+// If your proto defines other queries (presidents/plans/etc), keep them compiling as stubs.
+// Replace these method signatures to match exactly what `types.QueryServer` requires in your repo.
 
-func (q QueryServer) FundPlansByStatus(goCtx context.Context, req *QueryFundPlansByStatusRequest) (*QueryFundPlansByStatusResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	return &QueryFundPlansByStatusResponse{Plans: q.Keeper.GetPlansByStatus(ctx, req.Status)}, nil
+func (k Keeper) President(ctx context.Context, req *types.QueryPresidentRequest) (*types.QueryPresidentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "ugov: President query not implemented yet (proto/types mismatch)")
+}
+
+func (k Keeper) Presidents(ctx context.Context, req *types.QueryPresidentsRequest) (*types.QueryPresidentsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "ugov: Presidents query not implemented yet (proto/types mismatch)")
+}
+
+func (k Keeper) FundPlan(ctx context.Context, req *types.QueryFundPlanRequest) (*types.QueryFundPlanResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "ugov: FundPlan query not implemented yet (proto/types mismatch)")
+}
+
+func (k Keeper) FundPlans(ctx context.Context, req *types.QueryFundPlansRequest) (*types.QueryFundPlansResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "ugov: FundPlans query not implemented yet (proto/types mismatch)")
 }

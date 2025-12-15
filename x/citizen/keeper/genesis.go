@@ -9,13 +9,13 @@ import (
 )
 
 func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) error {
-	if err := k.SetParams(ctx, *genState.Params); err != nil {
+	// Params is a VALUE (not *Params) in SDK v0.53 proto output.
+	if err := k.SetParams(ctx, genState.Params); err != nil {
 		return err
 	}
+
+	// Entries is []CitizenRegion (not []*CitizenRegion).
 	for _, entry := range genState.Entries {
-		if entry == nil {
-			continue
-		}
 		addr, err := sdk.AccAddressFromBech32(entry.Address)
 		if err != nil {
 			return err
@@ -24,6 +24,7 @@ func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) er
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -32,10 +33,13 @@ func (k Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error) 
 	if err != nil {
 		return nil, err
 	}
-	entries := []*types.CitizenRegion{}
+
+	entries := make([]types.CitizenRegion, 0)
+
 	iterator, err := k.RegionByAddressStore.Iterate(ctx, nil)
 	if err == nil {
 		defer iterator.Close()
+
 		for ; iterator.Valid(); iterator.Next() {
 			addrBytes, err := iterator.Key()
 			if err != nil {
@@ -49,8 +53,12 @@ func (k Keeper) ExportGenesis(ctx context.Context) (*types.GenesisState, error) 
 			if err != nil {
 				continue
 			}
-			entries = append(entries, &types.CitizenRegion{Address: addrStr, RegionId: region})
+			entries = append(entries, types.CitizenRegion{Address: addrStr, RegionId: region})
 		}
 	}
-	return &types.GenesisState{Params: &params, Entries: entries}, nil
+
+	return &types.GenesisState{
+		Params:  params,
+		Entries: entries,
+	}, nil
 }
