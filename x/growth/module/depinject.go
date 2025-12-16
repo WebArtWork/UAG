@@ -2,28 +2,45 @@ package growth
 
 import (
 	"cosmossdk.io/core/address"
-	corestore "cosmossdk.io/core/store"
+	"cosmossdk.io/core/appmodule"
+	"cosmossdk.io/core/store"
+	"cosmossdk.io/depinject"
+	"cosmossdk.io/depinject/appconfig"
 	"github.com/cosmos/cosmos-sdk/codec"
 
 	"uagd/x/growth/keeper"
 	"uagd/x/growth/types"
 )
 
-type Inputs struct {
-	StoreService corestore.KVStoreService
+var _ depinject.OnePerModuleType = AppModule{}
+
+func (AppModule) IsOnePerModuleType() {}
+
+func init() {
+	appconfig.Register(
+		&types.Module{},
+		appconfig.Provide(ProvideModule),
+	)
+}
+
+type ModuleInputs struct {
+	depinject.In
+
+	Config       *types.Module
+	StoreService store.KVStoreService
 	Cdc          codec.Codec
 	AddressCodec address.Codec
 }
 
-type Outputs struct {
+type ModuleOutputs struct {
+	depinject.Out
+
 	GrowthKeeper keeper.Keeper
+	Module       appmodule.AppModule
 }
 
-func ProvideModule(in Inputs) Outputs {
+func ProvideModule(in ModuleInputs) ModuleOutputs {
 	k := keeper.NewKeeper(in.StoreService, in.Cdc, in.AddressCodec)
-	return Outputs{GrowthKeeper: k}
-}
-
-func ProvideStoreKey() string {
-	return types.StoreKey
+	m := NewAppModule(in.Cdc, k)
+	return ModuleOutputs{GrowthKeeper: k, Module: m}
 }

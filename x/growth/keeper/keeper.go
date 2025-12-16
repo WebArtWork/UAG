@@ -2,16 +2,13 @@ package keeper
 
 import (
 	"context"
-	"fmt"
 
-	"cosmossdk.io/collections"
 	"cosmossdk.io/core/address"
 	corestore "cosmossdk.io/core/store"
-	sdkmath "cosmossdk.io/math"
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/log"
 
-	fundtypes "uagd/x/fund/types"
+	"github.com/cosmos/cosmos-sdk/codec"
+
 	"uagd/x/growth/types"
 )
 
@@ -19,160 +16,135 @@ type Keeper struct {
 	storeService corestore.KVStoreService
 	cdc          codec.Codec
 	addressCodec address.Codec
-	types.UnimplementedQueryServer
-
-	Schema collections.Schema
-
-	Params collections.Item[types.Params]
-
-	// Metrics keyed by (region_id, period)
-	RegionMetrics collections.Map[collections.Pair[string, string], types.RegionMetric]
-
-	// Scores keyed by region_id (period-specific logic can be added later)
-	GrowthScores collections.Map[string, types.GrowthScore]
-
-	// Occupations keyed by (region_id, period) -> stored as STRING (decimal) to avoid missing LegacyDec codec.
-	Occupations collections.Map[collections.Pair[string, string], string]
+	logger       log.Logger
 }
 
-func NewKeeper(
-	storeService corestore.KVStoreService,
-	cdc codec.Codec,
-	addressCodec address.Codec,
-) Keeper {
-	sb := collections.NewSchemaBuilder(storeService)
-
-	k := Keeper{
+func NewKeeper(storeService corestore.KVStoreService, cdc codec.Codec, addressCodec address.Codec) Keeper {
+	return Keeper{
 		storeService: storeService,
 		cdc:          cdc,
 		addressCodec: addressCodec,
-
-		Params: collections.NewItem(
-			sb,
-			types.ParamsKey,
-			"params",
-			codec.CollValue[types.Params](cdc),
-		),
-
-		RegionMetrics: collections.NewMap(
-			sb,
-			types.RegionMetricKeyPrefix,
-			"region_metrics",
-			collections.PairKeyCodec(collections.StringKey, collections.StringKey),
-			codec.CollValue[types.RegionMetric](cdc),
-		),
-
-		GrowthScores: collections.NewMap(
-			sb,
-			types.GrowthScoreKeyPrefix,
-			"growth_scores",
-			collections.StringKey,
-			codec.CollValue[types.GrowthScore](cdc),
-		),
-
-		Occupations: collections.NewMap(
-			sb,
-			types.OccupationKeyPrefix,
-			"occupations",
-			collections.PairKeyCodec(collections.StringKey, collections.StringKey),
-			collections.StringValue,
-		),
+		logger:       log.NewNopLogger(),
 	}
+}
 
-	schema, err := sb.Build()
-	if err != nil {
-		panic(err)
-	}
-	k.Schema = schema
+func (k Keeper) Logger() log.Logger { return k.logger }
+
+func (k Keeper) SetLogger(l log.Logger) Keeper {
+	k.logger = l
 	return k
 }
 
-func (k Keeper) SetParams(ctx context.Context, p types.Params) error {
-	return k.Params.Set(ctx, p)
+// --- keys (core KVStoreService) ---
+var (
+	keyRegionMetric = []byte{0x01}
+	keyGrowthScore  = []byte{0x02}
+	keyOccupation   = []byte{0x03}
+)
+
+func metricKey(regionID string) []byte {
+	b := make([]byte, 0, 1+len(regionID))
+	b = append(b, keyRegionMetric...)
+	b = append(b, []byte(regionID)...)
+	return b
 }
 
-func (k Keeper) GetParams(ctx context.Context) (types.Params, error) {
-	p, err := k.Params.Get(ctx)
+func scoreKey(regionID string) []byte {
+	b := make([]byte, 0, 1+len(regionID))
+	b = append(b, keyGrowthScore...)
+	b = append(b, []byte(regionID)...)
+	return b
+}
+
+func occupationKey(regionID string) []byte {
+	b := make([]byte, 0, 1+len(regionID))
+	b = append(b, keyOccupation...)
+	b = append(b, []byte(regionID)...)
+	return b
+}
+
+// --- minimal KV storage used by msg_server ---
+
+func (k Keeper) SetRegionMetric(ctx context.Context, m types.RegionMetric) error {
+	store := k.storeService.OpenKVStore(ctx)
+
+	bz, err := k.cdc.Marshal(&m)
 	if err != nil {
-		return types.Params{}, err
-	}
-	return p, nil
-}
-
-func (k Keeper) SetRegionMetric(ctx context.Context, metric types.RegionMetric) error {
-	// FIX: validator expects VALUE not *VALUE
-	if err := types.ValidateRegionMetric(metric); err != nil {
 		return err
 	}
-	key := collections.Join(metric.RegionId, metric.Period)
-	return k.RegionMetrics.Set(ctx, key, metric)
+	return store.Set(metricKey(m.RegionId), bz)
 }
 
-func (k Keeper) GetRegionMetric(ctx context.Context, regionID, period string) (types.RegionMetric, bool) {
-	key := collections.Join(regionID, period)
-	v, err := k.RegionMetrics.Get(ctx, key)
+func (k Keeper) GetRegionMetric(ctx context.Context, regionID string) (types.RegionMetric, bool, error) {
+	store := k.storeService.OpenKVStore(ctx)
+
+	bz, err := store.Get(metricKey(regionID))
 	if err != nil {
-		return types.RegionMetric{}, false
+		return types.RegionMetric{}, false, err
 	}
-	return v, true
+	if bz == nil {
+		return types.RegionMetric{}, false, nil
+	}
+
+	var out types.RegionMetric
+	if err := k.cdc.Unmarshal(bz, &out); err != nil {
+		return types.RegionMetric{}, false, err
+	}
+	return out, true, nil
 }
 
-func (k Keeper) SetGrowthScore(ctx context.Context, score types.GrowthScore) error {
-	// FIX: validator expects VALUE not *VALUE
-	if err := types.ValidateGrowthScore(score); err != nil {
+func (k Keeper) SetGrowthScore(ctx context.Context, s types.GrowthScore) error {
+	store := k.storeService.OpenKVStore(ctx)
+
+	bz, err := k.cdc.Marshal(&s)
+	if err != nil {
 		return err
 	}
-	return k.GrowthScores.Set(ctx, score.RegionId, score)
+	return store.Set(scoreKey(s.RegionId), bz)
 }
 
-func (k Keeper) GetGrowthScore(ctx context.Context, regionID string) (types.GrowthScore, bool) {
-	v, err := k.GrowthScores.Get(ctx, regionID)
+func (k Keeper) GetGrowthScore(ctx context.Context, regionID string) (types.GrowthScore, bool, error) {
+	store := k.storeService.OpenKVStore(ctx)
+
+	bz, err := store.Get(scoreKey(regionID))
 	if err != nil {
-		return types.GrowthScore{}, false
+		return types.GrowthScore{}, false, err
 	}
-	return v, true
+	if bz == nil {
+		return types.GrowthScore{}, false, nil
+	}
+
+	var out types.GrowthScore
+	if err := k.cdc.Unmarshal(bz, &out); err != nil {
+		return types.GrowthScore{}, false, err
+	}
+	return out, true, nil
 }
 
-func (k Keeper) SetRegionOccupation(ctx context.Context, regionID, period string, occ sdkmath.LegacyDec) error {
-	if regionID == "" || period == "" {
-		return fmt.Errorf("region_id and period required")
-	}
-	key := collections.Join(regionID, period)
-	// store as string
-	return k.Occupations.Set(ctx, key, occ.String())
-}
+func (k Keeper) SetOccupation(ctx context.Context, o types.Occupation) error {
+	store := k.storeService.OpenKVStore(ctx)
 
-func (k Keeper) GetRegionOccupation(ctx context.Context, regionID, period string) (sdkmath.LegacyDec, bool) {
-	key := collections.Join(regionID, period)
-	s, err := k.Occupations.Get(ctx, key)
+	bz, err := k.cdc.Marshal(&o)
 	if err != nil {
-		return sdkmath.LegacyDec{}, false
+		return err
 	}
-	v, err := sdkmath.LegacyNewDecFromStr(s)
-	if err != nil {
-		return sdkmath.LegacyDec{}, false
-	}
-	return v, true
+	return store.Set(occupationKey(o.RegionId), bz)
 }
 
-// Used by fund module: keep stable signature.
-func (k Keeper) GetEffectiveLimits(ctx context.Context, fund fundtypes.Fund) (delegationLimit sdk.Coin, payrollLimit sdk.Coin) {
-	// Defaults: unlimited (0). You can wire real base caps from Params later.
-	baseDelegation := sdk.NewCoin(fundtypes.BaseDenom, sdkmath.NewInt(0))
-	basePayroll := sdk.NewCoin(fundtypes.BaseDenom, sdkmath.NewInt(0))
+func (k Keeper) GetOccupation(ctx context.Context, regionID string) (types.Occupation, bool, error) {
+	store := k.storeService.OpenKVStore(ctx)
 
-	score, found := k.GetGrowthScore(ctx, fund.RegionId)
-	if !found {
-		return baseDelegation, basePayroll
+	bz, err := store.Get(occupationKey(regionID))
+	if err != nil {
+		return types.Occupation{}, false, err
+	}
+	if bz == nil {
+		return types.Occupation{}, false, nil
 	}
 
-	// Multipliers are LegacyDec VALUE already (don’t parse strings).
-	if baseDelegation.Amount.IsPositive() {
-		baseDelegation = sdk.NewCoin(baseDelegation.Denom, score.DelegationMultiplier.MulInt(baseDelegation.Amount).TruncateInt())
+	var out types.Occupation
+	if err := k.cdc.Unmarshal(bz, &out); err != nil {
+		return types.Occupation{}, false, err
 	}
-	if basePayroll.Amount.IsPositive() {
-		basePayroll = sdk.NewCoin(basePayroll.Denom, score.PayrollMultiplier.MulInt(basePayroll.Amount).TruncateInt())
-	}
-
-	return baseDelegation, basePayroll
+	return out, true, nil
 }

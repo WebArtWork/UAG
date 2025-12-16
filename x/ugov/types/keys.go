@@ -7,7 +7,7 @@ const (
 )
 
 var (
-	ParamsKey      = []byte{0x00}
-	PlanKeyPrefix  = []byte{0x01}
-	NextPlanIDKey  = []byte{0x02}
+	ParamsKey     = []byte{0x00}
+	PlanKeyPrefix = []byte{0x01}
+	NextPlanIDKey = []byte{0x02}
 )

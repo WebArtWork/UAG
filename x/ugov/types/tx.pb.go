@@ -34,11 +34,11 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // MsgCreatePlan creates a new draft plan.
 type MsgCreatePlan struct {
-	Creator     string         `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	FundAddress string         `protobuf:"bytes,2,opt,name=fund_address,json=fundAddress,proto3" json:"fund_address,omitempty"`
-	Title       string         `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
-	Description string         `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	Plan        types.FundPlan `protobuf:"bytes,5,opt,name=plan,proto3" json:"plan"`
+	Creator     string             `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	FundAddress string             `protobuf:"bytes,2,opt,name=fund_address,json=fundAddress,proto3" json:"fund_address,omitempty"`
+	Title       string             `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	Description string             `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	Position    types.FundPosition `protobuf:"bytes,5,opt,name=position,proto3" json:"position"`
 }
 
 func (m *MsgCreatePlan) Reset()         { *m = MsgCreatePlan{} }
@@ -102,11 +102,11 @@ func (m *MsgCreatePlan) GetDescription() string {
 	return ""
 }
 
-func (m *MsgCreatePlan) GetPlan() types.FundPlan {
+func (m *MsgCreatePlan) GetPosition() types.FundPosition {
 	if m != nil {
-		return m.Plan
+		return m.Position
 	}
-	return types.FundPlan{}
+	return types.FundPosition{}
 }
 
 type MsgCreatePlanResponse struct {
@@ -155,11 +155,11 @@ func (m *MsgCreatePlanResponse) GetId() uint64 {
 
 // MsgUpdatePlan updates an existing draft plan.
 type MsgUpdatePlan struct {
-	Creator     string         `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	Id          uint64         `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
-	Title       string         `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
-	Description string         `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	Plan        types.FundPlan `protobuf:"bytes,5,opt,name=plan,proto3" json:"plan"`
+	Creator     string             `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	Id          uint64             `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
+	Title       string             `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	Description string             `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	Position    types.FundPosition `protobuf:"bytes,5,opt,name=position,proto3" json:"position"`
 }
 
 func (m *MsgUpdatePlan) Reset()         { *m = MsgUpdatePlan{} }
@@ -223,11 +223,11 @@ func (m *MsgUpdatePlan) GetDescription() string {
 	return ""
 }
 
-func (m *MsgUpdatePlan) GetPlan() types.FundPlan {
+func (m *MsgUpdatePlan) GetPosition() types.FundPosition {
 	if m != nil {
-		return m.Plan
+		return m.Position
 	}
-	return types.FundPlan{}
+	return types.FundPosition{}
 }
 
 type MsgUpdatePlanResponse struct {
@@ -363,26 +363,26 @@ func (m *MsgSubmitPlanResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgSubmitPlanResponse proto.InternalMessageInfo
 
-// MsgExecuteFundPlan is executed by x/gov authority (via proposal message execution).
-type MsgExecuteFundPlan struct {
+// MsgExecuteFundPosition is executed by x/gov authority (via proposal message execution).
+type MsgExecuteFundPosition struct {
 	// authority is expected to be the x/gov module account address (or configured ugov authority).
 	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
 	// plan_id references a stored ugov plan.
 	PlanId uint64 `protobuf:"varint,2,opt,name=plan_id,json=planId,proto3" json:"plan_id,omitempty"`
 }
 
-func (m *MsgExecuteFundPlan) Reset()         { *m = MsgExecuteFundPlan{} }
-func (m *MsgExecuteFundPlan) String() string { return proto.CompactTextString(m) }
-func (*MsgExecuteFundPlan) ProtoMessage()    {}
-func (*MsgExecuteFundPlan) Descriptor() ([]byte, []int) {
+func (m *MsgExecuteFundPosition) Reset()         { *m = MsgExecuteFundPosition{} }
+func (m *MsgExecuteFundPosition) String() string { return proto.CompactTextString(m) }
+func (*MsgExecuteFundPosition) ProtoMessage()    {}
+func (*MsgExecuteFundPosition) Descriptor() ([]byte, []int) {
 	return fileDescriptor_ba276dfac56d22bb, []int{6}
 }
-func (m *MsgExecuteFundPlan) XXX_Unmarshal(b []byte) error {
+func (m *MsgExecuteFundPosition) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgExecuteFundPlan) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgExecuteFundPosition) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgExecuteFundPlan.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgExecuteFundPosition.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -392,47 +392,47 @@ func (m *MsgExecuteFundPlan) XXX_Marshal(b []byte, deterministic bool) ([]byte, 
 		return b[:n], nil
 	}
 }
-func (m *MsgExecuteFundPlan) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgExecuteFundPlan.Merge(m, src)
+func (m *MsgExecuteFundPosition) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgExecuteFundPosition.Merge(m, src)
 }
-func (m *MsgExecuteFundPlan) XXX_Size() int {
+func (m *MsgExecuteFundPosition) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgExecuteFundPlan) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgExecuteFundPlan.DiscardUnknown(m)
+func (m *MsgExecuteFundPosition) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgExecuteFundPosition.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgExecuteFundPlan proto.InternalMessageInfo
+var xxx_messageInfo_MsgExecuteFundPosition proto.InternalMessageInfo
 
-func (m *MsgExecuteFundPlan) GetAuthority() string {
+func (m *MsgExecuteFundPosition) GetAuthority() string {
 	if m != nil {
 		return m.Authority
 	}
 	return ""
 }
 
-func (m *MsgExecuteFundPlan) GetPlanId() uint64 {
+func (m *MsgExecuteFundPosition) GetPlanId() uint64 {
 	if m != nil {
 		return m.PlanId
 	}
 	return 0
 }
 
-type MsgExecuteFundPlanResponse struct {
+type MsgExecuteFundPositionResponse struct {
 }
 
-func (m *MsgExecuteFundPlanResponse) Reset()         { *m = MsgExecuteFundPlanResponse{} }
-func (m *MsgExecuteFundPlanResponse) String() string { return proto.CompactTextString(m) }
-func (*MsgExecuteFundPlanResponse) ProtoMessage()    {}
-func (*MsgExecuteFundPlanResponse) Descriptor() ([]byte, []int) {
+func (m *MsgExecuteFundPositionResponse) Reset()         { *m = MsgExecuteFundPositionResponse{} }
+func (m *MsgExecuteFundPositionResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgExecuteFundPositionResponse) ProtoMessage()    {}
+func (*MsgExecuteFundPositionResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_ba276dfac56d22bb, []int{7}
 }
-func (m *MsgExecuteFundPlanResponse) XXX_Unmarshal(b []byte) error {
+func (m *MsgExecuteFundPositionResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgExecuteFundPlanResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgExecuteFundPositionResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgExecuteFundPlanResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgExecuteFundPositionResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -442,17 +442,17 @@ func (m *MsgExecuteFundPlanResponse) XXX_Marshal(b []byte, deterministic bool) (
 		return b[:n], nil
 	}
 }
-func (m *MsgExecuteFundPlanResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgExecuteFundPlanResponse.Merge(m, src)
+func (m *MsgExecuteFundPositionResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgExecuteFundPositionResponse.Merge(m, src)
 }
-func (m *MsgExecuteFundPlanResponse) XXX_Size() int {
+func (m *MsgExecuteFundPositionResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgExecuteFundPlanResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgExecuteFundPlanResponse.DiscardUnknown(m)
+func (m *MsgExecuteFundPositionResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgExecuteFundPositionResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgExecuteFundPlanResponse proto.InternalMessageInfo
+var xxx_messageInfo_MsgExecuteFundPositionResponse proto.InternalMessageInfo
 
 func init() {
 	proto.RegisterType((*MsgCreatePlan)(nil), "uagd.ugov.v1.MsgCreatePlan")
@@ -461,51 +461,51 @@ func init() {
 	proto.RegisterType((*MsgUpdatePlanResponse)(nil), "uagd.ugov.v1.MsgUpdatePlanResponse")
 	proto.RegisterType((*MsgSubmitPlan)(nil), "uagd.ugov.v1.MsgSubmitPlan")
 	proto.RegisterType((*MsgSubmitPlanResponse)(nil), "uagd.ugov.v1.MsgSubmitPlanResponse")
-	proto.RegisterType((*MsgExecuteFundPlan)(nil), "uagd.ugov.v1.MsgExecuteFundPlan")
-	proto.RegisterType((*MsgExecuteFundPlanResponse)(nil), "uagd.ugov.v1.MsgExecuteFundPlanResponse")
+	proto.RegisterType((*MsgExecuteFundPosition)(nil), "uagd.ugov.v1.MsgExecuteFundPosition")
+	proto.RegisterType((*MsgExecuteFundPositionResponse)(nil), "uagd.ugov.v1.MsgExecuteFundPositionResponse")
 }
 
 func init() { proto.RegisterFile("uagd/ugov/v1/tx.proto", fileDescriptor_ba276dfac56d22bb) }
 
 var fileDescriptor_ba276dfac56d22bb = []byte{
-	// 584 bytes of a gzipped FileDescriptorProto
+	// 585 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x54, 0x31, 0x6f, 0xd3, 0x40,
-	0x14, 0x8e, 0xdd, 0xa4, 0x55, 0x5f, 0x0a, 0xa8, 0xa7, 0x94, 0xb8, 0x06, 0xb9, 0x91, 0x19, 0x88,
-	0x82, 0xb0, 0x49, 0x90, 0x18, 0xca, 0x44, 0x10, 0x48, 0x1d, 0x52, 0x21, 0x57, 0x2c, 0x48, 0x28,
-	0x72, 0x73, 0xc6, 0x58, 0x4a, 0x7c, 0x96, 0xef, 0x1c, 0xa5, 0x1b, 0x62, 0x64, 0x62, 0x42, 0x8c,
-	0xfc, 0x84, 0x0c, 0xfc, 0x88, 0x8e, 0x15, 0x13, 0x12, 0x12, 0x42, 0xc9, 0x10, 0xf1, 0x2f, 0xd0,
-	0x9d, 0xe3, 0xd8, 0x89, 0x2b, 0x32, 0xc0, 0xd0, 0x25, 0xc9, 0xfb, 0xbe, 0x77, 0x5f, 0xbe, 0xf7,
-	0xdd, 0xb3, 0x61, 0x2f, 0xb2, 0x5d, 0x6c, 0x46, 0x2e, 0x19, 0x9a, 0xc3, 0xa6, 0xc9, 0x46, 0x46,
-	0x10, 0x12, 0x46, 0xd0, 0x0e, 0x87, 0x0d, 0x0e, 0x1b, 0xc3, 0xa6, 0xba, 0x6b, 0x0f, 0x3c, 0x9f,
-	0x98, 0xe2, 0x33, 0x6e, 0x50, 0xab, 0x3d, 0x42, 0x07, 0x84, 0x9a, 0x03, 0xea, 0xf2, 0x83, 0x03,
-	0xea, 0xce, 0x89, 0xfd, 0x98, 0xe8, 0x8a, 0xca, 0x8c, 0x8b, 0x39, 0x55, 0x71, 0x89, 0x4b, 0x62,
-	0x9c, 0xff, 0x4a, 0x94, 0x84, 0x83, 0x37, 0x91, 0x8f, 0xb9, 0x10, 0xff, 0x8e, 0x09, 0xfd, 0x93,
-	0x0c, 0xd7, 0x3a, 0xd4, 0x7d, 0x1a, 0x3a, 0x36, 0x73, 0x5e, 0xf4, 0x6d, 0x1f, 0xb5, 0x60, 0xab,
-	0xc7, 0x2b, 0x12, 0x2a, 0x52, 0x4d, 0xaa, 0x6f, 0xb7, 0x95, 0x6f, 0x5f, 0xef, 0x57, 0xe6, 0xff,
-	0xf1, 0x04, 0xe3, 0xd0, 0xa1, 0xf4, 0x84, 0x85, 0x9e, 0xef, 0x5a, 0x49, 0x23, 0x7a, 0x0c, 0x3b,
-	0x5c, 0xb3, 0x6b, 0xc7, 0xb4, 0x22, 0xaf, 0x39, 0x58, 0xe6, 0xdd, 0x73, 0x08, 0x55, 0xa0, 0xc4,
-	0x3c, 0xd6, 0x77, 0x94, 0x0d, 0x7e, 0xca, 0x8a, 0x0b, 0x54, 0x83, 0x32, 0x76, 0x68, 0x2f, 0xf4,
-	0x02, 0xe6, 0x11, 0x5f, 0x29, 0x0a, 0x2e, 0x0b, 0xa1, 0x07, 0x50, 0x0c, 0xfa, 0xb6, 0xaf, 0x94,
-	0x6a, 0x52, 0xbd, 0xdc, 0xba, 0x69, 0x88, 0x34, 0xc5, 0x68, 0xc3, 0xa6, 0xf1, 0x3c, 0xf2, 0x31,
-	0x1f, 0xa7, 0x5d, 0x3c, 0xff, 0x79, 0x50, 0xb0, 0x44, 0xe7, 0x61, 0xe3, 0xfd, 0x6c, 0xdc, 0x48,
-	0x4c, 0x7f, 0x98, 0x8d, 0x1b, 0xfb, 0x22, 0x96, 0x51, 0x7c, 0x35, 0x4b, 0x31, 0xe8, 0x77, 0x61,
-	0x6f, 0x09, 0xb0, 0x1c, 0x1a, 0x10, 0x9f, 0x3a, 0xe8, 0x3a, 0xc8, 0x1e, 0x16, 0xd1, 0x14, 0x2d,
-	0xd9, 0xc3, 0xfa, 0x6f, 0x49, 0x24, 0xf8, 0x32, 0xc0, 0xff, 0x92, 0x60, 0xac, 0x2a, 0x27, 0xaa,
-	0x57, 0x29, 0x94, 0x74, 0x32, 0xbd, 0x2a, 0x42, 0x49, 0x81, 0x24, 0x14, 0xfd, 0x4b, 0x1c, 0xc2,
-	0x49, 0x74, 0x3a, 0xf0, 0xd8, 0x7f, 0x0b, 0xe1, 0x00, 0xca, 0x41, 0x48, 0x02, 0x42, 0xed, 0x7e,
-	0xd7, 0xc3, 0x22, 0x8a, 0xa2, 0x05, 0x09, 0x74, 0x84, 0xd7, 0x7b, 0x4f, 0x0d, 0xcd, 0xbd, 0xa7,
-	0xc0, 0xc2, 0xfb, 0x67, 0x09, 0x50, 0x87, 0xba, 0xcf, 0x46, 0x4e, 0x2f, 0x62, 0x4e, 0x92, 0x11,
-	0x7a, 0x04, 0xdb, 0x76, 0xc4, 0xde, 0x92, 0xd0, 0x63, 0x67, 0x6b, 0x47, 0x48, 0x5b, 0x51, 0x15,
-	0xb6, 0x78, 0xae, 0xdd, 0xc5, 0x24, 0x9b, 0xbc, 0x3c, 0xc2, 0x87, 0x4d, 0x6e, 0x36, 0x6d, 0xe4,
-	0x76, 0xb5, 0x15, 0xbb, 0x2b, 0x1e, 0xf4, 0xdb, 0xa0, 0xe6, 0xd1, 0xc4, 0x78, 0xeb, 0x87, 0x0c,
-	0x1b, 0x1d, 0xea, 0xa2, 0x63, 0x80, 0xcc, 0xf3, 0x7b, 0xcb, 0xc8, 0xbe, 0x56, 0x8c, 0xa5, 0x25,
-	0x56, 0xef, 0xfc, 0x85, 0x5c, 0x6c, 0xf8, 0x31, 0x40, 0x66, 0x9b, 0xf3, 0x7a, 0x29, 0x79, 0x89,
-	0x5e, 0x7e, 0x39, 0xb8, 0x5e, 0x66, 0x31, 0xf2, 0x7a, 0x29, 0x79, 0x89, 0x5e, 0xfe, 0xc2, 0xd0,
-	0x6b, 0xb8, 0xb1, 0x7a, 0x59, 0xb5, 0xdc, 0xb9, 0x95, 0x0e, 0xb5, 0xbe, 0xae, 0x23, 0x91, 0x57,
-	0x4b, 0xef, 0x66, 0xe3, 0x86, 0xd4, 0xbe, 0x77, 0x3e, 0xd1, 0xa4, 0x8b, 0x89, 0x26, 0xfd, 0x9a,
-	0x68, 0xd2, 0xc7, 0xa9, 0x56, 0xb8, 0x98, 0x6a, 0x85, 0xef, 0x53, 0xad, 0xf0, 0x6a, 0x37, 0x7b,
-	0x6b, 0xec, 0x2c, 0x70, 0xe8, 0xe9, 0xa6, 0x78, 0x9b, 0x3e, 0xfc, 0x13, 0x00, 0x00, 0xff, 0xff,
-	0xb8, 0x86, 0x7d, 0xef, 0xea, 0x05, 0x00, 0x00,
+	0x18, 0x8d, 0xdd, 0xb4, 0xa5, 0x97, 0x82, 0xd4, 0x23, 0x25, 0xa9, 0x91, 0xdc, 0xc8, 0x20, 0x51,
+	0x05, 0xb0, 0x95, 0x20, 0x18, 0x0a, 0x0b, 0x41, 0x20, 0x75, 0x48, 0x55, 0xb9, 0x62, 0x61, 0x89,
+	0xdc, 0x9c, 0x31, 0x27, 0x25, 0x3e, 0xcb, 0x77, 0x8e, 0xd2, 0x0d, 0x31, 0x32, 0xf1, 0x13, 0x10,
+	0xbf, 0x20, 0x03, 0x3f, 0xa2, 0x63, 0xc5, 0xc4, 0x84, 0x50, 0x32, 0xe4, 0x17, 0xb0, 0xa3, 0xbb,
+	0xb3, 0x63, 0x07, 0x5b, 0x04, 0x09, 0x06, 0x96, 0x24, 0xf7, 0xde, 0xf7, 0x3d, 0xbf, 0xef, 0xdd,
+	0x17, 0x83, 0xdd, 0xc8, 0xf1, 0x90, 0x15, 0x79, 0x64, 0x64, 0x8d, 0x5a, 0x16, 0x1b, 0x9b, 0x41,
+	0x48, 0x18, 0x81, 0xdb, 0x1c, 0x36, 0x39, 0x6c, 0x8e, 0x5a, 0xda, 0x8e, 0x33, 0xc4, 0x3e, 0xb1,
+	0xc4, 0xa7, 0x2c, 0xd0, 0x6a, 0x7d, 0x42, 0x87, 0x84, 0x5a, 0x43, 0xea, 0xf1, 0xc6, 0x21, 0xf5,
+	0x62, 0x62, 0x4f, 0x12, 0x3d, 0x71, 0xb2, 0xe4, 0x21, 0xa6, 0xaa, 0x1e, 0xf1, 0x88, 0xc4, 0xf9,
+	0xaf, 0x44, 0x49, 0x38, 0x78, 0x1d, 0xf9, 0x88, 0x0b, 0xf1, 0x6f, 0x49, 0x18, 0x9f, 0x54, 0x70,
+	0xb5, 0x4b, 0xbd, 0x67, 0xa1, 0xeb, 0x30, 0xf7, 0x64, 0xe0, 0xf8, 0xb0, 0x0d, 0x36, 0xfb, 0xfc,
+	0x44, 0xc2, 0xba, 0xd2, 0x50, 0x0e, 0xb6, 0x3a, 0xf5, 0x2f, 0x9f, 0xef, 0x57, 0xe3, 0x67, 0x3c,
+	0x45, 0x28, 0x74, 0x29, 0x3d, 0x65, 0x21, 0xf6, 0x3d, 0x3b, 0x29, 0x84, 0x8f, 0xc1, 0x36, 0xd7,
+	0xec, 0x39, 0x92, 0xae, 0xab, 0x2b, 0x1a, 0x2b, 0xbc, 0x3a, 0x86, 0x60, 0x15, 0xac, 0x33, 0xcc,
+	0x06, 0x6e, 0x7d, 0x8d, 0x77, 0xd9, 0xf2, 0x00, 0x1b, 0xa0, 0x82, 0x5c, 0xda, 0x0f, 0x71, 0xc0,
+	0x30, 0xf1, 0xeb, 0x65, 0xc1, 0x65, 0x21, 0xf8, 0x04, 0x5c, 0x09, 0x08, 0xc5, 0x82, 0x5e, 0x6f,
+	0x28, 0x07, 0x95, 0xb6, 0x66, 0x8a, 0x44, 0xc5, 0x78, 0xa3, 0x96, 0xf9, 0x22, 0xf2, 0xd1, 0x49,
+	0x5c, 0xd1, 0x29, 0x5f, 0x7c, 0xdb, 0x2f, 0xd9, 0x8b, 0x8e, 0xc3, 0xe6, 0xbb, 0xf9, 0xa4, 0x99,
+	0x0c, 0xf0, 0x7e, 0x3e, 0x69, 0xee, 0x89, 0x88, 0xc6, 0xf2, 0x9a, 0x96, 0x22, 0x31, 0xee, 0x80,
+	0xdd, 0x25, 0xc0, 0x76, 0x69, 0x40, 0x7c, 0xea, 0xc2, 0x6b, 0x40, 0xc5, 0x48, 0xc4, 0x54, 0xb6,
+	0x55, 0x8c, 0x8c, 0x1f, 0x8a, 0x48, 0xf3, 0x65, 0x80, 0xfe, 0x26, 0x4d, 0xa9, 0xaa, 0x26, 0xaa,
+	0xff, 0x6b, 0x40, 0xe9, 0x94, 0x46, 0x4d, 0x04, 0x94, 0x02, 0x49, 0x40, 0xc6, 0x47, 0x19, 0xc8,
+	0x69, 0x74, 0x36, 0xc4, 0xec, 0x9f, 0x05, 0xb2, 0x0f, 0x2a, 0x41, 0x48, 0x02, 0x42, 0x9d, 0x41,
+	0x0f, 0x23, 0x11, 0x4b, 0xd9, 0x06, 0x09, 0x74, 0x84, 0x56, 0x7b, 0x4f, 0x0d, 0xc5, 0xde, 0x53,
+	0x20, 0xeb, 0xfd, 0x46, 0x97, 0x7a, 0xcf, 0xc7, 0x6e, 0x3f, 0x62, 0x6e, 0x36, 0x2b, 0xf8, 0x08,
+	0x6c, 0x39, 0x11, 0x7b, 0x43, 0x42, 0xcc, 0xce, 0x57, 0x8e, 0x91, 0x96, 0xc2, 0x1a, 0xd8, 0x0c,
+	0x06, 0x8e, 0xdf, 0x5b, 0x4c, 0xb3, 0xc1, 0x8f, 0x47, 0xe8, 0xf0, 0x21, 0x37, 0x9c, 0x16, 0x72,
+	0xcb, 0xc6, 0x2f, 0x96, 0x0b, 0x7c, 0x18, 0x0d, 0xa0, 0x17, 0x33, 0xc9, 0x10, 0xed, 0xb9, 0x0a,
+	0xd6, 0xba, 0xd4, 0x83, 0xc7, 0x00, 0x64, 0xfe, 0xe3, 0x37, 0xcd, 0xec, 0xab, 0xc7, 0x5c, 0x5a,
+	0x6e, 0xed, 0xd6, 0x6f, 0xc8, 0xc5, 0xe6, 0x1f, 0x03, 0x90, 0xd9, 0xf2, 0xbc, 0x5e, 0x4a, 0x16,
+	0xe8, 0xe5, 0x17, 0x85, 0xeb, 0x65, 0x96, 0x24, 0xaf, 0x97, 0x92, 0x05, 0x7a, 0xf9, 0xcb, 0x83,
+	0x18, 0x5c, 0x2f, 0xba, 0xb8, 0xdb, 0xb9, 0xde, 0x82, 0x2a, 0xed, 0xde, 0x9f, 0x54, 0x25, 0x8f,
+	0xd2, 0xd6, 0xdf, 0xce, 0x27, 0x4d, 0xa5, 0x73, 0xf7, 0x62, 0xaa, 0x2b, 0x97, 0x53, 0x5d, 0xf9,
+	0x3e, 0xd5, 0x95, 0x0f, 0x33, 0xbd, 0x74, 0x39, 0xd3, 0x4b, 0x5f, 0x67, 0x7a, 0xe9, 0xd5, 0x4e,
+	0xf6, 0x26, 0xd9, 0x79, 0xe0, 0xd2, 0xb3, 0x0d, 0xf1, 0xf6, 0x7d, 0xf0, 0x33, 0x00, 0x00, 0xff,
+	0xff, 0xc8, 0xa7, 0x22, 0x70, 0x1a, 0x06, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -526,8 +526,8 @@ type MsgClient interface {
 	UpdatePlan(ctx context.Context, in *MsgUpdatePlan, opts ...grpc.CallOption) (*MsgUpdatePlanResponse, error)
 	// SubmitPlan marks a plan as SUBMITTED (typically after creating a gov proposal off-chain).
 	SubmitPlan(ctx context.Context, in *MsgSubmitPlan, opts ...grpc.CallOption) (*MsgSubmitPlanResponse, error)
-	// ExecuteFundPlan is the governance-executed message: included inside a x/gov v1 proposal.
-	ExecuteFundPlan(ctx context.Context, in *MsgExecuteFundPlan, opts ...grpc.CallOption) (*MsgExecuteFundPlanResponse, error)
+	// ExecuteFundPosition is the governance-executed message: included inside a x/gov v1 proposal.
+	ExecuteFundPosition(ctx context.Context, in *MsgExecuteFundPosition, opts ...grpc.CallOption) (*MsgExecuteFundPositionResponse, error)
 }
 
 type msgClient struct {
@@ -565,9 +565,9 @@ func (c *msgClient) SubmitPlan(ctx context.Context, in *MsgSubmitPlan, opts ...g
 	return out, nil
 }
 
-func (c *msgClient) ExecuteFundPlan(ctx context.Context, in *MsgExecuteFundPlan, opts ...grpc.CallOption) (*MsgExecuteFundPlanResponse, error) {
-	out := new(MsgExecuteFundPlanResponse)
-	err := c.cc.Invoke(ctx, "/uagd.ugov.v1.Msg/ExecuteFundPlan", in, out, opts...)
+func (c *msgClient) ExecuteFundPosition(ctx context.Context, in *MsgExecuteFundPosition, opts ...grpc.CallOption) (*MsgExecuteFundPositionResponse, error) {
+	out := new(MsgExecuteFundPositionResponse)
+	err := c.cc.Invoke(ctx, "/uagd.ugov.v1.Msg/ExecuteFundPosition", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -582,8 +582,8 @@ type MsgServer interface {
 	UpdatePlan(context.Context, *MsgUpdatePlan) (*MsgUpdatePlanResponse, error)
 	// SubmitPlan marks a plan as SUBMITTED (typically after creating a gov proposal off-chain).
 	SubmitPlan(context.Context, *MsgSubmitPlan) (*MsgSubmitPlanResponse, error)
-	// ExecuteFundPlan is the governance-executed message: included inside a x/gov v1 proposal.
-	ExecuteFundPlan(context.Context, *MsgExecuteFundPlan) (*MsgExecuteFundPlanResponse, error)
+	// ExecuteFundPosition is the governance-executed message: included inside a x/gov v1 proposal.
+	ExecuteFundPosition(context.Context, *MsgExecuteFundPosition) (*MsgExecuteFundPositionResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -599,8 +599,8 @@ func (*UnimplementedMsgServer) UpdatePlan(ctx context.Context, req *MsgUpdatePla
 func (*UnimplementedMsgServer) SubmitPlan(ctx context.Context, req *MsgSubmitPlan) (*MsgSubmitPlanResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubmitPlan not implemented")
 }
-func (*UnimplementedMsgServer) ExecuteFundPlan(ctx context.Context, req *MsgExecuteFundPlan) (*MsgExecuteFundPlanResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ExecuteFundPlan not implemented")
+func (*UnimplementedMsgServer) ExecuteFundPosition(ctx context.Context, req *MsgExecuteFundPosition) (*MsgExecuteFundPositionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExecuteFundPosition not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -661,20 +661,20 @@ func _Msg_SubmitPlan_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_ExecuteFundPlan_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgExecuteFundPlan)
+func _Msg_ExecuteFundPosition_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgExecuteFundPosition)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).ExecuteFundPlan(ctx, in)
+		return srv.(MsgServer).ExecuteFundPosition(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/uagd.ugov.v1.Msg/ExecuteFundPlan",
+		FullMethod: "/uagd.ugov.v1.Msg/ExecuteFundPosition",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).ExecuteFundPlan(ctx, req.(*MsgExecuteFundPlan))
+		return srv.(MsgServer).ExecuteFundPosition(ctx, req.(*MsgExecuteFundPosition))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -697,8 +697,8 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Msg_SubmitPlan_Handler,
 		},
 		{
-			MethodName: "ExecuteFundPlan",
-			Handler:    _Msg_ExecuteFundPlan_Handler,
+			MethodName: "ExecuteFundPosition",
+			Handler:    _Msg_ExecuteFundPosition_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -726,7 +726,7 @@ func (m *MsgCreatePlan) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	var l int
 	_ = l
 	{
-		size, err := m.Plan.MarshalToSizedBuffer(dAtA[:i])
+		size, err := m.Position.MarshalToSizedBuffer(dAtA[:i])
 		if err != nil {
 			return 0, err
 		}
@@ -815,7 +815,7 @@ func (m *MsgUpdatePlan) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	var l int
 	_ = l
 	{
-		size, err := m.Plan.MarshalToSizedBuffer(dAtA[:i])
+		size, err := m.Position.MarshalToSizedBuffer(dAtA[:i])
 		if err != nil {
 			return 0, err
 		}
@@ -939,7 +939,7 @@ func (m *MsgSubmitPlanResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgExecuteFundPlan) Marshal() (dAtA []byte, err error) {
+func (m *MsgExecuteFundPosition) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -949,12 +949,12 @@ func (m *MsgExecuteFundPlan) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgExecuteFundPlan) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgExecuteFundPosition) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgExecuteFundPlan) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgExecuteFundPosition) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -974,7 +974,7 @@ func (m *MsgExecuteFundPlan) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgExecuteFundPlanResponse) Marshal() (dAtA []byte, err error) {
+func (m *MsgExecuteFundPositionResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -984,12 +984,12 @@ func (m *MsgExecuteFundPlanResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgExecuteFundPlanResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgExecuteFundPositionResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgExecuteFundPlanResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgExecuteFundPositionResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1030,7 +1030,7 @@ func (m *MsgCreatePlan) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	l = m.Plan.Size()
+	l = m.Position.Size()
 	n += 1 + l + sovTx(uint64(l))
 	return n
 }
@@ -1068,7 +1068,7 @@ func (m *MsgUpdatePlan) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	l = m.Plan.Size()
+	l = m.Position.Size()
 	n += 1 + l + sovTx(uint64(l))
 	return n
 }
@@ -1110,7 +1110,7 @@ func (m *MsgSubmitPlanResponse) Size() (n int) {
 	return n
 }
 
-func (m *MsgExecuteFundPlan) Size() (n int) {
+func (m *MsgExecuteFundPosition) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1126,7 +1126,7 @@ func (m *MsgExecuteFundPlan) Size() (n int) {
 	return n
 }
 
-func (m *MsgExecuteFundPlanResponse) Size() (n int) {
+func (m *MsgExecuteFundPositionResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1300,7 +1300,7 @@ func (m *MsgCreatePlan) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Plan", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Position", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1327,7 +1327,7 @@ func (m *MsgCreatePlan) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.Plan.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Position.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1567,7 +1567,7 @@ func (m *MsgUpdatePlan) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Plan", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Position", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1594,7 +1594,7 @@ func (m *MsgUpdatePlan) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.Plan.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Position.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1839,7 +1839,7 @@ func (m *MsgSubmitPlanResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgExecuteFundPlan) Unmarshal(dAtA []byte) error {
+func (m *MsgExecuteFundPosition) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1862,10 +1862,10 @@ func (m *MsgExecuteFundPlan) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgExecuteFundPlan: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgExecuteFundPosition: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgExecuteFundPlan: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgExecuteFundPosition: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1940,7 +1940,7 @@ func (m *MsgExecuteFundPlan) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgExecuteFundPlanResponse) Unmarshal(dAtA []byte) error {
+func (m *MsgExecuteFundPositionResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1963,10 +1963,10 @@ func (m *MsgExecuteFundPlanResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgExecuteFundPlanResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgExecuteFundPositionResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgExecuteFundPlanResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgExecuteFundPositionResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:

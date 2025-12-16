@@ -9,7 +9,6 @@ import (
 )
 
 // FundKeeper is the minimal surface ugov needs from x/fund.
-// Replace plan interface{} with fundtypes.FundPlan once imported.
 type FundKeeper interface {
-	ExecuteFundPlan(ctx context.Context, plan fundtypes.FundPlan, authority sdk.AccAddress) error
+	ExecuteFundPosition(ctx context.Context, position fundtypes.FundPosition, authority sdk.AccAddress) error
 }

@@ -5,37 +5,35 @@ import (
 )
 
 func DefaultGenesis() *GenesisState {
-	return &GenesisState{
-		Params:  Params{},
-		Metrics: []RegionMetric{},
-		Scores:  []GrowthScore{},
+	gs := &GenesisState{
+		Params:         DefaultParams(),
+		Metrics:        []RegionMetric{},
+		Scores:         []GrowthScore{},
+		OccupationList: []Occupation{},
 	}
+
+	// keep empty defaults for now (compile-first).
+	// We’ll add “UA + regions” bootstrap once we confirm the real proto fields/types.
+
+	return gs
 }
 
 func (gs GenesisState) Validate() error {
+	// Minimal, safe validation only (no helpers assumed).
 	for _, m := range gs.Metrics {
-		if err := ValidateRegionMetric(m); err != nil {
-			return err
+		if m.RegionId == "" {
+			return sdkerrors.ErrInvalidRequest.Wrap("metrics: region_id cannot be empty")
 		}
 	}
 	for _, s := range gs.Scores {
-		if err := ValidateGrowthScore(s); err != nil {
-			return err
+		if s.RegionId == "" {
+			return sdkerrors.ErrInvalidRequest.Wrap("scores: region_id cannot be empty")
 		}
 	}
-	return nil
-}
-
-func ValidateRegionMetric(m RegionMetric) error {
-	if m.RegionId == "" {
-		return sdkerrors.ErrInvalidRequest.Wrap("region_id cannot be empty")
+	for _, o := range gs.OccupationList {
+		if o.RegionId == "" {
+			return sdkerrors.ErrInvalidRequest.Wrap("occupation_list: region_id cannot be empty")
+		}
 	}
-	return nil
-}
-
-func ValidateGrowthScore(s GrowthScore) error {
-	if s.RegionId == "" {
-		return sdkerrors.ErrInvalidRequest.Wrap("region_id cannot be empty")
-	}
-	return nil
+	return gs.Params.Validate()
 }

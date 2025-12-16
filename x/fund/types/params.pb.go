@@ -27,8 +27,8 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // Params defines the fund module parameters.
 type Params struct {
-	// admin is the address allowed to execute fund plans directly in x/fund.
-	// NOTE: with x/ugov in place, typical flow is ugov.MsgExecuteFundPlan via x/gov.
+	// admin is the address allowed to execute fund positions directly in x/fund.
+	// NOTE: with x/ugov in place, typical flow is ugov.MsgExecuteFundPosition via x/gov.
 	Admin string `protobuf:"bytes,1,opt,name=admin,proto3" json:"admin,omitempty"`
 }
 

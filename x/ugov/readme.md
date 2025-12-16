@@ -1,31 +1,26 @@
 # CLI workflows
 
-## 1) Set national president (admin only)
+## 1) Create a plan (president)
 
-Tx: `MsgSetPresident`
-- authority = ugov.params.admin
-- role_type = NATIONAL
-- region_id = ""
+Tx: `MsgCreatePlan`
 
-## 2) Create a plan (president)
-
-Tx: `MsgCreateFundPlan`
 - creator = president
 - fund_address = fund module fund account address
-- plan_json = JSON encoding of your intended fund plan (temporary scaffold)
+- position = the FundPosition (delegations + payouts)
 
 Result: plan stored as DRAFT.
 
-## 3) Submit governance proposal (gov v1) to execute the plan
+## 2) Submit governance proposal (gov v1) to execute the plan
 
 Create a proposal with message:
 
-- `ugov.MsgExecuteFundPlan{ authority: <gov module address>, plan_id: <id> }`
+- `ugov.MsgExecuteFundPosition{ authority: <gov module address>, plan_id: <id> }`
 
-## 4) Vote & pass
+## 3) Vote & pass
 
 When passed:
+
 - gov executes msg
 - ugov verifies authority == gov authority
-- ugov calls x/fund ExecuteFundPlan(...)
+- ugov calls x/fund ExecuteFundPosition(...)
 - plan status becomes EXECUTED

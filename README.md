@@ -16,19 +16,19 @@ It is a **public economic coordination layer** designed to tie on-chain rules to
   - `1 UAG = 1,000,000 uuag`
 
 - **Initial supply:** `370,000,000 UAG`
-- **Inflation:** `7% yearly`, enabled from day one
+- **Inflation:** `Without`
 
 The node binary is **`uagdd`**, used by full nodes and validators.
 
 ---
 
-## Core idea (one paragraph)
+## Core idea
 
 UAG is a coordination token whose **usage limits are algorithmically tied to real economic growth** − not political promises or private control. Funds cannot be secretly moved, rewritten, or inflated beyond what Ukraine and its regions demonstrably produce in the real world.
 
 ---
 
-## Token distribution (hard-coded protocol logic)
+## Token distribution
 
 All UAG supply is fixed at genesis (no inflation; validators earn fees/gas) and split into **three protocol-owned buckets**:
 
@@ -70,7 +70,7 @@ Its limits depend on **country-wide growth**, not on political decisions.
 
 ---
 
-## Growth-based limits (the key rule)
+## Growth-based limits
 
 Neither regions nor the Ukraine-level fund can freely spend.
 
@@ -221,15 +221,15 @@ Used by:
 
 Controls all protocol-owned funds.
 
-- Regional funds (27)
+- 27 Regional funds
 - Ukraine-level fund
-- Projects fund
+- Engineering fund
 
 Enforces:
 
 - allowed actions (delegate, limited payroll/grants)
 - spending caps
-- occupation locks
+- real life occupation locks
 - vote-required execution
 
 No module or account can bypass this logic.

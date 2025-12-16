@@ -30,7 +30,7 @@ func (s MsgServer) CreatePlan(goCtx context.Context, msg *types.MsgCreatePlan) (
 		Title:       msg.Title,
 		Description: msg.Description,
 		Status:      types.PlanStatus_PLAN_STATUS_DRAFT,
-		Plan:        msg.Plan,
+		Position:    msg.Position,
 		ProposalId:  0,
 	}
 
@@ -64,7 +64,7 @@ func (s MsgServer) UpdatePlan(goCtx context.Context, msg *types.MsgUpdatePlan) (
 
 	plan.Title = msg.Title
 	plan.Description = msg.Description
-	plan.Plan = msg.Plan
+	plan.Position = msg.Position
 
 	if err := s.SetPlan(ctx, plan); err != nil {
 		return nil, err
@@ -101,7 +101,7 @@ func (s MsgServer) SubmitPlan(goCtx context.Context, msg *types.MsgSubmitPlan) (
 	return &types.MsgSubmitPlanResponse{}, nil
 }
 
-func (s MsgServer) ExecuteFundPlan(goCtx context.Context, msg *types.MsgExecuteFundPlan) (*types.MsgExecuteFundPlanResponse, error) {
+func (s MsgServer) ExecuteFundPosition(goCtx context.Context, msg *types.MsgExecuteFundPosition) (*types.MsgExecuteFundPositionResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	if err := msg.ValidateBasic(); err != nil {
@@ -127,10 +127,10 @@ func (s MsgServer) ExecuteFundPlan(goCtx context.Context, msg *types.MsgExecuteF
 	authorityAddr := sdk.MustAccAddressFromBech32(msg.Authority)
 
 	// Ensure fund address is carried (just in case)
-	fp := plan.Plan
-	fp.FundAddress = plan.FundAddress
+	pos := plan.Position
+	pos.FundAddress = plan.FundAddress
 
-	if err := s.fundKeeper.ExecuteFundPlan(ctx, fp, authorityAddr); err != nil {
+	if err := s.fundKeeper.ExecuteFundPosition(ctx, pos, authorityAddr); err != nil {
 		return nil, err
 	}
 
@@ -139,5 +139,5 @@ func (s MsgServer) ExecuteFundPlan(goCtx context.Context, msg *types.MsgExecuteF
 		return nil, err
 	}
 
-	return &types.MsgExecuteFundPlanResponse{}, nil
+	return &types.MsgExecuteFundPositionResponse{}, nil
 }

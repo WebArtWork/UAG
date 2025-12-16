@@ -121,8 +121,10 @@ func init() {
 func AppConfig() depinject.Config {
 	return depinject.Configs(
 		appConfig,
+		depinject.Provide(
+			ProvideFundGrowthKeeper,
+		),
 		depinject.Supply(
-			// supply custom module basics
 			map[string]module.AppModuleBasic{
 				genutiltypes.ModuleName: genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
 			},

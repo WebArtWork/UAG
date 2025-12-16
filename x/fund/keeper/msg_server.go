@@ -17,6 +17,6 @@ func NewMsgServerImpl(k Keeper) types.MsgServer {
 	return msgServer{Keeper: k}
 }
 
-func (m msgServer) ExecuteFundPlan(ctx context.Context, msg *types.MsgExecuteFundPlan) (*types.MsgExecuteFundPlanResponse, error) {
+func (m msgServer) ExecuteFundPosition(ctx context.Context, msg *types.MsgExecuteFundPosition) (*types.MsgExecuteFundPositionResponse, error) {
 	return nil, types.ErrDirectExecDisabled
 }

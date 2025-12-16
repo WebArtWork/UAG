@@ -26,7 +26,7 @@ func (m *MsgCreatePlan) ValidateBasic() error {
 	if m.Title == "" {
 		return fmt.Errorf("title required")
 	}
-	// m.Plan is non-nullable in proto, but still validate basics here if needed.
+	// m.Position is non-nullable in proto, but still validate basics here if needed.
 	return nil
 }
 
@@ -65,7 +65,7 @@ func (m *MsgSubmitPlan) ValidateBasic() error {
 	return nil
 }
 
-func (m *MsgExecuteFundPlan) ValidateBasic() error {
+func (m *MsgExecuteFundPosition) ValidateBasic() error {
 	if m == nil {
 		return fmt.Errorf("empty message")
 	}

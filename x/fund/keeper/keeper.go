@@ -138,8 +138,8 @@ func (k Keeper) assertGovAuthority(authority sdk.AccAddress) error {
 	return nil
 }
 
-func (k Keeper) ValidateFundPlan(ctx context.Context, plan types.FundPlan) error {
-	fundAddr, err := k.addressCodec.StringToBytes(plan.FundAddress)
+func (k Keeper) ValidateFundPosition(ctx context.Context, position types.FundPosition) error {
+	fundAddr, err := k.addressCodec.StringToBytes(position.FundAddress)
 	if err != nil {
 		return err
 	}
@@ -164,7 +164,7 @@ func (k Keeper) ValidateFundPlan(ctx context.Context, plan types.FundPlan) error
 	totalDelegations := sdkmath.ZeroInt()
 	totalPayouts := sdkmath.ZeroInt()
 
-	for _, d := range plan.Delegations {
+	for _, d := range position.Delegations {
 		// FundDelegation is a VALUE type (not *FundDelegation).
 		if d.ValidatorAddress == "" {
 			return fmt.Errorf("delegation validator_address is required")
@@ -178,7 +178,7 @@ func (k Keeper) ValidateFundPlan(ctx context.Context, plan types.FundPlan) error
 		totalDelegations = totalDelegations.Add(d.Amount.Amount)
 	}
 
-	for _, p := range plan.Payouts {
+	for _, p := range position.Payouts {
 		// FundPayout is a VALUE type (not *FundPayout).
 		if p.RecipientAddress == "" {
 			return fmt.Errorf("payout recipient_address is required")
@@ -201,21 +201,21 @@ func (k Keeper) ValidateFundPlan(ctx context.Context, plan types.FundPlan) error
 	return nil
 }
 
-func (k Keeper) ExecuteFundPlan(ctx context.Context, plan types.FundPlan, authority sdk.AccAddress) error {
+func (k Keeper) ExecuteFundPosition(ctx context.Context, position types.FundPosition, authority sdk.AccAddress) error {
 	if err := k.assertGovAuthority(authority); err != nil {
 		return err
 	}
-	if err := k.ValidateFundPlan(ctx, plan); err != nil {
+	if err := k.ValidateFundPosition(ctx, position); err != nil {
 		return err
 	}
 
-	fundAddr, err := k.addressCodec.StringToBytes(plan.FundAddress)
+	fundAddr, err := k.addressCodec.StringToBytes(position.FundAddress)
 	if err != nil {
 		return err
 	}
 	fundAcc := sdk.AccAddress(fundAddr)
 
-	for _, del := range plan.Delegations {
+	for _, del := range position.Delegations {
 		if del.ValidatorAddress == "" {
 			return fmt.Errorf("delegation validator_address is required")
 		}
@@ -238,7 +238,7 @@ func (k Keeper) ExecuteFundPlan(ctx context.Context, plan types.FundPlan, author
 		}
 	}
 
-	for _, payout := range plan.Payouts {
+	for _, payout := range position.Payouts {
 		if payout.RecipientAddress == "" {
 			return fmt.Errorf("payout recipient_address is required")
 		}
@@ -260,9 +260,9 @@ func (k Keeper) ExecuteFundPlan(ctx context.Context, plan types.FundPlan, author
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	sdkCtx.EventManager().EmitEvent(
 		sdk.NewEvent(
-			"fund_plan_executed",
-			sdk.NewAttribute("fund", plan.FundAddress),
-			sdk.NewAttribute("plan_id", fmt.Sprintf("%d", plan.Id)),
+			"fund_position_executed",
+			sdk.NewAttribute("fund", position.FundAddress),
+			sdk.NewAttribute("position_id", fmt.Sprintf("%d", position.Id)),
 		),
 	)
 
