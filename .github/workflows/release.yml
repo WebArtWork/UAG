@@ -7,6 +7,9 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 jobs:
   might_release:
     runs-on: ubuntu-latest
@@ -58,11 +61,10 @@ jobs:
           EXTRACT_DIR="$(mktemp -d)"
           tar -xzf "$WIN_TGZ" -C "$EXTRACT_DIR"
 
-          # Ignite sometimes nests binary like tmp/6721773/uagdd (no .exe)
           BIN_PATH="$(find "$EXTRACT_DIR" -type f \( -name 'uagdd' -o -name 'uagdd.exe' \) | head -n 1 || true)"
           if [[ -z "${BIN_PATH}" ]]; then
             echo "Windows binary not found inside extracted archive"
-            find "$EXTRACT_DIR" -maxdepth 4 -type f | head -n 200
+            find "$EXTRACT_DIR" -maxdepth 5 -type f | head -n 200
             exit 1
           fi
 
@@ -87,11 +89,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish the Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: ${{ steps.vars.outputs.should_release == 'true' }}
         with:
           tag_name: ${{ steps.vars.outputs.tag_name }}
-          files: release/*
-          prerelease: true
+          target_commitish: ${{ github.sha }}
+          name: ${{ steps.vars.outputs.tag_name }}
+          files: release/**
+          prerelease: ${{ steps.vars.outputs.is_release_type_latest == 'true' }}
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
