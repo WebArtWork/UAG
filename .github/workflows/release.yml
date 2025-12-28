@@ -43,7 +43,7 @@ jobs:
           DO_NOT_TRACK: 1
           GOFLAGS: "-buildvcs=false"
 
-      - name: Normalize Windows release artifact (zip + .exe)
+      - name: Normalize Windows release artifact (flat zip + uagdd.exe)
         if: ${{ steps.vars.outputs.should_release == 'true' }}
         shell: bash
         run: |
@@ -55,24 +55,27 @@ jobs:
             exit 0
           fi
 
-          TMP="$(mktemp -d)"
-          tar -xzf "$WIN_TGZ" -C "$TMP"
+          EXTRACT_DIR="$(mktemp -d)"
+          tar -xzf "$WIN_TGZ" -C "$EXTRACT_DIR"
 
-          # ignite currently outputs "uagdd" (no .exe) inside windows archive
-          if [[ -f "$TMP/uagdd" && ! -f "$TMP/uagdd.exe" ]]; then
-            mv "$TMP/uagdd" "$TMP/uagdd.exe"
+          # Ignite sometimes nests binary like tmp/6721773/uagdd (no .exe)
+          BIN_PATH="$(find "$EXTRACT_DIR" -type f \( -name 'uagdd' -o -name 'uagdd.exe' \) | head -n 1 || true)"
+          if [[ -z "${BIN_PATH}" ]]; then
+            echo "Windows binary not found inside extracted archive"
+            find "$EXTRACT_DIR" -maxdepth 4 -type f | head -n 200
+            exit 1
           fi
 
+          STAGE_DIR="$(mktemp -d)"
+          cp "$BIN_PATH" "$STAGE_DIR/uagdd.exe"
+
           ZIP_OUT="${WIN_TGZ%.tar.gz}.zip"
-          (cd "$TMP" && zip -r -q "$OLDPWD/$ZIP_OUT" .)
+          (cd "$STAGE_DIR" && zip -9 -q "$OLDPWD/$ZIP_OUT" uagdd.exe)
 
-          # optional: keep only .zip for Windows users
           rm -f "$WIN_TGZ"
+          (cd release && rm -f release_checksum && sha256sum * > release_checksum)
 
-          # regenerate checksum file to include the .zip and reflect deletions
-          (cd release && sha256sum * > release_checksum)
-
-          rm -rf "$TMP"
+          rm -rf "$EXTRACT_DIR" "$STAGE_DIR"
 
       - name: Delete the "latest" Release
         uses: dev-drprasad/delete-tag-and-release@v0.2.1
