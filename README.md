@@ -7,6 +7,21 @@ It is a **public economic coordination layer** designed to tie on-chain rules to
 
 ---
 
+## Investor overview (non-technical)
+
+Ukraine Growth (UAG) is a public, rule-based system that helps fund regions and protect critical economic records in a way that’s hard to manipulate and easy to audit.
+
+- Solves the trust gap in rebuilding budgets, grants, and regional programs − rules are stronger than promises.
+- Starts with a fixed pool of **370,000,000 UAG** (no inflation).
+- Funds are split into locked vaults: **70%** for **27 regional funds**, **20%** for a Ukraine-level fund, **10%** for a projects/tools fund (spending requires a public vote).
+- Spending capacity grows only with real-world progress (taxes, GDP, exports) − if growth slows, limits tighten automatically.
+- »Presidents are servants« − leaders propose, explain, and execute only what the community approves.
+- Citizens can be verified by region without exposing personal data publicly.
+- Businesses can stamp critical CRM records so silent edits become detectable (anti-fraud, accountability).
+- Built to become trust infrastructure for Ukraine’s recovery and long-term economic growth.
+
+---
+
 ## Network basics
 
 - **Chain ID:** `uag-1`
@@ -280,27 +295,27 @@ All commands use the `uagdd` binary and the `uuag` fee token.
 1. **Store a contract** (any account can upload):
 
    ```bash
-   uagdd tx wasm store path/to/contract.wasm \\
-     --from <key-name> \\
-     --chain-id uag-test-1 \\
+   uagdd tx wasm store path/to/contract.wasm \
+     --from <key-name> \
+     --chain-id uag-test-1 \
      --gas auto --gas-adjustment 1.3 --fees 7500uuag
    ```
 
 2. **Instantiate** the uploaded code (replace `<code-id>` from the store result):
 
    ```bash
-   uagdd tx wasm instantiate <code-id> '{"count":0}' \\
-     --label "demo-counter" \\
-     --admin <admin-address> \\
-     --from <key-name> --chain-id uag-test-1 \\
+   uagdd tx wasm instantiate <code-id> '{"count":0}' \
+     --label "demo-counter" \
+     --admin <admin-address> \
+     --from <key-name> --chain-id uag-test-1 \
      --gas auto --gas-adjustment 1.3 --fees 6000uuag
    ```
 
 3. **Execute** a contract message:
 
    ```bash
-   uagdd tx wasm execute <contract-address> '{"increment":{}}' \\
-     --from <key-name> --chain-id uag-test-1 \\
+   uagdd tx wasm execute <contract-address> '{"increment":{}}' \
+     --from <key-name> --chain-id uag-test-1 \
      --gas auto --gas-adjustment 1.3 --fees 5000uuag
    ```
 
@@ -347,3 +362,14 @@ It is about **making growth measurable, enforceable, and irreversible**.
 - ✅ Code > promises
 - ✅ Votes > power
 - ✅ Growth > speculation
+
+---
+
+## Contributing
+
+- This repository contains the core chain implementation (`uagdd`, modules, governance logic).
+- For operational scripts and tooling (build, node management, automation), see **UAG-tools**:
+
+  - [https://github.com/WebArtWork/UAG-tools](https://github.com/WebArtWork/UAG-tools)
+
+- PRs and issues are welcome. Keep changes focused and aligned with the core principles above.
