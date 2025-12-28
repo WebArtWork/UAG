@@ -1,3 +1,5 @@
+name: Release
+
 on:
   push:
     branches:
@@ -8,6 +10,7 @@ on:
 jobs:
   might_release:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,6 +42,37 @@ jobs:
         env:
           DO_NOT_TRACK: 1
           GOFLAGS: "-buildvcs=false"
+
+      - name: Normalize Windows release artifact (zip + .exe)
+        if: ${{ steps.vars.outputs.should_release == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          WIN_TGZ="$(ls -1 release/*windows_amd64.tar.gz 2>/dev/null | head -n 1 || true)"
+          if [[ -z "${WIN_TGZ}" ]]; then
+            echo "No windows_amd64 tarball found in release/, skip"
+            exit 0
+          fi
+
+          TMP="$(mktemp -d)"
+          tar -xzf "$WIN_TGZ" -C "$TMP"
+
+          # ignite currently outputs "uagdd" (no .exe) inside windows archive
+          if [[ -f "$TMP/uagdd" && ! -f "$TMP/uagdd.exe" ]]; then
+            mv "$TMP/uagdd" "$TMP/uagdd.exe"
+          fi
+
+          ZIP_OUT="${WIN_TGZ%.tar.gz}.zip"
+          (cd "$TMP" && zip -r -q "$OLDPWD/$ZIP_OUT" .)
+
+          # optional: keep only .zip for Windows users
+          rm -f "$WIN_TGZ"
+
+          # regenerate checksum file to include the .zip and reflect deletions
+          (cd release && sha256sum * > release_checksum)
+
+          rm -rf "$TMP"
 
       - name: Delete the "latest" Release
         uses: dev-drprasad/delete-tag-and-release@v0.2.1
