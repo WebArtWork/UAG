@@ -6,20 +6,16 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-type Params struct {
-	Admin string `json:"admin" yaml:"admin"`
-}
-
 func DefaultParams() Params {
-	return Params{Admin: ""}
+	return Params{Authority: ""}
 }
 
 func (p Params) Validate() error {
-	if p.Admin == "" {
+	if p.Authority == "" {
 		return nil
 	}
-	if _, err := sdk.AccAddressFromBech32(p.Admin); err != nil {
-		return fmt.Errorf("invalid admin address: %w", err)
+	if _, err := sdk.AccAddressFromBech32(p.Authority); err != nil {
+		return fmt.Errorf("invalid authority address: %w", err)
 	}
 	return nil
 }

@@ -8,22 +8,32 @@ import (
 )
 
 func InitGenesis(ctx sdk.Context, k keeper.Keeper, gen types.GenesisState) {
-	k.SetParams(ctx, gen.Params)
-	for _, p := range gen.Presidents {
-		k.SetPresident(ctx, p)
+	_ = k.SetParams(ctx, gen.Params)
+
+	// Store plans
+	for _, p := range gen.Plans {
+		_ = k.SetPlan(ctx, p)
 	}
-	for _, pl := range gen.Plans {
-		k.SetPlan(ctx, pl)
+
+	// NextPlanId
+	next := gen.NextPlanId
+	if next == 0 {
+		next = 1
 	}
+	_ = k.NextPlanID.Set(ctx, next)
 }
 
 func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
-	gs := types.DefaultGenesis()
-	gs.Params = k.GetParams(ctx)
-	gs.Presidents = k.GetAllPresidents(ctx)
-	gs.Plans = append(gs.Plans, k.GetPlansByStatus(ctx, types.PLAN_STATUS_DRAFT)...)
-	gs.Plans = append(gs.Plans, k.GetPlansByStatus(ctx, types.PLAN_STATUS_SUBMITTED)...)
-	gs.Plans = append(gs.Plans, k.GetPlansByStatus(ctx, types.PLAN_STATUS_EXECUTED)...)
-	gs.Plans = append(gs.Plans, k.GetPlansByStatus(ctx, types.PLAN_STATUS_REJECTED)...)
-	return &gs
+	params, _ := k.GetParams(ctx)
+
+	nextID, err := k.NextPlanID.Get(ctx)
+	if err != nil || nextID == 0 {
+		nextID = 1
+	}
+
+	return &types.GenesisState{
+		Params:     params,
+		Plans:      k.GetAllPlans(ctx),
+		NextPlanId: nextID,
+	}
 }

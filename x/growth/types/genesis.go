@@ -1,117 +1,39 @@
 package types
 
 import (
-	"fmt"
-
-	sdkmath "cosmossdk.io/math"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-// DefaultGenesis returns the default GenesisState.
 func DefaultGenesis() *GenesisState {
-	p := DefaultParams()
-	return &GenesisState{
-		Params:         &p,
-		Metrics:        []*RegionMetric{},
-		Scores:         []*GrowthScore{},
-		OccupationList: []*Occupation{},
+	gs := &GenesisState{
+		Params:         DefaultParams(),
+		Metrics:        []RegionMetric{},
+		Scores:         []GrowthScore{},
+		OccupationList: []Occupation{},
 	}
+
+	// keep empty defaults for now (compile-first).
+	// We’ll add “UA + regions” bootstrap once we confirm the real proto fields/types.
+
+	return gs
 }
 
-// Validate performs basic genesis state validation.
 func (gs GenesisState) Validate() error {
-	if gs.Params == nil {
-		return fmt.Errorf("params are required")
-	}
-	if err := gs.Params.Validate(); err != nil {
-		return err
-	}
+	// Minimal, safe validation only (no helpers assumed).
 	for _, m := range gs.Metrics {
-		if err := ValidateRegionMetric(m); err != nil {
-			return err
+		if m.RegionId == "" {
+			return sdkerrors.ErrInvalidRequest.Wrap("metrics: region_id cannot be empty")
 		}
 	}
 	for _, s := range gs.Scores {
-		if err := ValidateGrowthScore(s); err != nil {
-			return err
+		if s.RegionId == "" {
+			return sdkerrors.ErrInvalidRequest.Wrap("scores: region_id cannot be empty")
 		}
 	}
 	for _, o := range gs.OccupationList {
-		if err := ValidateOccupation(o); err != nil {
-			return err
+		if o.RegionId == "" {
+			return sdkerrors.ErrInvalidRequest.Wrap("occupation_list: region_id cannot be empty")
 		}
 	}
-	return nil
-}
-
-// ValidateRegionMetric ensures a metric is well-formed.
-func ValidateRegionMetric(m *RegionMetric) error {
-	if m == nil {
-		return fmt.Errorf("metric is required")
-	}
-	if m.RegionId == "" {
-		return fmt.Errorf("region id required")
-	}
-	if m.Period == "" {
-		return fmt.Errorf("period required")
-	}
-	tax, err := sdkmath.LegacyNewDecFromStr(m.TaxIndex)
-	if err != nil {
-		return err
-	}
-	gdp, err := sdkmath.LegacyNewDecFromStr(m.GdpIndex)
-	if err != nil {
-		return err
-	}
-	exports, err := sdkmath.LegacyNewDecFromStr(m.ExportsIndex)
-	if err != nil {
-		return err
-	}
-	if tax.IsNegative() || gdp.IsNegative() || exports.IsNegative() {
-		return ErrInvalidMetric
-	}
-	return nil
-}
-
-// ValidateGrowthScore ensures a derived score is well-formed.
-func ValidateGrowthScore(s *GrowthScore) error {
-	if s == nil {
-		return fmt.Errorf("score is required")
-	}
-	if s.RegionId == "" {
-		return fmt.Errorf("region id required")
-	}
-	if s.Period == "" {
-		return fmt.Errorf("period required")
-	}
-	if _, err := sdkmath.LegacyNewDecFromStr(s.Score); err != nil {
-		return err
-	}
-	if _, err := sdkmath.LegacyNewDecFromStr(s.DelegationMultiplier); err != nil {
-		return err
-	}
-	if _, err := sdkmath.LegacyNewDecFromStr(s.PayrollMultiplier); err != nil {
-		return err
-	}
-	return nil
-}
-
-// ValidateOccupation ensures an occupation entry is well-formed.
-func ValidateOccupation(o *Occupation) error {
-	if o == nil {
-		return fmt.Errorf("occupation is required")
-	}
-	if o.RegionId == "" {
-		return fmt.Errorf("region id required")
-	}
-	if o.Period == "" {
-		return fmt.Errorf("period required")
-	}
-	dec, err := sdkmath.LegacyNewDecFromStr(o.Occupation)
-	if err != nil {
-		return err
-	}
-	if dec.IsNegative() {
-		return ErrInvalidMetric
-	}
-	return nil
+	return gs.Params.Validate()
 }

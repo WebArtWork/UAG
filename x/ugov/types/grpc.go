@@ -1,11 +1,6 @@
 package types
 
-import "google.golang.org/grpc"
-
-// RegisterMsgServer wires the ugov message server into the gRPC router.
-// TODO: replace the placeholder implementation once protobuf services are added.
-func RegisterMsgServer(_ grpc.ServiceRegistrar, _ interface{}) {}
-
-// RegisterQueryServer wires the ugov query server into the gRPC router.
-// TODO: replace the placeholder implementation once protobuf services are added.
-func RegisterQueryServer(_ grpc.ServiceRegistrar, _ interface{}) {}
+// Intentionally empty.
+//
+// Previously this file declared RegisterMsgServer/RegisterQueryServer placeholders,
+// but those collide with protobuf-generated functions in *pb.go in SDK v0.53+Ignite.

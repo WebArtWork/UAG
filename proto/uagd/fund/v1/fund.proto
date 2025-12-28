@@ -40,8 +40,8 @@ message FundPayout {
   string category = 3;
 }
 
-// FundPlan captures a set of delegations and payouts to execute for a fund.
-message FundPlan {
+// FundPosition captures a set of delegations and payouts to execute for a fund.
+message FundPosition {
   uint64 id = 1;
   string fund_address = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string title = 3;

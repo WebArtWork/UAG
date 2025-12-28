@@ -1,9 +1,99 @@
-vue/node_modules
-vue/dist
-release/
+# -----------------------------
+# Go build outputs
+# -----------------------------
+/bin/
+/build/
+/dist/
+/release/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.a
+*.out
+*.test
+
+# Common local binaries (chain binary name can vary)
+uagdd
+uagd
+simd
+
+# -----------------------------
+# Go tooling / caches
+# -----------------------------
+*.log
+*.tmp
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Go workspaces
+go.work
+go.work.sum
+
+# Coverage
+*.cover
+coverage.*
+cover.out
+
+# -----------------------------
+# Cosmos SDK / Ignite / local chain state
+# -----------------------------
+**/.ignite/
+/config.yml.local
+**/.uagd/
+**/.uagd-home/
+**/.gaia/
+**/.simapp/
+**/.wasmd/
+**/*.db/
+**/data/
+**/wasm/
+
+# Keys / keyrings / local secrets (keep safe)
+**/keyring-*
+**/*.key
+**/*.pem
+**/*.crt
+
+# Genesis / configs that are generated locally (adjust if you commit them)
+**/genesis.json
+**/priv_validator_key.json
+**/node_key.json
+
+# Logs produced by node
+**/logs/
+**/*.log
+
+# -----------------------------
+# Protobuf / buf (generated)
+# -----------------------------
+# If you generate Go code into a folder, ignore it here.
+# Comment out if your repo tracks generated protobuf outputs.
+# /api/
+# /x/**/types/*.pb.go
+# /x/**/types/*.pb.gw.go
+
+# -----------------------------
+# Editor / IDE
+# -----------------------------
 .idea/
 .vscode/
-.DS_Store
-*.dot
-*.log
-*.ign
+*.iml
+
+# -----------------------------
+# Node (only if you actually have a UI folder)
+# -----------------------------
+/vue/node_modules/
+/vue/dist/
+node_modules/
+dist/
+
+# -----------------------------
+# Env files
+# -----------------------------
+.env
+.env.*
+project.zip

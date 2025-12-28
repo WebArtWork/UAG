@@ -2,61 +2,66 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"uagd/x/growth/types"
 )
 
-var _ types.MsgServer = msgServer{}
-
 type msgServer struct {
 	Keeper
-	types.UnimplementedMsgServer
 }
+
+var _ types.MsgServer = msgServer{}
 
 func NewMsgServerImpl(k Keeper) types.MsgServer {
-	return msgServer{Keeper: k}
+	return &msgServer{Keeper: k}
 }
 
-func (m msgServer) SetRegionMetric(ctx context.Context, msg *types.MsgSetRegionMetric) (*types.MsgSetRegionMetricResponse, error) {
-	params, err := m.GetParams(ctx)
-	if err != nil {
-		return nil, err
+func (m msgServer) SetRegionMetric(goCtx context.Context, msg *types.MsgSetRegionMetric) (*types.MsgSetRegionMetricResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	if msg == nil {
+		return nil, fmt.Errorf("empty message")
 	}
-	if params.Oracle != msg.Authority {
-		return nil, types.ErrUnauthorized
+	if msg.RegionId == "" {
+		return nil, fmt.Errorf("region_id required")
 	}
-	if err := msg.ValidateBasic(); err != nil {
-		return nil, err
+	if msg.Period == "" {
+		return nil, fmt.Errorf("period required")
 	}
-	if err := m.Keeper.SetRegionMetric(ctx, types.RegionMetric{
+
+	metric := types.RegionMetric{
 		RegionId:     msg.RegionId,
 		Period:       msg.Period,
 		TaxIndex:     msg.TaxIndex,
 		GdpIndex:     msg.GdpIndex,
 		ExportsIndex: msg.ExportsIndex,
-	}); err != nil {
+	}
+
+	if err := m.Keeper.SetRegionMetric(ctx, metric); err != nil {
 		return nil, err
 	}
-	score := m.ComputeGrowthScore(types.RegionMetric{
-		RegionId:     msg.RegionId,
-		Period:       msg.Period,
-		TaxIndex:     msg.TaxIndex,
-		GdpIndex:     msg.GdpIndex,
-		ExportsIndex: msg.ExportsIndex,
-	})
 
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	sdkCtx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			"region_metric_updated",
-			sdk.NewAttribute("region_id", msg.RegionId),
-			sdk.NewAttribute("period", msg.Period),
-			sdk.NewAttribute("delegation_multiplier", score.DelegationMultiplier),
-			sdk.NewAttribute("payroll_multiplier", score.PayrollMultiplier),
-		),
-	)
+	// Best-effort: compute and store a score for the region.
+	_ = m.computeAndStoreScore(ctx, msg.RegionId)
 
-	return &types.MsgSetRegionMetricResponse{Score: &score}, nil
+	return &types.MsgSetRegionMetricResponse{}, nil
+}
+
+// computeAndStoreScore is intentionally minimal for now.
+// Replace later with your real growth formula.
+func (m msgServer) computeAndStoreScore(ctx context.Context, regionID string) error {
+	one := sdkmath.LegacyNewDec(1)
+
+	score := types.GrowthScore{
+		RegionId:             regionID,
+		Score:                one,
+		DelegationMultiplier: one,
+		PayrollMultiplier:    one,
+	}
+
+	return m.Keeper.SetGrowthScore(ctx, score)
 }

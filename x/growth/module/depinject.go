@@ -1,6 +1,7 @@
 package growth
 
 import (
+	"cosmossdk.io/core/address"
 	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/core/store"
 	"cosmossdk.io/depinject"
@@ -28,6 +29,7 @@ type ModuleInputs struct {
 	Config       *types.Module
 	StoreService store.KVStoreService
 	Cdc          codec.Codec
+	AddressCodec address.Codec
 }
 
 type ModuleOutputs struct {
@@ -38,7 +40,7 @@ type ModuleOutputs struct {
 }
 
 func ProvideModule(in ModuleInputs) ModuleOutputs {
-	k := keeper.NewKeeper(in.StoreService, in.Cdc)
+	k := keeper.NewKeeper(in.StoreService, in.Cdc, in.AddressCodec)
 	m := NewAppModule(in.Cdc, k)
 	return ModuleOutputs{GrowthKeeper: k, Module: m}
 }

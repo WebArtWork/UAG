@@ -11,25 +11,26 @@ message RegionMetric {
   string region_id = 1;
   string period = 2;
   // Index values are decimals in the range [0, 2].
-  string tax_index = 3 [(cosmos_proto.scalar) = "cosmos.Dec", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
-  string gdp_index = 4 [(cosmos_proto.scalar) = "cosmos.Dec", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
-  string exports_index = 5 [(cosmos_proto.scalar) = "cosmos.Dec", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+  // NOTE: Cosmos SDK v0.53 uses cosmossdk.io/math.LegacyDec (sdk.Dec was removed).
+  string tax_index = 3 [(cosmos_proto.scalar) = "cosmos.Dec", (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
+  string gdp_index = 4 [(cosmos_proto.scalar) = "cosmos.Dec", (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
+  string exports_index = 5 [(cosmos_proto.scalar) = "cosmos.Dec", (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
 }
 
 // GrowthScore stores derived multipliers for a region and period.
 message GrowthScore {
   string region_id = 1;
   string period = 2;
-  string score = 3 [(cosmos_proto.scalar) = "cosmos.Dec", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
-  string delegation_multiplier = 4 [(cosmos_proto.scalar) = "cosmos.Dec", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
-  string payroll_multiplier = 5 [(cosmos_proto.scalar) = "cosmos.Dec", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+  string score = 3 [(cosmos_proto.scalar) = "cosmos.Dec", (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
+  string delegation_multiplier = 4 [(cosmos_proto.scalar) = "cosmos.Dec", (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
+  string payroll_multiplier = 5 [(cosmos_proto.scalar) = "cosmos.Dec", (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
 }
 
 // Occupation stores the occupation percentage for a region and period.
 message Occupation {
   string region_id = 1;
   string period = 2;
-  string occupation = 3 [(cosmos_proto.scalar) = "cosmos.Dec", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+  string occupation = 3 [(cosmos_proto.scalar) = "cosmos.Dec", (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
 }
 
 // Params defines module parameters.

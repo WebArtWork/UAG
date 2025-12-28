@@ -11,10 +11,10 @@ import (
 
 func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 	registry.RegisterImplementations((*sdk.Msg)(nil),
-		&MsgExecuteFundPlan{},
+		&MsgExecuteFundPosition{},
 	)
 	registry.RegisterImplementations((*tx.MsgResponse)(nil),
-		&MsgExecuteFundPlanResponse{},
+		&MsgExecuteFundPositionResponse{},
 	)
 }
 
@@ -34,8 +34,8 @@ func getModuleCodec() codec.Codec {
 	return ModuleCdc
 }
 
-// GetFundPlanCodec exposes the JSON/proto codec for fund plan serialization.
-func GetFundPlanCodec() codec.Codec {
+// GetFundPositionCodec exposes the JSON/proto codec for fund position serialization.
+func GetFundPositionCodec() codec.Codec {
 	return getModuleCodec()
 }
 

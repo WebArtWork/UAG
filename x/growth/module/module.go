@@ -52,7 +52,7 @@ func (AppModule) RegisterInterfaces(registrar codectypes.InterfaceRegistry) {
 
 func (am AppModule) RegisterServices(registrar grpc.ServiceRegistrar) error {
 	types.RegisterMsgServer(registrar, keeper.NewMsgServerImpl(am.keeper))
-	types.RegisterQueryServer(registrar, am.keeper)
+	types.RegisterQueryServer(registrar, am.keeper) // keeper implements types.QueryServer in keeper/query_server.go
 	return nil
 }
 

@@ -17,8 +17,10 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 			},
 		},
 		Tx: &autocliv1.ServiceCommandDescriptor{
-			Service:           types.Msg_ServiceDesc.ServiceName,
-			RpcCommandOptions: []*autocliv1.RpcCommandOptions{{RpcMethod: "ExecuteFundPlan", Use: "execute-plan", Short: "Execute a fund plan"}},
+			Service: types.Msg_ServiceDesc.ServiceName,
+			RpcCommandOptions: []*autocliv1.RpcCommandOptions{
+				{RpcMethod: "ExecuteFundPosition", Use: "execute-position", Short: "Execute a fund position"},
+			},
 		},
 	}
 }

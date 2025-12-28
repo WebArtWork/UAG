@@ -10,9 +10,9 @@ func NewMsgSetRegionMetric(authority, regionID, period string, tax, gdp, exports
 		Authority:    authority,
 		RegionId:     regionID,
 		Period:       period,
-		TaxIndex:     tax.String(),
-		GdpIndex:     gdp.String(),
-		ExportsIndex: exports.String(),
+		TaxIndex:     tax,
+		GdpIndex:     gdp,
+		ExportsIndex: exports,
 	}
 }
 
@@ -26,13 +26,9 @@ func (msg *MsgSetRegionMetric) ValidateBasic() error {
 	if msg.RegionId == "" || msg.Period == "" {
 		return ErrInvalidMetric
 	}
-	decs := []string{msg.TaxIndex, msg.GdpIndex, msg.ExportsIndex}
+	decs := []sdkmath.LegacyDec{msg.TaxIndex, msg.GdpIndex, msg.ExportsIndex}
 	for _, d := range decs {
-		v, err := sdkmath.LegacyNewDecFromStr(d)
-		if err != nil {
-			return err
-		}
-		if v.IsNegative() {
+		if d.IsNegative() {
 			return ErrInvalidMetric
 		}
 	}

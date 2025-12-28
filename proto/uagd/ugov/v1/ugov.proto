@@ -35,8 +35,8 @@ message Plan {
 
   PlanStatus status = 6;
 
-  // The actual fund plan actions (delegations + payouts) to be executed.
-  uagd.fund.v1.FundPlan plan = 7 [(gogoproto.nullable) = false];
+  // The actual fund position actions (delegations + payouts) to be executed.
+  uagd.fund.v1.FundPosition position = 7 [(gogoproto.nullable) = false];
 
   // Optional: link to a gov proposal id once submitted.
   uint64 proposal_id = 8;
