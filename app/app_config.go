@@ -1,320 +1,204 @@
 package app
 
 import (
-	"time"
-	_ "uagd/x/citizen/module"
-	citizenmoduletypes "uagd/x/citizen/types"
-	_ "uagd/x/fund/module"
-	fundmoduletypes "uagd/x/fund/types"
-	_ "uagd/x/growth/module"
-	growthmoduletypes "uagd/x/growth/types"
-	_ "uagd/x/uagd/module"
-	uagdmoduletypes "uagd/x/uagd/types"
-	_ "uagd/x/ugov"
-	ugovmoduletypes "uagd/x/ugov/types"
-
-	wasmmodulev1 "github.com/CosmWasm/wasmd/api/wasm/module/v1"
-	_ "github.com/CosmWasm/wasmd/x/wasm/module" // import for side-effects
-	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
-
-	runtimev1alpha1 "cosmossdk.io/api/cosmos/app/runtime/v1alpha1"
-	appv1alpha1 "cosmossdk.io/api/cosmos/app/v1alpha1"
 	authmodulev1 "cosmossdk.io/api/cosmos/auth/module/v1"
-	authzmodulev1 "cosmossdk.io/api/cosmos/authz/module/v1"
 	bankmodulev1 "cosmossdk.io/api/cosmos/bank/module/v1"
 	circuitmodulev1 "cosmossdk.io/api/cosmos/circuit/module/v1"
 	consensusmodulev1 "cosmossdk.io/api/cosmos/consensus/module/v1"
-	distrmodulev1 "cosmossdk.io/api/cosmos/distribution/module/v1"
+	distributionmodulev1 "cosmossdk.io/api/cosmos/distribution/module/v1"
 	epochsmodulev1 "cosmossdk.io/api/cosmos/epochs/module/v1"
 	evidencemodulev1 "cosmossdk.io/api/cosmos/evidence/module/v1"
 	feegrantmodulev1 "cosmossdk.io/api/cosmos/feegrant/module/v1"
 	genutilmodulev1 "cosmossdk.io/api/cosmos/genutil/module/v1"
 	govmodulev1 "cosmossdk.io/api/cosmos/gov/module/v1"
 	groupmodulev1 "cosmossdk.io/api/cosmos/group/module/v1"
+	mintmodulev1 "cosmossdk.io/api/cosmos/mint/module/v1"
 	nftmodulev1 "cosmossdk.io/api/cosmos/nft/module/v1"
 	paramsmodulev1 "cosmossdk.io/api/cosmos/params/module/v1"
 	slashingmodulev1 "cosmossdk.io/api/cosmos/slashing/module/v1"
 	stakingmodulev1 "cosmossdk.io/api/cosmos/staking/module/v1"
-	txconfigv1 "cosmossdk.io/api/cosmos/tx/config/v1"
+	txmodulev1 "cosmossdk.io/api/cosmos/tx/module/v1"
 	upgrademodulev1 "cosmossdk.io/api/cosmos/upgrade/module/v1"
-	vestingmodulev1 "cosmossdk.io/api/cosmos/vesting/module/v1"
-	"cosmossdk.io/depinject/appconfig"
-	_ "cosmossdk.io/x/circuit" // import for side-effects
-	circuittypes "cosmossdk.io/x/circuit/types"
-	_ "cosmossdk.io/x/evidence" // import for side-effects
-	evidencetypes "cosmossdk.io/x/evidence/types"
-	"cosmossdk.io/x/feegrant"
-	_ "cosmossdk.io/x/feegrant/module" // import for side-effects
-	"cosmossdk.io/x/nft"
-	_ "cosmossdk.io/x/nft/module" // import for side-effects
-	_ "cosmossdk.io/x/upgrade"    // import for side-effects
-	upgradetypes "cosmossdk.io/x/upgrade/types"
+	cmtmodulev1 "github.com/cometbft/cometbft/api/cometbft/module/v1"
+	ibcmodulev1 "github.com/cosmos/ibc-go/v10/modules/core/module/v1"
+	ibcfeetypes "github.com/cosmos/ibc-go/v10/modules/apps/29-fee/types"
+
+	citizenmodulev1 "uagd/api/uagd/citizen/module/v1"
+	fundmodulev1 "uagd/api/uagd/fund/module/v1"
+	growthmodulev1 "uagd/api/uagd/growth/module/v1"
+	reportmodulev1 "uagd/api/uagd/report/module/v1"
+	ugovmodulev1 "uagd/api/uagd/ugov/module/v1"
+
+	"cosmossdk.io/core/appconfig"
+	"cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/runtime"
-	_ "github.com/cosmos/cosmos-sdk/x/auth/tx/config" // import for side-effects
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	_ "github.com/cosmos/cosmos-sdk/x/auth/vesting" // import for side-effects
-	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
-	"github.com/cosmos/cosmos-sdk/x/authz"
-	_ "github.com/cosmos/cosmos-sdk/x/authz/module" // import for side-effects
-	_ "github.com/cosmos/cosmos-sdk/x/bank"         // import for side-effects
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	_ "github.com/cosmos/cosmos-sdk/x/consensus" // import for side-effects
-	consensustypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
-	_ "github.com/cosmos/cosmos-sdk/x/distribution" // import for side-effects
-	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	_ "github.com/cosmos/cosmos-sdk/x/epochs" // import for side-effects
-	epochstypes "github.com/cosmos/cosmos-sdk/x/epochs/types"
-	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
-	_ "github.com/cosmos/cosmos-sdk/x/gov" // import for side-effects
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	"github.com/cosmos/cosmos-sdk/x/group"
-	_ "github.com/cosmos/cosmos-sdk/x/group/module" // import for side-effects
-	_ "github.com/cosmos/cosmos-sdk/x/params"       // import for side-effects
-	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	_ "github.com/cosmos/cosmos-sdk/x/slashing" // import for side-effects
-	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
-	_ "github.com/cosmos/cosmos-sdk/x/staking" // import for side-effects
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	icatypes "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v10/modules/apps/transfer/types"
-	ibcexported "github.com/cosmos/ibc-go/v10/modules/core/exported"
+
 	"google.golang.org/protobuf/types/known/durationpb"
+
+	_ "github.com/CosmWasm/wasmd/x/wasm" // registers depinject wiring (init)
+	wasmmodulev1 "github.com/CosmWasm/wasmd/api/cosmwasm/wasm/module/v1"
+	_jsii "github.com/CosmWasm/wasmd/x/wasm/types"
 )
 
-var (
-	moduleAccPerms = []*authmodulev1.ModuleAccountPermission{
-		{Account: authtypes.FeeCollectorName},
-		{Account: distrtypes.ModuleName},
-		{Account: stakingtypes.BondedPoolName, Permissions: []string{authtypes.Burner, stakingtypes.ModuleName}},
-		{Account: stakingtypes.NotBondedPoolName, Permissions: []string{authtypes.Burner, stakingtypes.ModuleName}},
-		{Account: govtypes.ModuleName, Permissions: []string{authtypes.Burner}},
-		{Account: nft.ModuleName},
-		{Account: ibctransfertypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
-		{Account: icatypes.ModuleName},
-		{Account: wasmtypes.ModuleName, Permissions: []string{authtypes.Burner}},
-	}
+var AppConfig = appconfig.Compose(&runtime.AppConfig{
+	Modules: []*runtime.Module{
+		runtime.NewModule(
+			"auth",
+			appconfig.WrapAny(&authmodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"bank",
+			appconfig.WrapAny(&bankmodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"circuit",
+			appconfig.WrapAny(&circuitmodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"consensus",
+			appconfig.WrapAny(&consensusmodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"distribution",
+			appconfig.WrapAny(&distributionmodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"epochs",
+			appconfig.WrapAny(&epochsmodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"evidence",
+			appconfig.WrapAny(&evidencemodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"feegrant",
+			appconfig.WrapAny(&feegrantmodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"genutil",
+			appconfig.WrapAny(&genutilmodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"gov",
+			appconfig.WrapAny(&govmodulev1.Module{
+				MaxMetadataLen:  255,
+				Authority:       "cosmos10d07y265gmmuvt4z0w9aw880jnsr700j6zn9kn",
+				ExpeditedVotingPeriod: &durationpb.Duration{
+					Seconds: 172800,
+				},
+				ExpeditedThreshold:          "0.667000000000000000",
+				ExpeditedMinDeposit:         "50000000",
+				ExpeditedMinDepositRatio:    "0.500000000000000000",
+				MinInitialDepositRatio:      "0.000000000000000000",
+				BurnVoteQuorum:              false,
+				BurnProposalDepositPrevote:  false,
+				BurnVoteVeto:                true,
+				VotingPeriod:                &durationpb.Duration{Seconds: 172800},
+				MaxDepositPeriod:            &durationpb.Duration{Seconds: 172800},
+				MinDeposit:                 "100000000",
+				Quorum:                     "0.334000000000000000",
+				Threshold:                  "0.500000000000000000",
+				VetoThreshold:              "0.334000000000000000",
+			}),
+		),
+		runtime.NewModule(
+			"group",
+			appconfig.WrapAny(&groupmodulev1.Module{
+				MaxExecutionPeriod: &durationpb.Duration{
+					Seconds: 1209600,
+				},
+				MaxMetadataLen: 255,
+			}),
+		),
+		runtime.NewModule(
+			"mint",
+			appconfig.WrapAny(&mintmodulev1.Module{
+				MintDenom:         "uuag",
+				InflationRateChange: "0.130000000000000000",
+				InflationMax:      "0.200000000000000000",
+				InflationMin:      "0.070000000000000000",
+				GoalBonded:        "0.670000000000000000",
+				BlocksPerYear:     4360000,
+			}),
+		),
+		runtime.NewModule(
+			"nft",
+			appconfig.WrapAny(&nftmodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"params",
+			appconfig.WrapAny(&paramsmodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"slashing",
+			appconfig.WrapAny(&slashingmodulev1.Module{
+				SignedBlocksWindow:      10000,
+				MinSignedPerWindow:      "0.500000000000000000",
+				DowntimeJailDuration:    &durationpb.Duration{Seconds: 600},
+				SlashFractionDoubleSign: "0.050000000000000000",
+				SlashFractionDowntime:   "0.010000000000000000",
+			}),
+		),
+		runtime.NewModule(
+			"staking",
+			appconfig.WrapAny(&stakingmodulev1.Module{
+				UnbondingTime: &durationpb.Duration{
+					Seconds: 1814400,
+				},
+				MaxValidators:     100,
+				MaxEntries:        7,
+				HistoricalEntries: 10000,
+				BondDenom:         "uuag",
+				MinCommissionRate: "0.000000000000000000",
+			}),
+		),
+		runtime.NewModule(
+			"tx",
+			appconfig.WrapAny(&txmodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"upgrade",
+			appconfig.WrapAny(&upgrademodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"cometbft",
+			appconfig.WrapAny(&cmtmodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"ibc",
+			appconfig.WrapAny(&ibcmodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"ibcfee",
+			appconfig.WrapAny(&ibcfeetypes.Module{}),
+		),
 
-	// blocked account addresses
-	blockAccAddrs = []string{
-		authtypes.FeeCollectorName,
-		distrtypes.ModuleName,
-		stakingtypes.BondedPoolName,
-		stakingtypes.NotBondedPoolName,
-		nft.ModuleName,
-		wasmtypes.ModuleName,
-		// We allow the following module accounts to receive funds:
-		// govtypes.ModuleName
-	}
+		// uagd modules
+		runtime.NewModule(
+			"citizen",
+			appconfig.WrapAny(&citizenmodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"fund",
+			appconfig.WrapAny(&fundmodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"growth",
+			appconfig.WrapAny(&growthmodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"report",
+			appconfig.WrapAny(&reportmodulev1.Module{}),
+		),
+		runtime.NewModule(
+			"ugov",
+			appconfig.WrapAny(&ugovmodulev1.Module{}),
+		),
 
-	// application configuration (used by depinject)
-	appConfig = appconfig.Compose(&appv1alpha1.Config{
-		Modules: []*appv1alpha1.ModuleConfig{
-			{
-				Name: runtime.ModuleName,
-				Config: appconfig.WrapAny(&runtimev1alpha1.Module{
-					AppName: Name,
-					// NOTE: upgrade module is required to be prioritized
-					PreBlockers: []string{
-						upgradetypes.ModuleName,
-						authtypes.ModuleName,
-						wasmtypes.ModuleName,
-						// this line is used by starport scaffolding # stargate/app/preBlockers
-					},
-					// During begin block slashing happens after distr.BeginBlocker so that
-					// there is nothing left over in the validator fee pool, so as to keep the
-					// CanWithdrawInvariant invariant.
-					// NOTE: staking module is required if HistoricalEntries param > 0
-					BeginBlockers: []string{
-						distrtypes.ModuleName,
-						slashingtypes.ModuleName,
-						evidencetypes.ModuleName,
-						stakingtypes.ModuleName,
-						authz.ModuleName,
-						epochstypes.ModuleName,
-						wasmtypes.ModuleName,
-						// ibc modules
-						ibcexported.ModuleName,
-						// chain modules
-						citizenmoduletypes.ModuleName,
-						fundmoduletypes.ModuleName,
-						growthmoduletypes.ModuleName,
-						uagdmoduletypes.ModuleName,
-						ugovmoduletypes.ModuleName,
-						// this line is used by starport scaffolding # stargate/app/beginBlockers
-					},
-					EndBlockers: []string{
-						govtypes.ModuleName,
-						stakingtypes.ModuleName,
-						feegrant.ModuleName,
-						group.ModuleName,
-						wasmtypes.ModuleName,
-						// chain modules
-						citizenmoduletypes.ModuleName,
-						fundmoduletypes.ModuleName,
-						growthmoduletypes.ModuleName,
-						uagdmoduletypes.ModuleName,
-						ugovmoduletypes.ModuleName,
-						// this line is used by starport scaffolding # stargate/app/endBlockers
-					},
-					// The following is mostly only needed when ModuleName != StoreKey name.
-					OverrideStoreKeys: []*runtimev1alpha1.StoreKeyConfig{
-						{
-							ModuleName: authtypes.ModuleName,
-							KvStoreKey: "acc",
-						},
-					},
-					// NOTE: The genutils module must occur after staking so that pools are
-					// properly initialized with tokens from genesis accounts.
-					// NOTE: The genutils module must also occur after auth so that it can access the params from auth.
-					InitGenesis: []string{
-						consensustypes.ModuleName,
-						authtypes.ModuleName,
-						banktypes.ModuleName,
-						distrtypes.ModuleName,
-						stakingtypes.ModuleName,
-						slashingtypes.ModuleName,
-						govtypes.ModuleName,
-						genutiltypes.ModuleName,
-						evidencetypes.ModuleName,
-						authz.ModuleName,
-						feegrant.ModuleName,
-						vestingtypes.ModuleName,
-						nft.ModuleName,
-						group.ModuleName,
-						upgradetypes.ModuleName,
-						circuittypes.ModuleName,
-						epochstypes.ModuleName,
-						wasmtypes.ModuleName,
-						// ibc modules
-						ibcexported.ModuleName,
-						ibctransfertypes.ModuleName,
-						icatypes.ModuleName,
-						// chain modules
-						citizenmoduletypes.ModuleName,
-						fundmoduletypes.ModuleName,
-						growthmoduletypes.ModuleName,
-						uagdmoduletypes.ModuleName,
-						ugovmoduletypes.ModuleName,
-						// this line is used by starport scaffolding # stargate/app/initGenesis
-					},
-				}),
-			},
-			{
-				Name: authtypes.ModuleName,
-				Config: appconfig.WrapAny(&authmodulev1.Module{
-					Bech32Prefix:                AccountAddressPrefix,
-					ModuleAccountPermissions:    moduleAccPerms,
-					EnableUnorderedTransactions: true,
-					// By default modules authority is the governance module. This is configurable with the following:
-					// Authority: "group", // A custom module authority can be set using a module name
-					// Authority: "cosmos1cwwv22j5ca08ggdv9c2uky355k908694z577tv", // or a specific address
-				}),
-			},
-			{
-				Name:   vestingtypes.ModuleName,
-				Config: appconfig.WrapAny(&vestingmodulev1.Module{}),
-			},
-			{
-				Name: banktypes.ModuleName,
-				Config: appconfig.WrapAny(&bankmodulev1.Module{
-					BlockedModuleAccountsOverride: blockAccAddrs,
-				}),
-			},
-			{
-				Name:   stakingtypes.ModuleName,
-				Config: appconfig.WrapAny(&stakingmodulev1.Module{}),
-			},
-			{
-				Name:   slashingtypes.ModuleName,
-				Config: appconfig.WrapAny(&slashingmodulev1.Module{}),
-			},
-			{
-				Name:   "tx",
-				Config: appconfig.WrapAny(&txconfigv1.Config{}),
-			},
-			{
-				Name:   genutiltypes.ModuleName,
-				Config: appconfig.WrapAny(&genutilmodulev1.Module{}),
-			},
-			{
-				Name:   authz.ModuleName,
-				Config: appconfig.WrapAny(&authzmodulev1.Module{}),
-			},
-			{
-				Name:   upgradetypes.ModuleName,
-				Config: appconfig.WrapAny(&upgrademodulev1.Module{}),
-			},
-			{
-				Name:   distrtypes.ModuleName,
-				Config: appconfig.WrapAny(&distrmodulev1.Module{}),
-			},
-			{
-				Name:   evidencetypes.ModuleName,
-				Config: appconfig.WrapAny(&evidencemodulev1.Module{}),
-			},
-			{
-				Name: group.ModuleName,
-				Config: appconfig.WrapAny(&groupmodulev1.Module{
-					MaxExecutionPeriod: durationpb.New(time.Second * 1209600),
-					MaxMetadataLen:     255,
-				}),
-			},
-			{
-				Name:   nft.ModuleName,
-				Config: appconfig.WrapAny(&nftmodulev1.Module{}),
-			},
-			{
-				Name:   feegrant.ModuleName,
-				Config: appconfig.WrapAny(&feegrantmodulev1.Module{}),
-			},
-			{
-				Name:   govtypes.ModuleName,
-				Config: appconfig.WrapAny(&govmodulev1.Module{}),
-			},
-			{
-				Name:   consensustypes.ModuleName,
-				Config: appconfig.WrapAny(&consensusmodulev1.Module{}),
-			},
-			{
-				Name:   circuittypes.ModuleName,
-				Config: appconfig.WrapAny(&circuitmodulev1.Module{}),
-			},
-			{
-				Name:   paramstypes.ModuleName,
-				Config: appconfig.WrapAny(&paramsmodulev1.Module{}),
-			},
-			{
-				Name:   epochstypes.ModuleName,
-				Config: appconfig.WrapAny(&epochsmodulev1.Module{}),
-			},
-			{
-				Name:   citizenmoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&citizenmoduletypes.Module{}),
-			},
-			{
-				Name:   fundmoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&fundmoduletypes.Module{}),
-			},
-			{
-				Name:   growthmoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&growthmoduletypes.Module{}),
-			},
-			{
-				Name:   uagdmoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&uagdmoduletypes.Module{}),
-			},
-			{
-				Name:   ugovmoduletypes.ModuleName,
-				Config: appconfig.WrapAny(&ugovmoduletypes.Module{}),
-			},
-			{
-				Name: wasmtypes.ModuleName,
-				Config: appconfig.WrapAny(&wasmmodulev1.Module{
-					// Enable permissionless code upload for testnets. Other defaults are kept standard.
-					UploadPermission: wasmtypes.AccessConfig{Permission: wasmtypes.AccessTypeEverybody},
-				}),
-			},
-			// this line is used by starport scaffolding # stargate/app/moduleConfig
-		},
-	})
-)
+		// CosmWasm
+		runtime.NewModule(
+			_jsii.ModuleName,
+			appconfig.WrapAny(&wasmmodulev1.Module{}),
+		),
+	},
+}, log.NewNopLogger())
