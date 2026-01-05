@@ -2,10 +2,10 @@ package growth
 
 import (
 	"cosmossdk.io/core/address"
+	"cosmossdk.io/core/appconfig"
 	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/core/store"
 	"cosmossdk.io/depinject"
-	"cosmossdk.io/core/appconfig"
 	"github.com/cosmos/cosmos-sdk/codec"
 
 	"uagd/x/growth/keeper"
