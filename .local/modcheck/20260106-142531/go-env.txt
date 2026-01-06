@@ -1,0 +1,6 @@
+go version: go version go1.24.1 linux/amd64
+GOMOD:      /home/waw/uag/go.mod
+GOMODCACHE: /home/waw/go/pkg/mod
+GOPATH:     /home/waw/go
+GOPROXY:    https://proxy.golang.org,direct
+GOSUMDB:    sum.golang.org

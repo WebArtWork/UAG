@@ -1,0 +1,63 @@
+go: finding module for package github.com/CosmWasm/wasmd/api/cosmwasm/wasm/module/v1
+go: finding module for package github.com/cometbft/cometbft/proto/tendermint/types
+go: finding module for package github.com/cometbft/cometbft/api/cometbft/module/v1
+go: finding module for package cosmossdk.io/api/cosmos/tx/module/v1
+go: finding module for package github.com/cosmos/ibc-go/v10/api/ibc/core/module/v1
+go: finding module for package github.com/cosmos/ibc-go/v10/modules/apps/29-fee/types
+go: finding module for package github.com/cometbft/cometbft/proto/tendermint/crypto
+go: finding module for package cosmossdk.io/core/context
+go: finding module for package cosmossdk.io/core/registry
+go: finding module for package cosmossdk.io/core/transaction
+go: finding module for package github.com/cometbft/cometbft/libs/rand
+go: finding module for package github.com/cometbft/cometbft/proto/tendermint/state
+go: finding module for package github.com/cometbft/cometbft/proto/tendermint/p2p
+go: finding module for package github.com/cometbft/cometbft/proto/tendermint/version
+go: finding module for package github.com/cometbft/cometbft/crypto/sr25519
+go: finding module for package cosmossdk.io/core/log
+go: uagd/app imports
+	cosmossdk.io/api/cosmos/tx/module/v1: module cosmossdk.io/api@latest found (v0.9.2, replaced by cosmossdk.io/api@v0.9.2), but does not contain package cosmossdk.io/api/cosmos/tx/module/v1
+go: uagd/app imports
+	github.com/CosmWasm/wasmd/api/cosmwasm/wasm/module/v1: module github.com/CosmWasm/wasmd@latest found (v1.0.0), but does not contain package github.com/CosmWasm/wasmd/api/cosmwasm/wasm/module/v1
+go: uagd/app imports
+	github.com/cometbft/cometbft/api/cometbft/module/v1: module github.com/cometbft/cometbft/api@latest found (v1.0.0), but does not contain package github.com/cometbft/cometbft/api/cometbft/module/v1
+go: uagd/app imports
+	github.com/cometbft/cometbft/proto/tendermint/types: module github.com/cometbft/cometbft@latest found (v1.0.1), but does not contain package github.com/cometbft/cometbft/proto/tendermint/types
+go: uagd/app imports
+	github.com/cosmos/ibc-go/v10/api/ibc/core/module/v1: module github.com/cosmos/ibc-go/v10@latest found (v10.5.0), but does not contain package github.com/cosmos/ibc-go/v10/api/ibc/core/module/v1
+go: uagd/app imports
+	github.com/cosmos/ibc-go/v10/modules/apps/29-fee/types: module github.com/cosmos/ibc-go/v10@latest found (v10.5.0), but does not contain package github.com/cosmos/ibc-go/v10/modules/apps/29-fee/types
+go: uagd/app imports
+	cosmossdk.io/store/types imports
+	github.com/cometbft/cometbft/proto/tendermint/crypto: module github.com/cometbft/cometbft@latest found (v1.0.1), but does not contain package github.com/cometbft/cometbft/proto/tendermint/crypto
+go: uagd/app imports
+	cosmossdk.io/x/consensus/keeper imports
+	cosmossdk.io/core/context: module cosmossdk.io/core@latest found (v1.0.0, replaced by cosmossdk.io/core@v0.11.3), but does not contain package cosmossdk.io/core/context
+go: uagd/app imports
+	cosmossdk.io/x/consensus/types imports
+	cosmossdk.io/core/registry: module cosmossdk.io/core@latest found (v1.0.0, replaced by cosmossdk.io/core@v0.11.3), but does not contain package cosmossdk.io/core/registry
+go: uagd/app imports
+	cosmossdk.io/x/consensus/types imports
+	cosmossdk.io/core/transaction: module cosmossdk.io/core@latest found (v1.0.0, replaced by cosmossdk.io/core@v0.11.3), but does not contain package cosmossdk.io/core/transaction
+go: uagd/app imports
+	github.com/CosmWasm/wasmd/x/wasm/keeper imports
+	github.com/cometbft/cometbft/libs/rand: module github.com/cometbft/cometbft@latest found (v1.0.1), but does not contain package github.com/cometbft/cometbft/libs/rand
+go: uagd/app imports
+	github.com/cosmos/cosmos-sdk/server imports
+	github.com/cometbft/cometbft/proto/tendermint/state: module github.com/cometbft/cometbft@latest found (v1.0.1), but does not contain package github.com/cometbft/cometbft/proto/tendermint/state
+go: uagd/app imports
+	github.com/cosmos/cosmos-sdk/runtime imports
+	github.com/cosmos/cosmos-sdk/client/grpc/cmtservice imports
+	github.com/cometbft/cometbft/proto/tendermint/p2p: module github.com/cometbft/cometbft@latest found (v1.0.1), but does not contain package github.com/cometbft/cometbft/proto/tendermint/p2p
+go: uagd/app imports
+	github.com/cosmos/cosmos-sdk/runtime imports
+	github.com/cosmos/cosmos-sdk/client/grpc/cmtservice imports
+	github.com/cometbft/cometbft/proto/tendermint/version: module github.com/cometbft/cometbft@latest found (v1.0.1), but does not contain package github.com/cometbft/cometbft/proto/tendermint/version
+go: uagd/app imports
+	github.com/cosmos/cosmos-sdk/server imports
+	github.com/cosmos/cosmos-sdk/crypto/codec imports
+	github.com/cometbft/cometbft/crypto/sr25519: module github.com/cometbft/cometbft@latest found (v1.0.1), but does not contain package github.com/cometbft/cometbft/crypto/sr25519
+go: uagd/app imports
+	cosmossdk.io/x/consensus/keeper tested by
+	cosmossdk.io/x/consensus/keeper.test imports
+	cosmossdk.io/core/testing imports
+	cosmossdk.io/core/log: module cosmossdk.io/core@latest found (v1.0.0, replaced by cosmossdk.io/core@v0.11.3), but does not contain package cosmossdk.io/core/log

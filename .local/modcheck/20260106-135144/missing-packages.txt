@@ -1,0 +1,16 @@
+18:	cosmossdk.io/api/cosmos/tx/module/v1: module cosmossdk.io/api@latest found (v0.9.2, replaced by cosmossdk.io/api@v0.9.2), but does not contain package cosmossdk.io/api/cosmos/tx/module/v1
+20:	github.com/CosmWasm/wasmd/api/cosmwasm/wasm/module/v1: module github.com/CosmWasm/wasmd@latest found (v1.0.0), but does not contain package github.com/CosmWasm/wasmd/api/cosmwasm/wasm/module/v1
+22:	github.com/cometbft/cometbft/api/cometbft/module/v1: module github.com/cometbft/cometbft/api@latest found (v1.0.0), but does not contain package github.com/cometbft/cometbft/api/cometbft/module/v1
+24:	github.com/cometbft/cometbft/proto/tendermint/types: module github.com/cometbft/cometbft@latest found (v1.0.1), but does not contain package github.com/cometbft/cometbft/proto/tendermint/types
+26:	github.com/cosmos/ibc-go/v10/api/ibc/core/module/v1: module github.com/cosmos/ibc-go/v10@latest found (v10.5.0), but does not contain package github.com/cosmos/ibc-go/v10/api/ibc/core/module/v1
+28:	github.com/cosmos/ibc-go/v10/modules/apps/29-fee/types: module github.com/cosmos/ibc-go/v10@latest found (v10.5.0), but does not contain package github.com/cosmos/ibc-go/v10/modules/apps/29-fee/types
+31:	github.com/cometbft/cometbft/proto/tendermint/crypto: module github.com/cometbft/cometbft@latest found (v1.0.1), but does not contain package github.com/cometbft/cometbft/proto/tendermint/crypto
+34:	cosmossdk.io/core/context: module cosmossdk.io/core@latest found (v1.0.0, replaced by cosmossdk.io/core@v0.11.3), but does not contain package cosmossdk.io/core/context
+37:	cosmossdk.io/core/registry: module cosmossdk.io/core@latest found (v1.0.0, replaced by cosmossdk.io/core@v0.11.3), but does not contain package cosmossdk.io/core/registry
+40:	cosmossdk.io/core/transaction: module cosmossdk.io/core@latest found (v1.0.0, replaced by cosmossdk.io/core@v0.11.3), but does not contain package cosmossdk.io/core/transaction
+43:	github.com/cometbft/cometbft/libs/rand: module github.com/cometbft/cometbft@latest found (v1.0.1), but does not contain package github.com/cometbft/cometbft/libs/rand
+46:	github.com/cometbft/cometbft/proto/tendermint/state: module github.com/cometbft/cometbft@latest found (v1.0.1), but does not contain package github.com/cometbft/cometbft/proto/tendermint/state
+50:	github.com/cometbft/cometbft/proto/tendermint/p2p: module github.com/cometbft/cometbft@latest found (v1.0.1), but does not contain package github.com/cometbft/cometbft/proto/tendermint/p2p
+54:	github.com/cometbft/cometbft/proto/tendermint/version: module github.com/cometbft/cometbft@latest found (v1.0.1), but does not contain package github.com/cometbft/cometbft/proto/tendermint/version
+58:	github.com/cometbft/cometbft/crypto/sr25519: module github.com/cometbft/cometbft@latest found (v1.0.1), but does not contain package github.com/cometbft/cometbft/crypto/sr25519
+63:	cosmossdk.io/core/log: module cosmossdk.io/core@latest found (v1.0.0, replaced by cosmossdk.io/core@v0.11.3), but does not contain package cosmossdk.io/core/log

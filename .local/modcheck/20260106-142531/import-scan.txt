@@ -1,0 +1,19 @@
+[scan] github.com/cosmos/cosmos-sdk/x/* imports still in code:
+     17 auth
+     11 gov
+     10 staking
+      6 params
+      5 slashing
+      4 simulation
+      4 bank
+      3 genutil
+      3 distribution
+      2 authz
+      1 crisis
+      1 consensus
+
+[scan] cosmossdk.io/x/* imports:
+      3 upgrade
+      2 feegrant
+      2 consensus
+      2 circuit

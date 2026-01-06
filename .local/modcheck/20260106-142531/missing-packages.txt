@@ -1,0 +1,4 @@
+7:	cosmossdk.io/core/context: module cosmossdk.io/core@latest found (v1.0.0, replaced by cosmossdk.io/core@v0.11.3), but does not contain package cosmossdk.io/core/context
+10:	cosmossdk.io/core/registry: module cosmossdk.io/core@latest found (v1.0.0, replaced by cosmossdk.io/core@v0.11.3), but does not contain package cosmossdk.io/core/registry
+13:	cosmossdk.io/core/transaction: module cosmossdk.io/core@latest found (v1.0.0, replaced by cosmossdk.io/core@v0.11.3), but does not contain package cosmossdk.io/core/transaction
+18:	cosmossdk.io/core/log: module cosmossdk.io/core@latest found (v1.0.0, replaced by cosmossdk.io/core@v0.11.3), but does not contain package cosmossdk.io/core/log

@@ -4,7 +4,6 @@ import (
 	authmodulev1 "cosmossdk.io/api/cosmos/auth/module/v1"
 	bankmodulev1 "cosmossdk.io/api/cosmos/bank/module/v1"
 	circuitmodulev1 "cosmossdk.io/api/cosmos/circuit/module/v1"
-	consensusmodulev1 "cosmossdk.io/api/cosmos/consensus/module/v1"
 	distributionmodulev1 "cosmossdk.io/api/cosmos/distribution/module/v1"
 	epochsmodulev1 "cosmossdk.io/api/cosmos/epochs/module/v1"
 	evidencemodulev1 "cosmossdk.io/api/cosmos/evidence/module/v1"
@@ -16,27 +15,19 @@ import (
 	paramsmodulev1 "cosmossdk.io/api/cosmos/params/module/v1"
 	slashingmodulev1 "cosmossdk.io/api/cosmos/slashing/module/v1"
 	stakingmodulev1 "cosmossdk.io/api/cosmos/staking/module/v1"
-	txmodulev1 "cosmossdk.io/api/cosmos/tx/module/v1"
+	txconfigv1 "cosmossdk.io/api/cosmos/tx/config/v1"
 	upgrademodulev1 "cosmossdk.io/api/cosmos/upgrade/module/v1"
-	cmtmodulev1 "github.com/cometbft/cometbft/api/cometbft/module/v1"
-	ibcfeetypes "github.com/cosmos/ibc-go/v10/modules/apps/29-fee/types"
-	ibcmodulev1 "github.com/cosmos/ibc-go/v10/api/ibc/core/module/v1"
 
-	citizenmodulev1 "uagd/api/uagd/citizen/module/v1"
-	fundmodulev1 "uagd/api/uagd/fund/module/v1"
-	growthmodulev1 "uagd/api/uagd/growth/module/v1"
-	reportmodulev1 "uagd/api/uagd/report/module/v1"
-	ugovmodulev1 "uagd/api/uagd/ugov/module/v1"
+	citizenmodulev1 "uagd/x/citizen/types"
+	fundmodulev1 "uagd/x/fund/types"
+	growthmodulev1 "uagd/x/growth/types"
+	ugovmodulev1 "uagd/x/ugov/types"
 
 	"cosmossdk.io/core/appconfig"
 	"cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/runtime"
 
 	"google.golang.org/protobuf/types/known/durationpb"
-
-	wasmmodulev1 "github.com/CosmWasm/wasmd/api/cosmwasm/wasm/module/v1"
-	_ "github.com/CosmWasm/wasmd/x/wasm" // registers depinject wiring (init)
-	_jsii "github.com/CosmWasm/wasmd/x/wasm/types"
 )
 
 var AppConfig = appconfig.Compose(&runtime.AppConfig{
@@ -52,10 +43,6 @@ var AppConfig = appconfig.Compose(&runtime.AppConfig{
 		runtime.NewModule(
 			"circuit",
 			appconfig.WrapAny(&circuitmodulev1.Module{}),
-		),
-		runtime.NewModule(
-			"consensus",
-			appconfig.WrapAny(&consensusmodulev1.Module{}),
 		),
 		runtime.NewModule(
 			"distribution",
@@ -142,23 +129,11 @@ var AppConfig = appconfig.Compose(&runtime.AppConfig{
 		),
 		runtime.NewModule(
 			"tx",
-			appconfig.WrapAny(&txmodulev1.Module{}),
+			appconfig.WrapAny(&txconfigv1.Config{}),
 		),
 		runtime.NewModule(
 			"upgrade",
 			appconfig.WrapAny(&upgrademodulev1.Module{}),
-		),
-		runtime.NewModule(
-			"cometbft",
-			appconfig.WrapAny(&cmtmodulev1.Module{}),
-		),
-		runtime.NewModule(
-			"ibc",
-			appconfig.WrapAny(&ibcmodulev1.Module{}),
-		),
-		runtime.NewModule(
-			"ibcfee",
-			appconfig.WrapAny(&ibcfeetypes.Module{}),
 		),
 
 		// uagd modules
@@ -175,18 +150,8 @@ var AppConfig = appconfig.Compose(&runtime.AppConfig{
 			appconfig.WrapAny(&growthmodulev1.Module{}),
 		),
 		runtime.NewModule(
-			"report",
-			appconfig.WrapAny(&reportmodulev1.Module{}),
-		),
-		runtime.NewModule(
 			"ugov",
 			appconfig.WrapAny(&ugovmodulev1.Module{}),
-		),
-
-		// CosmWasm
-		runtime.NewModule(
-			_jsii.ModuleName,
-			appconfig.WrapAny(&wasmmodulev1.Module{}),
 		),
 	},
 }, log.NewNopLogger())

@@ -14,8 +14,6 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	circuitkeeper "cosmossdk.io/x/circuit/keeper"
 	circuittypes "cosmossdk.io/x/circuit/types"
-	consensuskeeper "cosmossdk.io/x/consensus/keeper"
-	consensustypes "cosmossdk.io/x/consensus/types"
 	upgradekeeper "cosmossdk.io/x/upgrade/keeper"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 
