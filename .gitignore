@@ -13,6 +13,7 @@
 *.a
 *.out
 *.test
+*.local
 
 # Common local binaries (chain binary name can vary)
 uagdd
