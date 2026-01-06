@@ -98,3 +98,6 @@ dist/
 .env
 .env.*
 project.zip
+
+# Local-only notes
+local-context.md

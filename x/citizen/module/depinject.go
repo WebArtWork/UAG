@@ -2,10 +2,10 @@ package citizen
 
 import (
 	"cosmossdk.io/core/address"
-	"cosmossdk.io/core/appconfig"
 	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/core/store"
 	"cosmossdk.io/depinject"
+	"cosmossdk.io/depinject/appconfig"
 	"github.com/cosmos/cosmos-sdk/codec"
 
 	"uagd/x/citizen/keeper"
@@ -17,7 +17,7 @@ var _ depinject.OnePerModuleType = AppModule{}
 func (AppModule) IsOnePerModuleType() {}
 
 func init() {
-	appconfig.Register(
+	appconfig.RegisterModule(
 		&types.Module{},
 		appconfig.Provide(ProvideModule),
 	)
