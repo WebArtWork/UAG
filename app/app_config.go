@@ -20,7 +20,7 @@ import (
 	upgrademodulev1 "cosmossdk.io/api/cosmos/upgrade/module/v1"
 	cmtmodulev1 "github.com/cometbft/cometbft/api/cometbft/module/v1"
 	ibcfeetypes "github.com/cosmos/ibc-go/v10/modules/apps/29-fee/types"
-	ibcmodulev1 "github.com/cosmos/ibc-go/v10/modules/core/module/v1"
+	ibcmodulev1 "github.com/cosmos/ibc-go/v10/api/ibc/core/module/v1"
 
 	citizenmodulev1 "uagd/api/uagd/citizen/module/v1"
 	fundmodulev1 "uagd/api/uagd/fund/module/v1"
