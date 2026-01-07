@@ -16,8 +16,12 @@ import (
 	dbm "github.com/cosmos/cosmos-db"
 
 	feegrantkeeper "cosmossdk.io/x/feegrant/keeper"
+	wasm "github.com/CosmWasm/wasmd/x/wasm"
+	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/runtime"
@@ -42,6 +46,7 @@ import (
 	slashingkeeper "github.com/cosmos/cosmos-sdk/x/slashing/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/spf13/cast"
 
 	// custom modules
 	citizenkeeper "uagd/x/citizen/keeper"
@@ -64,6 +69,7 @@ var maccPerms = map[string][]string{
 	stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
 	stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 	govtypes.ModuleName:            {authtypes.Burner},
+	wasmtypes.ModuleName:           {authtypes.Burner},
 }
 
 var (
@@ -109,6 +115,7 @@ type App struct {
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
 	CircuitBreakerKeeper  circuitkeeper.Keeper
 	ParamsKeeper          paramskeeper.Keeper
+	WasmKeeper            wasmkeeper.Keeper
 	// custom keepers
 	CitizenKeeper citizenkeeper.Keeper
 	GrowthKeeper  growthkeeper.Keeper
@@ -180,6 +187,10 @@ func New(
 	app.BaseApp = builtApp.BaseApp
 	app.runtimeApp = builtApp
 	app.moduleManager = builtApp.ModuleManager
+
+	if err := app.registerWasm(appOpts); err != nil {
+		panic(err)
+	}
 
 	app.setupUpgradeHandlers()
 
@@ -375,4 +386,83 @@ func (app *App) setupUpgradeHandlers() {
 // setupHooks sets up the hooks for the app
 func (app *App) setupHooks() {
 	// Add your hooks here
+}
+
+func (app *App) registerWasm(appOpts servertypes.AppOptions) error {
+	if app.runtimeApp == nil {
+		return nil
+	}
+
+	if app.keys == nil {
+		app.keys = make(map[string]*storetypes.KVStoreKey)
+	}
+	if app.tkeys == nil {
+		app.tkeys = make(map[string]*storetypes.TransientStoreKey)
+	}
+
+	if _, exists := app.keys[wasmtypes.StoreKey]; !exists {
+		wasmKey := storetypes.NewKVStoreKey(wasmtypes.StoreKey)
+		app.keys[wasmtypes.StoreKey] = wasmKey
+
+		wasmTKey := storetypes.NewTransientStoreKey(wasmtypes.TStoreKey)
+		app.tkeys[wasmtypes.TStoreKey] = wasmTKey
+
+		if err := app.runtimeApp.RegisterStores(wasmKey, wasmTKey); err != nil {
+			return err
+		}
+	}
+
+	homePath := cast.ToString(appOpts.Get(flags.FlagHome))
+	if homePath == "" {
+		homePath = DefaultNodeHome
+	}
+	wasmDir := filepath.Join(homePath, "wasm")
+
+	nodeConfig, err := wasm.ReadNodeConfig(appOpts)
+	if err != nil {
+		return err
+	}
+
+	app.WasmKeeper = wasmkeeper.NewKeeper(
+		app.appCodec,
+		runtime.NewKVStoreService(app.keys[wasmtypes.StoreKey]),
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.StakingKeeper,
+		distrkeeper.NewQuerier(app.DistrKeeper),
+		nil,
+		nil,
+		nil,
+		app.MsgServiceRouter(),
+		app.GRPCQueryRouter(),
+		wasmDir,
+		nodeConfig,
+		wasmtypes.VMConfig{},
+		wasmkeeper.BuiltInCapabilities(),
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+
+	wasmModule := wasm.NewAppModule(
+		app.appCodec,
+		&app.WasmKeeper,
+		app.StakingKeeper,
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.MsgServiceRouter(),
+		nil,
+	)
+
+	if err := app.runtimeApp.RegisterModules(wasmModule); err != nil {
+		return err
+	}
+
+	if manager := app.SnapshotManager(); manager != nil {
+		if err := manager.RegisterExtensions(
+			wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper),
+		); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

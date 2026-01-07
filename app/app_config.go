@@ -76,6 +76,7 @@ var (
 		"evidence",
 		"citizen",
 		"growth",
+		"wasm",
 	}
 )
 
@@ -179,7 +180,6 @@ var AppConfig = appconfig.Compose(&appv1alpha1.Config{
 			Name:   "upgrade",
 			Config: appconfig.WrapAny(&upgrademodulev1.Module{}),
 		},
-
 		// uagd modules
 		{
 			Name:   "citizen",
