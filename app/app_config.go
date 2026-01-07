@@ -10,13 +10,11 @@ import (
 	consensusmodulev1 "cosmossdk.io/api/cosmos/consensus/module/v1"
 	crisismodulev1 "cosmossdk.io/api/cosmos/crisis/module/v1"
 	distributionmodulev1 "cosmossdk.io/api/cosmos/distribution/module/v1"
-	epochsmodulev1 "cosmossdk.io/api/cosmos/epochs/module/v1"
 	evidencemodulev1 "cosmossdk.io/api/cosmos/evidence/module/v1"
 	feegrantmodulev1 "cosmossdk.io/api/cosmos/feegrant/module/v1"
 	genutilmodulev1 "cosmossdk.io/api/cosmos/genutil/module/v1"
 	govmodulev1 "cosmossdk.io/api/cosmos/gov/module/v1"
 	groupmodulev1 "cosmossdk.io/api/cosmos/group/module/v1"
-	nftmodulev1 "cosmossdk.io/api/cosmos/nft/module/v1"
 	paramsmodulev1 "cosmossdk.io/api/cosmos/params/module/v1"
 	slashingmodulev1 "cosmossdk.io/api/cosmos/slashing/module/v1"
 	stakingmodulev1 "cosmossdk.io/api/cosmos/staking/module/v1"
@@ -72,7 +70,6 @@ var (
 		"feegrant",
 		"authz",
 		"circuit",
-		"epochs",
 		"evidence",
 		"citizen",
 		"growth",
@@ -122,10 +119,6 @@ var AppConfig = appconfig.Compose(&appv1alpha1.Config{
 			Config: appconfig.WrapAny(&distributionmodulev1.Module{}),
 		},
 		{
-			Name:   "epochs",
-			Config: appconfig.WrapAny(&epochsmodulev1.Module{}),
-		},
-		{
 			Name:   "evidence",
 			Config: appconfig.WrapAny(&evidencemodulev1.Module{}),
 		},
@@ -152,10 +145,6 @@ var AppConfig = appconfig.Compose(&appv1alpha1.Config{
 				},
 				MaxMetadataLen: 255,
 			}),
-		},
-		{
-			Name:   "nft",
-			Config: appconfig.WrapAny(&nftmodulev1.Module{}),
 		},
 		{
 			Name:   "params",
