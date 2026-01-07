@@ -16,7 +16,7 @@
 *.local
 
 # Common local binaries (chain binary name can vary)
-uagdd
+uag
 uagd
 simd
 

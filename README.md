@@ -33,7 +33,7 @@ Ukraine Growth (UAG) is a public, rule-based system that helps fund regions and 
 - **Initial supply:** `370,000,000 UAG`
 - **Inflation:** `Without`
 
-The node binary is **`uagdd`**, used by full nodes and validators.
+The node binary is **`uag`**, used by full nodes and validators.
 
 ---
 
@@ -290,12 +290,12 @@ Gas and fees are always paid in **`uuag`**.
 
 #### CosmWasm CLI quickstart
 
-All commands use the `uagdd` binary and the `uuag` fee token.
+All commands use the `uag` binary and the `uuag` fee token.
 
 1. **Store a contract** (any account can upload):
 
    ```bash
-   uagdd tx wasm store path/to/contract.wasm \
+   uag tx wasm store path/to/contract.wasm \
      --from <key-name> \
      --chain-id uag-test-1 \
      --gas auto --gas-adjustment 1.3 --fees 7500uuag
@@ -304,7 +304,7 @@ All commands use the `uagdd` binary and the `uuag` fee token.
 2. **Instantiate** the uploaded code (replace `<code-id>` from the store result):
 
    ```bash
-   uagdd tx wasm instantiate <code-id> '{"count":0}' \
+   uag tx wasm instantiate <code-id> '{"count":0}' \
      --label "demo-counter" \
      --admin <admin-address> \
      --from <key-name> --chain-id uag-test-1 \
@@ -314,7 +314,7 @@ All commands use the `uagdd` binary and the `uuag` fee token.
 3. **Execute** a contract message:
 
    ```bash
-   uagdd tx wasm execute <contract-address> '{"increment":{}}' \
+   uag tx wasm execute <contract-address> '{"increment":{}}' \
      --from <key-name> --chain-id uag-test-1 \
      --gas auto --gas-adjustment 1.3 --fees 5000uuag
    ```
@@ -322,7 +322,7 @@ All commands use the `uagdd` binary and the `uuag` fee token.
 4. **Query** contract state:
 
    ```bash
-   uagdd query wasm contract-state smart <contract-address> '{"get_count":{}}'
+   uag query wasm contract-state smart <contract-address> '{"get_count":{}}'
    ```
 
 Uploads are permissionless, and state writes pay gas in `uuag`.
@@ -367,7 +367,7 @@ It is about **making growth measurable, enforceable, and irreversible**.
 
 ## Contributing
 
-- This repository contains the core chain implementation (`uagdd`, modules, governance logic).
+- This repository contains the core chain implementation (`uag`, modules, governance logic).
 - For operational scripts and tooling (build, node management, automation), see **UAG-tools**:
 
   - [https://github.com/WebArtWork/UAG-tools](https://github.com/WebArtWork/UAG-tools)

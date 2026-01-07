@@ -46,7 +46,7 @@ jobs:
           DO_NOT_TRACK: 1
           GOFLAGS: "-buildvcs=false"
 
-      - name: Normalize Windows release artifact (flat zip + uagdd.exe)
+      - name: Normalize Windows release artifact (flat zip + uag.exe)
         if: ${{ steps.vars.outputs.should_release == 'true' }}
         shell: bash
         run: |
@@ -61,7 +61,7 @@ jobs:
           EXTRACT_DIR="$(mktemp -d)"
           tar -xzf "$WIN_TGZ" -C "$EXTRACT_DIR"
 
-          BIN_PATH="$(find "$EXTRACT_DIR" -type f \( -name 'uagdd' -o -name 'uagdd.exe' \) | head -n 1 || true)"
+          BIN_PATH="$(find "$EXTRACT_DIR" -type f \( -name 'uag' -o -name 'uag.exe' \) | head -n 1 || true)"
           if [[ -z "${BIN_PATH}" ]]; then
             echo "Windows binary not found inside extracted archive"
             find "$EXTRACT_DIR" -maxdepth 5 -type f | head -n 200
@@ -69,10 +69,10 @@ jobs:
           fi
 
           STAGE_DIR="$(mktemp -d)"
-          cp "$BIN_PATH" "$STAGE_DIR/uagdd.exe"
+          cp "$BIN_PATH" "$STAGE_DIR/uag.exe"
 
           ZIP_OUT="${WIN_TGZ%.tar.gz}.zip"
-          (cd "$STAGE_DIR" && zip -9 -q "$OLDPWD/$ZIP_OUT" uagdd.exe)
+          (cd "$STAGE_DIR" && zip -9 -q "$OLDPWD/$ZIP_OUT" uag.exe)
 
           rm -f "$WIN_TGZ"
           (cd release && rm -f release_checksum && sha256sum * > release_checksum)

@@ -10,7 +10,7 @@ Development is performed mostly via **terminal scripts** located in the repo roo
 A separate **tools repository** exists and may be used to support this repo,
 but this repository is the **source of truth**.
 
-Chain binary: **`uagdd`**
+Chain binary: **`uag`**
 
 ---
 
@@ -49,7 +49,7 @@ Local ports:
 ./build.sh
 ```
 
-Build `uagdd`.
+Build `uag`.
 
 ```bash
 ./init-chain.sh
