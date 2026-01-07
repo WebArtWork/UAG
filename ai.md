@@ -29,8 +29,8 @@ Common optional env:
 CHAIN_ID=uag-test-1
 UAGD_HOME=~/.uagd
 PREFIX=uag
-GAS_PRICE=0.025uuag
-FEES=5000uuag
+GAS_PRICE=0.025muag
+FEES=5000muag
 ```
 
 Local ports:

@@ -5,7 +5,7 @@ import sdk "github.com/cosmos/cosmos-sdk/types"
 func init() {
 	// Set bond denom
 
-	sdk.DefaultBondDenom = "uuag"
+	sdk.DefaultBondDenom = "muag"
 
 	// Set address prefixes
 	accountPubKeyPrefix := AccountAddressPrefix + "pub"

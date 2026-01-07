@@ -26,9 +26,9 @@ Ukraine Growth (UAG) is a public, rule-based system that helps fund regions and 
 
 - **Chain ID:** `uag-1`
 - **Native token:** `UAG`
-- **Base denom:** `uuag`
+- **Base denom:** `muag`
 
-  - `1 UAG = 1,000,000 uuag`
+  - `1 UAG = 1,000,000 muag`
 
 - **Initial supply:** `370,000,000 UAG`
 - **Inflation:** `Without`
@@ -199,7 +199,7 @@ By integrating **CosmWasm** as `x/wasm`, the chain allows anyone with UAG to:
 
 Every contract interaction is a normal transaction:
 
-- pays **gas in `uuag`**
+- pays **gas in `muag`**
 - writes to the chain’s immutable state
 - can interoperate with UAG-native modules (e.g. read `x/citizen` or react to `x/fund` decisions)
 
@@ -286,11 +286,11 @@ Open smart-contract platform:
   - serve as app backends (CRMs, registries, DAOs)
   - integrate with UAG’s native economics
 
-Gas and fees are always paid in **`uuag`**.
+Gas and fees are always paid in **`muag`**.
 
 #### CosmWasm CLI quickstart
 
-All commands use the `uag` binary and the `uuag` fee token.
+All commands use the `uag` binary and the `muag` fee token.
 
 1. **Store a contract** (any account can upload):
 
@@ -298,7 +298,7 @@ All commands use the `uag` binary and the `uuag` fee token.
    uag tx wasm store path/to/contract.wasm \
      --from <key-name> \
      --chain-id uag-test-1 \
-     --gas auto --gas-adjustment 1.3 --fees 7500uuag
+     --gas auto --gas-adjustment 1.3 --fees 7500muag
    ```
 
 2. **Instantiate** the uploaded code (replace `<code-id>` from the store result):
@@ -308,7 +308,7 @@ All commands use the `uag` binary and the `uuag` fee token.
      --label "demo-counter" \
      --admin <admin-address> \
      --from <key-name> --chain-id uag-test-1 \
-     --gas auto --gas-adjustment 1.3 --fees 6000uuag
+     --gas auto --gas-adjustment 1.3 --fees 6000muag
    ```
 
 3. **Execute** a contract message:
@@ -316,7 +316,7 @@ All commands use the `uag` binary and the `uuag` fee token.
    ```bash
    uag tx wasm execute <contract-address> '{"increment":{}}' \
      --from <key-name> --chain-id uag-test-1 \
-     --gas auto --gas-adjustment 1.3 --fees 5000uuag
+     --gas auto --gas-adjustment 1.3 --fees 5000muag
    ```
 
 4. **Query** contract state:
@@ -325,7 +325,7 @@ All commands use the `uag` binary and the `uuag` fee token.
    uag query wasm contract-state smart <contract-address> '{"get_count":{}}'
    ```
 
-Uploads are permissionless, and state writes pay gas in `uuag`.
+Uploads are permissionless, and state writes pay gas in `muag`.
 
 ---
 
