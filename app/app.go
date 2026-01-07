@@ -43,20 +43,9 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
-	// IBC v8
-	capabilitykeeper "github.com/cosmos/ibc-go/modules/capability/keeper"
-	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
-
-	// wasm
-	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
-	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
-
 	// custom modules
 	citizenkeeper "uagd/x/citizen/keeper"
-	fundkeeper "uagd/x/fund/keeper"
 	growthkeeper "uagd/x/growth/keeper"
-	uagdkeeper "uagd/x/uagd/keeper"
-	ugovkeeper "uagd/x/ugov/keeper"
 )
 
 const (
@@ -75,7 +64,6 @@ var maccPerms = map[string][]string{
 	stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
 	stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 	govtypes.ModuleName:            {authtypes.Burner},
-	wasmtypes.ModuleName:           {authtypes.Burner},
 }
 
 var (
@@ -121,18 +109,9 @@ type App struct {
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
 	CircuitBreakerKeeper  circuitkeeper.Keeper
 	ParamsKeeper          paramskeeper.Keeper
-	IBCKeeper             *ibckeeper.Keeper
-	WasmKeeper            *wasmkeeper.Keeper
-	CapabilityKeeper      *capabilitykeeper.Keeper
-	ScopedIBCKeeper       capabilitykeeper.ScopedKeeper
-	ScopedWasmKeeper      capabilitykeeper.ScopedKeeper
-
 	// custom keepers
 	CitizenKeeper citizenkeeper.Keeper
-	FundKeeper    fundkeeper.Keeper
 	GrowthKeeper  growthkeeper.Keeper
-	UAGDKeeper    uagdkeeper.Keeper
-	UGovKeeper    ugovkeeper.Keeper
 
 	// the module store keys
 	keys map[string]*storetypes.KVStoreKey
@@ -188,15 +167,7 @@ func New(
 		&app.CircuitBreakerKeeper,
 		&app.ParamsKeeper,
 		&app.CitizenKeeper,
-		&app.FundKeeper,
 		&app.GrowthKeeper,
-		&app.UAGDKeeper,
-		&app.UGovKeeper,
-		&app.IBCKeeper,
-		&app.WasmKeeper,
-		&app.CapabilityKeeper,
-		&app.ScopedIBCKeeper,
-		&app.ScopedWasmKeeper,
 		&app.keys,
 		&app.tkeys,
 		&app.memKeys,
@@ -251,15 +222,7 @@ func New(
 func AppConfigOptions() depinject.Config {
 	return depinject.Configs(
 		AppConfig,
-		depinject.Provide(
-			ProvideFundGrowthKeeper,
-		),
 	)
-}
-
-// AppConfig exposes the composed app config for CLI wiring.
-func AppConfig() depinject.Config {
-	return AppConfigOptions()
 }
 
 // Name returns the name of the App
@@ -307,7 +270,12 @@ func (app *App) ModuleAccountAddrs() map[string]bool {
 
 // BlockedAddresses returns the set of module account addresses that are blocked from receiving funds.
 func BlockedAddresses() map[string]bool {
-	return maccPerms
+	accs := make(map[string]bool)
+	for acc := range maccPerms {
+		accs[authtypes.NewModuleAddress(acc).String()] = true
+	}
+
+	return accs
 }
 
 // DefaultGenesis returns default genesis state.

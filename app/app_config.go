@@ -26,9 +26,7 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 
 	citizenmodulev1 "uagd/x/citizen/types"
-	fundmodulev1 "uagd/x/fund/types"
 	growthmodulev1 "uagd/x/growth/types"
-	ugovmodulev1 "uagd/x/ugov/types"
 
 	"cosmossdk.io/depinject/appconfig"
 )
@@ -48,9 +46,7 @@ var (
 		"authz",
 		"circuit",
 		"citizen",
-		"fund",
 		"growth",
-		"ugov",
 	}
 	endBlockers = []string{
 		"gov",
@@ -62,9 +58,7 @@ var (
 		"params",
 		"circuit",
 		"citizen",
-		"fund",
 		"growth",
-		"ugov",
 	}
 	initGenesis = []string{
 		"auth",
@@ -81,9 +75,7 @@ var (
 		"epochs",
 		"evidence",
 		"citizen",
-		"fund",
 		"growth",
-		"ugov",
 	}
 )
 
@@ -194,16 +186,8 @@ var AppConfig = appconfig.Compose(&appv1alpha1.Config{
 			Config: appconfig.WrapAny(&citizenmodulev1.Module{}),
 		},
 		{
-			Name:   "fund",
-			Config: appconfig.WrapAny(&fundmodulev1.Module{}),
-		},
-		{
 			Name:   "growth",
 			Config: appconfig.WrapAny(&growthmodulev1.Module{}),
-		},
-		{
-			Name:   "ugov",
-			Config: appconfig.WrapAny(&ugovmodulev1.Module{}),
 		},
 	},
 })
