@@ -12,10 +12,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
 
-	_ "uagd/app"
-	"uagd/x/citizen/keeper"
-	citizenmodule "uagd/x/citizen/module"
-	"uagd/x/citizen/types"
+	_ "uag/app"
+	"uag/x/citizen/keeper"
+	citizenmodule "uag/x/citizen/module"
+	"uag/x/citizen/types"
 )
 
 type fixture struct {

@@ -1,7 +1,7 @@
 package keeper
 
 import (
-	"uagd/x/growth/types"
+	"uag/x/growth/types"
 )
 
 // Matches the call site in msg_server.go: m.ComputeGrowthScore(metric)

@@ -3,7 +3,7 @@ package growth
 import (
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 
-	"uagd/x/growth/types"
+	"uag/x/growth/types"
 )
 
 func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {

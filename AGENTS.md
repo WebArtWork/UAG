@@ -1,6 +1,6 @@
-# AGENTS.md – How humans and machines work on UAGD
+# AGENTS.md – How humans and machines work on UAG
 
-This document defines **roles, responsibilities, and rules** for everyone (and everything) interacting with the **UAGD – Ukraine Growth blockchain** codebase.
+This document defines **roles, responsibilities, and rules** for everyone (and everything) interacting with the **UAG – Ukraine Growth blockchain** codebase.
 
 It applies to:
 
@@ -9,7 +9,7 @@ It applies to:
 - automated agents (AI, bots, CI),
 - external auditors and integrators.
 
-UAGD is a **public protocol**, not a startup codebase.
+UAG is a **public protocol**, not a startup codebase.
 Rules matter.
 
 ---
@@ -191,7 +191,6 @@ Breaking changes require:
 Agents working on:
 
 - CRM anchoring,
-- CosmWasm contracts,
 - external tooling
 
 must respect:
@@ -228,7 +227,7 @@ If an agent needs power − it must be justified by code and votes.
 
 ## 8. Final rule
 
-If you are an agent working on UAGD:
+If you are an agent working on UAG:
 
 > **You do not decide outcomes.
 > You implement rules that make outcomes unavoidable.**

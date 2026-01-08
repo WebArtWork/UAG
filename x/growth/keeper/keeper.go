@@ -9,7 +9,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 
-	"uagd/x/growth/types"
+	"uag/x/growth/types"
 )
 
 type Keeper struct {

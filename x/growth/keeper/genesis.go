@@ -3,7 +3,7 @@ package keeper
 import (
 	"context"
 
-	"uagd/x/growth/types"
+	"uag/x/growth/types"
 )
 
 func (k Keeper) InitGenesis(ctx context.Context, gs types.GenesisState) error {

@@ -5,7 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"uagd/x/citizen/types"
+	"uag/x/citizen/types"
 )
 
 var _ types.MsgServer = msgServer{}

@@ -7,7 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
 
-	"uagd/x/citizen/types"
+	"uag/x/citizen/types"
 )
 
 func CmdRegionByAddress() *cobra.Command {

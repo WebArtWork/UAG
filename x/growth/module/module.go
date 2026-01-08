@@ -14,8 +14,8 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 
-	"uagd/x/growth/keeper"
-	"uagd/x/growth/types"
+	"uag/x/growth/keeper"
+	"uag/x/growth/types"
 )
 
 var (

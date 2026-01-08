@@ -6,7 +6,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cobra"
 
-	"uagd/x/citizen/types"
+	"uag/x/citizen/types"
 )
 
 func CmdSetCitizenRegion() *cobra.Command {

@@ -1,6 +1,6 @@
-# UAGD – Ukraine Growth blockchain
+# UAG – Ukraine Growth blockchain
 
-`uagd` is the reference implementation of the **Ukraine Growth (UAG)** blockchain, built on **Cosmos SDK + CometBFT** and scaffolded with **Ignite CLI**.
+`uag` is the reference implementation of the **Ukraine Growth (UAG)** blockchain, built on **Cosmos SDK + CometBFT** and scaffolded with **Ignite CLI**.
 
 Ukraine Growth is not a typical crypto project.
 It is a **public economic coordination layer** designed to tie on-chain rules to **real-world regional growth**, using transparent governance and immutable records.
@@ -164,8 +164,7 @@ Each CRM can enable **UAG mode**.
   - contracts
   - inventory checkpoints
   - audit milestones
-- These records are **anchored to the UAG chain**:
-  - either via **native modules** or via **CosmWasm smart contracts (`x/wasm`)**
+- These records are **anchored to the UAG chain** via **native modules**
 - Once written:
 
   - ❌ cannot be changed
@@ -181,32 +180,6 @@ This directly blocks the classic **»devops + employee« fraud**:
 
 The company decides **what to anchor**.
 The chain guarantees **those facts are immutable**.
-
----
-
-## Smart contracts and builders layer (`x/wasm`)
-
-UAG is not only a protocol for Ukraine Growth itself; it is also a **platform for builders**.
-
-By integrating **CosmWasm** as `x/wasm`, the chain allows anyone with UAG to:
-
-- upload smart contracts (WASM code)
-- instantiate them
-- execute methods that:
-  - manage their own state
-  - store arbitrary business data
-  - implement custom logic, DAOs, games, audit trails, etc.
-
-Every contract interaction is a normal transaction:
-
-- pays **gas in `muag`**
-- writes to the chain’s immutable state
-- can interoperate with UAG-native modules (e.g. read `x/citizen` or react to `x/fund` decisions)
-
-This gives:
-
-- **Businesses** – a way to build tailor-made logic on top of UAG
-- **Developers** – a permissionless environment to deploy tools for citizens, regions, and companies
 
 ---
 
@@ -272,60 +245,6 @@ Global governance.
 - Protocol upgrades
 
 ---
-
-### `x/wasm` (CosmWasm smart contracts)
-
-Open smart-contract platform:
-
-- Any address with UAG can:
-  - upload contracts
-  - instantiate contracts
-  - execute contract messages
-- Contracts can:
-  - store arbitrary state
-  - serve as app backends (CRMs, registries, DAOs)
-  - integrate with UAG’s native economics
-
-Gas and fees are always paid in **`muag`**.
-
-#### CosmWasm CLI quickstart
-
-All commands use the `uag` binary and the `muag` fee token.
-
-1. **Store a contract** (any account can upload):
-
-   ```bash
-   uag tx wasm store path/to/contract.wasm \
-     --from <key-name> \
-     --chain-id uag-test-1 \
-     --gas auto --gas-adjustment 1.3 --fees 7500muag
-   ```
-
-2. **Instantiate** the uploaded code (replace `<code-id>` from the store result):
-
-   ```bash
-   uag tx wasm instantiate <code-id> '{"count":0}' \
-     --label "demo-counter" \
-     --admin <admin-address> \
-     --from <key-name> --chain-id uag-test-1 \
-     --gas auto --gas-adjustment 1.3 --fees 6000muag
-   ```
-
-3. **Execute** a contract message:
-
-   ```bash
-   uag tx wasm execute <contract-address> '{"increment":{}}' \
-     --from <key-name> --chain-id uag-test-1 \
-     --gas auto --gas-adjustment 1.3 --fees 5000muag
-   ```
-
-4. **Query** contract state:
-
-   ```bash
-   uag query wasm contract-state smart <contract-address> '{"get_count":{}}'
-   ```
-
-Uploads are permissionless, and state writes pay gas in `muag`.
 
 ---
 

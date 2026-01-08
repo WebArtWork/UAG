@@ -4,7 +4,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 
-	"uagd/x/growth/types"
+	"uag/x/growth/types"
 )
 
 func (AppModule) GenerateGenesisState(simState *module.SimulationState) {

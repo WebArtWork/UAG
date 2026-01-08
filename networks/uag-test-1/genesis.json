@@ -278,9 +278,7 @@
         "clients_consensus": [],
         "clients_metadata": [],
         "params": {
-          "allowed_clients": [
-            "*"
-          ]
+          "allowed_clients": ["*"]
         },
         "create_localhost": false,
         "next_client_sequence": "0"
@@ -329,9 +327,7 @@
         "port": "icahost",
         "params": {
           "host_enabled": true,
-          "allow_messages": [
-            "*"
-          ]
+          "allow_messages": ["*"]
         }
       }
     },
@@ -378,7 +374,7 @@
       },
       "total_escrowed": []
     },
-    "uagd": {
+    "uag": {
       "params": {}
     },
     "upgrade": {},
@@ -396,9 +392,7 @@
         "max_bytes": "1048576"
       },
       "validator": {
-        "pub_key_types": [
-          "ed25519"
-        ]
+        "pub_key_types": ["ed25519"]
       },
       "version": {
         "app": "0"

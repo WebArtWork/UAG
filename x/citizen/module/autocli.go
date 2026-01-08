@@ -3,7 +3,7 @@ package citizen
 import (
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 
-	"uagd/x/citizen/types"
+	"uag/x/citizen/types"
 )
 
 func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {

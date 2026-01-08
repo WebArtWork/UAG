@@ -6,7 +6,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"uagd/x/growth/types"
+	"uag/x/growth/types"
 )
 
 var _ types.QueryServer = Keeper{}

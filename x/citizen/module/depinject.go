@@ -8,8 +8,8 @@ import (
 	"cosmossdk.io/depinject/appconfig"
 	"github.com/cosmos/cosmos-sdk/codec"
 
-	"uagd/x/citizen/keeper"
-	"uagd/x/citizen/types"
+	"uag/x/citizen/keeper"
+	"uag/x/citizen/types"
 )
 
 var _ depinject.OnePerModuleType = AppModule{}

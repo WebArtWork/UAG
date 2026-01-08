@@ -7,7 +7,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"uagd/x/growth/types"
+	"uag/x/growth/types"
 )
 
 type msgServer struct {

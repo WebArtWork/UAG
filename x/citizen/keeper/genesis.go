@@ -5,7 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"uagd/x/citizen/types"
+	"uag/x/citizen/types"
 )
 
 func (k Keeper) InitGenesis(ctx context.Context, genState types.GenesisState) error {

@@ -14,8 +14,8 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 
-	"uagd/x/citizen/keeper"
-	"uagd/x/citizen/types"
+	"uag/x/citizen/keeper"
+	"uag/x/citizen/types"
 )
 
 var (

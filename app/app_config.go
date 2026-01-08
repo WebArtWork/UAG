@@ -10,7 +10,6 @@ import (
 	consensusmodulev1 "cosmossdk.io/api/cosmos/consensus/module/v1"
 	crisismodulev1 "cosmossdk.io/api/cosmos/crisis/module/v1"
 	distributionmodulev1 "cosmossdk.io/api/cosmos/distribution/module/v1"
-	epochsmodulev1 "cosmossdk.io/api/cosmos/epochs/module/v1"
 	evidencemodulev1 "cosmossdk.io/api/cosmos/evidence/module/v1"
 	feegrantmodulev1 "cosmossdk.io/api/cosmos/feegrant/module/v1"
 	genutilmodulev1 "cosmossdk.io/api/cosmos/genutil/module/v1"
@@ -25,8 +24,8 @@ import (
 
 	"google.golang.org/protobuf/types/known/durationpb"
 
-	citizenmodulev1 "uagd/x/citizen/types"
-	growthmodulev1 "uagd/x/growth/types"
+	citizenmodulev1 "uag/x/citizen/types"
+	growthmodulev1 "uag/x/growth/types"
 
 	"cosmossdk.io/depinject/appconfig"
 )
@@ -72,11 +71,9 @@ var (
 		"feegrant",
 		"authz",
 		"circuit",
-		"epochs",
 		"evidence",
 		"citizen",
 		"growth",
-		"wasm",
 	}
 )
 
@@ -120,10 +117,6 @@ var AppConfig = appconfig.Compose(&appv1alpha1.Config{
 		{
 			Name:   "distribution",
 			Config: appconfig.WrapAny(&distributionmodulev1.Module{}),
-		},
-		{
-			Name:   "epochs",
-			Config: appconfig.WrapAny(&epochsmodulev1.Module{}),
 		},
 		{
 			Name:   "evidence",
@@ -180,7 +173,7 @@ var AppConfig = appconfig.Compose(&appv1alpha1.Config{
 			Name:   "upgrade",
 			Config: appconfig.WrapAny(&upgrademodulev1.Module{}),
 		},
-		// uagd modules
+		// uag modules
 		{
 			Name:   "citizen",
 			Config: appconfig.WrapAny(&citizenmodulev1.Module{}),

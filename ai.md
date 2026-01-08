@@ -27,7 +27,7 @@ Common optional env:
 
 ```env
 CHAIN_ID=uag-test-1
-UAGD_HOME=~/.uagd
+UAG_HOME=~/.uag
 PREFIX=uag
 GAS_PRICE=0.025muag
 FEES=5000muag
@@ -139,22 +139,6 @@ Run `go mod tidy` and `go test`.
 ```
 
 Generate protobufs and format code.
-
----
-
-### CosmWasm (if used)
-
-```bash
-./install-contract.sh
-```
-
-Install Rust + wasm tooling.
-
-```bash
-./create-contract.sh <name>
-```
-
-Create and build a CosmWasm contract.
 
 ---
 

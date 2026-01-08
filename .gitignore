@@ -17,7 +17,7 @@
 
 # Common local binaries (chain binary name can vary)
 uag
-uagd
+uag
 simd
 
 # -----------------------------
@@ -44,8 +44,8 @@ cover.out
 # -----------------------------
 **/.ignite/
 /config.yml.local
-**/.uagd/
-**/.uagd-home/
+**/.uag/
+**/.uag-home/
 **/.gaia/
 **/.simapp/
 **/.wasmd/
