@@ -14,10 +14,9 @@
 *.out
 *.test
 *.local
+/uag
 
 # Common local binaries (chain binary name can vary)
-uag
-uag
 simd
 
 # -----------------------------
