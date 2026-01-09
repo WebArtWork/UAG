@@ -8,6 +8,7 @@ import (
 	// Cosmos SDK modules (within github.com/cosmos/cosmos-sdk)
 	_ "github.com/cosmos/cosmos-sdk/x/auth"
 	_ "github.com/cosmos/cosmos-sdk/x/authz"
+	_ "github.com/cosmos/cosmos-sdk/x/authz/module"
 	_ "github.com/cosmos/cosmos-sdk/x/bank"
 	_ "github.com/cosmos/cosmos-sdk/x/consensus"
 	_ "github.com/cosmos/cosmos-sdk/x/crisis"
@@ -15,6 +16,7 @@ import (
 	_ "github.com/cosmos/cosmos-sdk/x/genutil"
 	_ "github.com/cosmos/cosmos-sdk/x/gov"
 	_ "github.com/cosmos/cosmos-sdk/x/group"
+	_ "github.com/cosmos/cosmos-sdk/x/group/module"
 	_ "github.com/cosmos/cosmos-sdk/x/params"
 	_ "github.com/cosmos/cosmos-sdk/x/slashing"
 	_ "github.com/cosmos/cosmos-sdk/x/staking"

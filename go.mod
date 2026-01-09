@@ -6,7 +6,6 @@ toolchain go1.24.1
 
 require (
 	cosmossdk.io/api v1.0.0-alpha.1
-	cosmossdk.io/client/v2 v2.10.0-beta.4
 	cosmossdk.io/collections v1.3.1
 	cosmossdk.io/core v1.1.0-alpha.2
 	cosmossdk.io/depinject v1.2.1
@@ -20,10 +19,10 @@ require (
 	cosmossdk.io/x/feegrant v0.2.0
 	cosmossdk.io/x/nft v0.2.0
 	cosmossdk.io/x/upgrade v0.2.0
-	github.com/cometbft/cometbft v1.0.0
+	github.com/cometbft/cometbft v0.38.20
 	github.com/cosmos/cosmos-db v1.1.3
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
-	github.com/cosmos/cosmos-sdk v0.54.0-alpha.0.0.20250611155041-9fa93c9afe32
+	github.com/cosmos/cosmos-sdk v0.53.5
 	github.com/cosmos/gogoproto v1.7.2
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/spf13/cast v1.10.0

@@ -3,7 +3,6 @@ package cmd
 import (
 	"os"
 
-	"cosmossdk.io/client/v2/autocli"
 	"cosmossdk.io/depinject"
 	"cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -23,7 +22,6 @@ import (
 // NewRootCmd creates a new root command for uag. It is called once in the main function.
 func NewRootCmd() *cobra.Command {
 	var (
-		autoCliOpts        autocli.AppOptions
 		moduleBasicManager module.BasicManager
 		clientCtx          client.Context
 	)
@@ -35,7 +33,6 @@ func NewRootCmd() *cobra.Command {
 				ProvideClientContext,
 			),
 		),
-		&autoCliOpts,
 		&moduleBasicManager,
 		&clientCtx,
 	); err != nil {
@@ -43,7 +40,7 @@ func NewRootCmd() *cobra.Command {
 	}
 
 	rootCmd := &cobra.Command{
-		Use:           app.Name + "d",
+		Use:           app.Name,
 		Short:         "uag node",
 		SilenceErrors: true,
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
@@ -74,10 +71,6 @@ func NewRootCmd() *cobra.Command {
 	}
 
 	initRootCmd(rootCmd, clientCtx.TxConfig, moduleBasicManager)
-
-	if err := autoCliOpts.EnhanceRootCommand(rootCmd); err != nil {
-		panic(err)
-	}
 
 	return rootCmd
 }
