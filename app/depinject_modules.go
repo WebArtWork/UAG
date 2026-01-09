@@ -25,10 +25,14 @@ import (
 	_ "cosmossdk.io/x/circuit"
 	_ "cosmossdk.io/x/evidence"
 	_ "cosmossdk.io/x/feegrant"
+	_ "cosmossdk.io/x/feegrant/module"
 	_ "cosmossdk.io/x/nft/module"
 	_ "cosmossdk.io/x/upgrade"
 
 	// UAG modules
 	_ "uag/x/citizen/module"
 	_ "uag/x/growth/module"
+
+	// CosmWasm (wasmd)
+	_ "github.com/CosmWasm/wasmd/x/wasm"
 )

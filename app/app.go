@@ -16,6 +16,7 @@ import (
 	dbm "github.com/cosmos/cosmos-db"
 
 	feegrantkeeper "cosmossdk.io/x/feegrant/keeper"
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -64,6 +65,7 @@ var maccPerms = map[string][]string{
 	stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
 	stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 	govtypes.ModuleName:            {authtypes.Burner},
+	wasmtypes.ModuleName:           {authtypes.Burner},
 }
 
 var (

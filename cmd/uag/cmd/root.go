@@ -14,6 +14,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtxconfig "github.com/cosmos/cosmos-sdk/x/auth/tx/config"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	genutil "github.com/cosmos/cosmos-sdk/x/genutil"
+	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/spf13/cobra"
 
 	"uag/app"
@@ -38,6 +40,10 @@ func NewRootCmd() *cobra.Command {
 	); err != nil {
 		panic(err)
 	}
+
+	// ---- FIX: genutil CLI expects genutil.AppModuleBasic, but DI may wrap it in an adaptor ----
+	// Override it so genutilcli.Commands() doesn't panic at runtime.
+	moduleBasicManager[genutiltypes.ModuleName] = genutil.AppModuleBasic{}
 
 	rootCmd := &cobra.Command{
 		Use:           app.Name,

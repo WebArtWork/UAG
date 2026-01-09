@@ -31,7 +31,6 @@ import (
 )
 
 var (
-	// Module execution ordering.
 	beginBlockers = []string{
 		"upgrade",
 		"staking",
@@ -77,7 +76,6 @@ var (
 	}
 )
 
-// AppConfig is the depinject wiring configuration for the application.
 var AppConfig = appconfig.Compose(&appv1alpha1.Config{
 	Modules: []*appv1alpha1.ModuleConfig{
 		{
@@ -91,8 +89,19 @@ var AppConfig = appconfig.Compose(&appv1alpha1.Config{
 			}),
 		},
 		{
-			Name:   "auth",
-			Config: appconfig.WrapAny(&authmodulev1.Module{Bech32Prefix: AccountAddressPrefix}),
+			Name: "auth",
+			Config: appconfig.WrapAny(&authmodulev1.Module{
+				Bech32Prefix: AccountAddressPrefix,
+				ModuleAccountPermissions: []*authmodulev1.ModuleAccountPermission{
+					{Account: "fee_collector"},
+					{Account: "distribution"},
+					{Account: "bonded_tokens_pool", Permissions: []string{"burner", "staking"}},
+					{Account: "not_bonded_tokens_pool", Permissions: []string{"burner", "staking"}},
+					{Account: "gov", Permissions: []string{"burner"}},
+					{Account: "nft"},
+					{Account: "wasm", Permissions: []string{"burner"}},
+				},
+			}),
 		},
 		{
 			Name:   "authz",
@@ -140,10 +149,8 @@ var AppConfig = appconfig.Compose(&appv1alpha1.Config{
 		{
 			Name: "group",
 			Config: appconfig.WrapAny(&groupmodulev1.Module{
-				MaxExecutionPeriod: &durationpb.Duration{
-					Seconds: 1209600,
-				},
-				MaxMetadataLen: 255,
+				MaxExecutionPeriod: &durationpb.Duration{Seconds: 1209600},
+				MaxMetadataLen:     255,
 			}),
 		},
 		{
@@ -173,7 +180,6 @@ var AppConfig = appconfig.Compose(&appv1alpha1.Config{
 			Name:   "upgrade",
 			Config: appconfig.WrapAny(&upgrademodulev1.Module{}),
 		},
-		// uag modules
 		{
 			Name:   "citizen",
 			Config: appconfig.WrapAny(&citizenmodulev1.Module{}),
