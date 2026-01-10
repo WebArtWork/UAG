@@ -1,11 +1,10 @@
 package app
 
 import (
-	"encoding/json"
 	"io"
-	"os"
-	"path/filepath"
 
+	clienthelpers "cosmossdk.io/client/v2/helpers"
+	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/depinject"
 	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
@@ -14,118 +13,119 @@ import (
 
 	abci "github.com/cometbft/cometbft/abci/types"
 	dbm "github.com/cosmos/cosmos-db"
-
-	feegrantkeeper "cosmossdk.io/x/feegrant/keeper"
-	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/runtime"
+	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/server/api"
 	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/cosmos/cosmos-sdk/x/auth/ante"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
-	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
+	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	consensusparamkeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
-	crisiskeeper "github.com/cosmos/cosmos-sdk/x/crisis/keeper"
+	consensuskeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
-	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+	"github.com/cosmos/cosmos-sdk/x/genutil"
+	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
+	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	slashingkeeper "github.com/cosmos/cosmos-sdk/x/slashing/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	icacontrollerkeeper "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts/controller/keeper"
+	icahostkeeper "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts/host/keeper"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v10/modules/apps/transfer/keeper"
+	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 
-	// custom modules
-	citizenkeeper "uag/x/citizen/keeper"
-	growthkeeper "uag/x/growth/keeper"
+	"uag/docs"
+	uagmodulekeeper "uag/x/uag/keeper"
 )
 
 const (
+	// Name is the name of the application.
+	Name = "uag"
+	// AccountAddressPrefix is the prefix for accounts addresses.
 	AccountAddressPrefix = "uag"
-	Name                 = "uag"
-	ChainCoinType        = 118
+	// ChainCoinType is the coin type of the chain.
+	ChainCoinType = 118
 )
 
-var (
-	DefaultNodeHome string
-)
-
-var maccPerms = map[string][]string{
-	authtypes.FeeCollectorName:     nil,
-	distrtypes.ModuleName:          nil,
-	stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
-	stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
-	govtypes.ModuleName:            {authtypes.Burner},
-	wasmtypes.ModuleName:           {authtypes.Burner},
-}
+// DefaultNodeHome default home directories for the application daemon
+var DefaultNodeHome string
 
 var (
+	_ runtime.AppI            = (*App)(nil)
 	_ servertypes.Application = (*App)(nil)
 )
 
-func init() {
-	userHomeDir, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-	}
-
-	DefaultNodeHome = filepath.Join(userHomeDir, "."+Name)
-}
-
-// App extends an ABCI application, but with keepers, managers and other useful components.
+// App extends an ABCI application, but with most of its parameters exported.
+// They are exported for convenience in creating helper functions, as object
+// capabilities aren't needed for testing.
 type App struct {
-	*baseapp.BaseApp
+	*runtime.App
+	legacyAmino       *codec.LegacyAmino
 	appCodec          codec.Codec
 	txConfig          client.TxConfig
-	cdc               *codec.LegacyAmino
 	interfaceRegistry codectypes.InterfaceRegistry
-	runtimeApp        *runtime.App
-
-	// The module manager
-	moduleManager *module.Manager
-	// simulation manager
-	sm *module.SimulationManager
-	// module configurator
-	configurator module.Configurator
 
 	// keepers
-	AccountKeeper         authkeeper.AccountKeeper
+	// only keepers required by the app are exposed
+	// the list of all modules is available in the app_config
+	AuthKeeper            authkeeper.AccountKeeper
 	BankKeeper            bankkeeper.Keeper
 	StakingKeeper         *stakingkeeper.Keeper
 	SlashingKeeper        slashingkeeper.Keeper
+	MintKeeper            mintkeeper.Keeper
 	DistrKeeper           distrkeeper.Keeper
 	GovKeeper             *govkeeper.Keeper
-	CrisisKeeper          *crisiskeeper.Keeper
 	UpgradeKeeper         *upgradekeeper.Keeper
 	AuthzKeeper           authzkeeper.Keeper
-	FeegrantKeeper        feegrantkeeper.Keeper
-	ConsensusParamsKeeper consensusparamkeeper.Keeper
+	ConsensusParamsKeeper consensuskeeper.Keeper
 	CircuitBreakerKeeper  circuitkeeper.Keeper
 	ParamsKeeper          paramskeeper.Keeper
-	// custom keepers
-	CitizenKeeper citizenkeeper.Keeper
-	GrowthKeeper  growthkeeper.Keeper
 
-	// the module store keys
-	keys map[string]*storetypes.KVStoreKey
+	// ibc keepers
+	IBCKeeper           *ibckeeper.Keeper
+	ICAControllerKeeper icacontrollerkeeper.Keeper
+	ICAHostKeeper       icahostkeeper.Keeper
+	TransferKeeper      ibctransferkeeper.Keeper
 
-	// the transient store keys
-	tkeys map[string]*storetypes.TransientStoreKey
-
-	// the memory store keys
-	memKeys map[string]*storetypes.MemoryStoreKey
+	// simulation manager
+	sm        *module.SimulationManager
+	UagKeeper uagmodulekeeper.Keeper
 }
 
-// New creates a new App object
+func init() {
+	var err error
+	clienthelpers.EnvPrefix = Name
+	DefaultNodeHome, err = clienthelpers.GetNodeHomeDirectory("." + Name)
+	if err != nil {
+		panic(err)
+	}
+}
+
+// AppConfig returns the default app config.
+func AppConfig() depinject.Config {
+	return depinject.Configs(
+		appConfig,
+		depinject.Supply(
+			// supply custom module basics
+			map[string]module.AppModuleBasic{
+				genutiltypes.ModuleName: genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
+			},
+		),
+	)
+}
+
+// New returns a reference to an initialized App.
 func New(
 	logger log.Logger,
 	db dbm.DB,
@@ -138,230 +138,126 @@ func New(
 		app        = &App{}
 		appBuilder *runtime.AppBuilder
 
+		// merge the AppConfig and other configuration in one config
 		appConfig = depinject.Configs(
-			AppConfigOptions(),
+			AppConfig(),
 			depinject.Supply(
-				logger,
-				appOpts,
+				appOpts, // supply app options
+				logger,  // supply logger
+
+				// Supply with IBC keeper getter for the IBC modules with App Wiring.
+				// The IBC Keeper cannot be passed because it has not been initiated yet.
+				// Passing the getter, the app IBC Keeper will always be accessible.
+				// This needs to be removed after IBC supports App Wiring.
+				app.GetIBCKeeper,
+
+				// here alternative options can be supplied to the DI container.
+				// those options can be used f.e to override the default behavior of some modules.
+				// for instance supplying a custom address codec for not using bech32 addresses.
+				// read the depinject documentation and depinject module wiring for more information
+				// on available options and how to use them.
 			),
 		)
 	)
 
+	var appModules map[string]appmodule.AppModule
 	if err := depinject.Inject(appConfig,
 		&appBuilder,
+		&appModules,
 		&app.appCodec,
-		&app.cdc,
+		&app.legacyAmino,
+		&app.txConfig,
 		&app.interfaceRegistry,
-		&app.moduleManager,
-		&app.sm,
-		&app.configurator,
-		&app.AccountKeeper,
+		&app.AuthKeeper,
 		&app.BankKeeper,
 		&app.StakingKeeper,
 		&app.SlashingKeeper,
+		&app.MintKeeper,
 		&app.DistrKeeper,
 		&app.GovKeeper,
-		&app.CrisisKeeper,
 		&app.UpgradeKeeper,
 		&app.AuthzKeeper,
-		&app.FeegrantKeeper,
 		&app.ConsensusParamsKeeper,
 		&app.CircuitBreakerKeeper,
 		&app.ParamsKeeper,
-		&app.CitizenKeeper,
-		&app.GrowthKeeper,
-		&app.keys,
-		&app.tkeys,
-		&app.memKeys,
+		&app.UagKeeper,
 	); err != nil {
 		panic(err)
 	}
 
-	// setup baseapp
-	builtApp := appBuilder.Build(db, traceStore, baseAppOptions...)
-	app.BaseApp = builtApp.BaseApp
-	app.runtimeApp = builtApp
-	app.moduleManager = builtApp.ModuleManager
+	// add to default baseapp options
+	// enable optimistic execution
+	baseAppOptions = append(baseAppOptions, baseapp.SetOptimisticExecution())
 
-	app.setupUpgradeHandlers()
+	// build app
+	app.App = appBuilder.Build(db, traceStore, baseAppOptions...)
 
-	app.setupHooks()
-
-	// enable sign mode textual by overwriting the default TxConfig
-	app.txConfig = authtx.NewTxConfig(app.appCodec, authtx.DefaultSignModes)
-
-	// set the baseapp's parameter store
-	app.BaseApp.SetParamStore(app.ConsensusParamsKeeper.ParamsStore)
-
-	// set ante handler
-	anteHandler, err := ante.NewAnteHandler(ante.HandlerOptions{
-		AccountKeeper:   app.AccountKeeper,
-		BankKeeper:      app.BankKeeper,
-		FeegrantKeeper:  app.FeegrantKeeper,
-		SignModeHandler: app.txConfig.SignModeHandler(),
-	})
-	if err != nil {
-		panic(err)
-	}
-	app.SetAnteHandler(anteHandler)
-
-	// load state streaming if enabled
-	if err := app.BaseApp.RegisterStreamingServices(appOpts, app.keys); err != nil {
+	// register legacy modules
+	if err := app.registerIBCModules(appOpts); err != nil {
 		panic(err)
 	}
 
-	// load latest version
-	if loadLatest {
-		if err := app.LoadLatestVersion(); err != nil {
-			panic(err)
+	/****  Module Options ****/
+
+	// create the simulation manager and define the order of the modules for deterministic simulations
+	overrideModules := map[string]module.AppModuleSimulation{
+		authtypes.ModuleName: auth.NewAppModule(app.appCodec, app.AuthKeeper, authsims.RandomGenesisAccounts, nil),
+	}
+	app.sm = module.NewSimulationManagerFromAppModules(app.ModuleManager.Modules, overrideModules)
+
+	app.sm.RegisterStoreDecoders()
+
+	// A custom InitChainer sets if extra pre-init-genesis logic is required.
+	// This is necessary for manually registered modules that do not support app wiring.
+	// Manually set the module version map as shown below.
+	// The upgrade module will automatically handle de-duplication of the module version map.
+	app.SetInitChainer(func(ctx sdk.Context, req *abci.RequestInitChain) (*abci.ResponseInitChain, error) {
+		if err := app.UpgradeKeeper.SetModuleVersionMap(ctx, app.ModuleManager.GetVersionMap()); err != nil {
+			return nil, err
 		}
+		return app.App.InitChainer(ctx, req)
+	})
+
+	if err := app.Load(loadLatest); err != nil {
+		panic(err)
 	}
 
 	return app
 }
 
-// AppConfig returns the default app config.
-func AppConfigOptions() depinject.Config {
-	return depinject.Configs(
-		AppConfig,
-	)
+// GetSubspace returns a param subspace for a given module name.
+func (app *App) GetSubspace(moduleName string) paramstypes.Subspace {
+	subspace, _ := app.ParamsKeeper.GetSubspace(moduleName)
+	return subspace
 }
 
-// Name returns the name of the App
-func (app *App) Name() string { return app.BaseApp.Name() }
-
-// ModuleManager accessor for tests/CLI wiring.
-func (app *App) ModuleManager() *module.Manager {
-	return app.moduleManager
-}
-
-// BeginBlocker application updates every begin block
-func (app *App) BeginBlocker(ctx sdk.Context) (sdk.BeginBlock, error) {
-	return app.moduleManager.BeginBlock(ctx)
-}
-
-// EndBlocker application updates every end block
-func (app *App) EndBlocker(ctx sdk.Context) (sdk.EndBlock, error) {
-	return app.moduleManager.EndBlock(ctx)
-}
-
-// InitChainer application update at chain initialization
-func (app *App) InitChainer(ctx sdk.Context, req *abci.RequestInitChain) (*abci.ResponseInitChain, error) {
-	var genesisState map[string]json.RawMessage
-	if err := json.Unmarshal(req.AppStateBytes, &genesisState); err != nil {
-		panic(err)
-	}
-
-	return app.moduleManager.InitGenesis(ctx, app.appCodec, genesisState)
-}
-
-// LoadHeight loads a particular height
-func (app *App) LoadHeight(height int64) error {
-	return app.LoadVersion(height)
-}
-
-// ModuleAccountAddrs returns all the app's module account addresses.
-func (app *App) ModuleAccountAddrs() map[string]bool {
-	accs := make(map[string]bool)
-	for acc := range maccPerms {
-		accs[authtypes.NewModuleAddress(acc).String()] = true
-	}
-
-	return accs
-}
-
-// BlockedAddresses returns the set of module account addresses that are blocked from receiving funds.
-func BlockedAddresses() map[string]bool {
-	accs := make(map[string]bool)
-	for acc := range maccPerms {
-		accs[authtypes.NewModuleAddress(acc).String()] = true
-	}
-
-	return accs
-}
-
-// DefaultGenesis returns default genesis state.
-func (app *App) DefaultGenesis() map[string]json.RawMessage {
-	if app.runtimeApp != nil {
-		return app.runtimeApp.DefaultGenesis()
-	}
-	return nil
-}
-
-// LegacyAmino returns the application's LegacyAmino codec.
+// LegacyAmino returns App's amino codec.
 func (app *App) LegacyAmino() *codec.LegacyAmino {
-	return app.cdc
+	return app.legacyAmino
 }
 
-// AppCodec returns the application's appCodec.
+// AppCodec returns App's app codec.
 func (app *App) AppCodec() codec.Codec {
 	return app.appCodec
 }
 
-// InterfaceRegistry returns the application's InterfaceRegistry.
+// InterfaceRegistry returns App's InterfaceRegistry.
 func (app *App) InterfaceRegistry() codectypes.InterfaceRegistry {
 	return app.interfaceRegistry
 }
 
-// TxConfig returns the application's TxConfig.
+// TxConfig returns App's TxConfig
 func (app *App) TxConfig() client.TxConfig {
 	return app.txConfig
 }
 
 // GetKey returns the KVStoreKey for the provided store key.
 func (app *App) GetKey(storeKey string) *storetypes.KVStoreKey {
-	return app.keys[storeKey]
-}
-
-// GetTKey returns the TransientStoreKey for the provided store key.
-func (app *App) GetTKey(storeKey string) *storetypes.TransientStoreKey {
-	return app.tkeys[storeKey]
-}
-
-// GetMemKey returns the MemoryStoreKey for the provided store key.
-func (app *App) GetMemKey(storeKey string) *storetypes.MemoryStoreKey {
-	return app.memKeys[storeKey]
-}
-
-// GetStoreKeys returns all store keys.
-func (app *App) GetStoreKeys() []storetypes.StoreKey {
-	out := make([]storetypes.StoreKey, 0, len(app.keys))
-	for _, k := range app.keys {
-		out = append(out, k)
+	kvStoreKey, ok := app.UnsafeFindStoreKey(storeKey).(*storetypes.KVStoreKey)
+	if !ok {
+		return nil
 	}
-	return out
-}
-
-// RegisterAPIRoutes registers all application module routes with the provided API server.
-func (app *App) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
-	if app.runtimeApp != nil {
-		app.runtimeApp.RegisterAPIRoutes(apiSvr, apiConfig)
-		return
-	}
-}
-
-// RegisterTxService implements the Application interface.
-func (app *App) RegisterTxService(clientCtx client.Context) {
-	if app.runtimeApp != nil {
-		app.runtimeApp.RegisterTxService(clientCtx)
-		return
-	}
-}
-
-// RegisterTendermintService implements the Application interface.
-func (app *App) RegisterTendermintService(clientCtx client.Context) {
-	if app.runtimeApp != nil {
-		app.runtimeApp.RegisterTendermintService(clientCtx)
-		return
-	}
-}
-
-// RegisterNodeService registers the node gRPC service.
-func (app *App) RegisterNodeService(clientCtx client.Context, cfg config.Config) {
-	if app.runtimeApp != nil {
-		app.runtimeApp.RegisterNodeService(clientCtx, cfg)
-		return
-	}
+	return kvStoreKey
 }
 
 // SimulationManager implements the SimulationApp interface
@@ -369,12 +265,44 @@ func (app *App) SimulationManager() *module.SimulationManager {
 	return app.sm
 }
 
-// setupUpgradeHandlers sets up the upgrade handlers
-func (app *App) setupUpgradeHandlers() {
-	// Add your upgrade handlers here
+// RegisterAPIRoutes registers all application module routes with the provided
+// API server.
+func (app *App) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
+	app.App.RegisterAPIRoutes(apiSvr, apiConfig)
+	// register swagger API in app.go so that other applications can override easily
+	if err := server.RegisterSwaggerAPI(apiSvr.ClientCtx, apiSvr.Router, apiConfig.Swagger); err != nil {
+		panic(err)
+	}
+
+	// register app's OpenAPI routes.
+	docs.RegisterOpenAPIService(Name, apiSvr.Router)
 }
 
-// setupHooks sets up the hooks for the app
-func (app *App) setupHooks() {
-	// Add your hooks here
+// GetMaccPerms returns a copy of the module account permissions
+//
+// NOTE: This is solely to be used for testing purposes.
+func GetMaccPerms() map[string][]string {
+	dup := make(map[string][]string)
+	for _, perms := range moduleAccPerms {
+		dup[perms.GetAccount()] = perms.GetPermissions()
+	}
+
+	return dup
+}
+
+// BlockedAddresses returns all the app's blocked account addresses.
+func BlockedAddresses() map[string]bool {
+	result := make(map[string]bool)
+
+	if len(blockAccAddrs) > 0 {
+		for _, addr := range blockAccAddrs {
+			result[addr] = true
+		}
+	} else {
+		for addr := range GetMaccPerms() {
+			result[addr] = true
+		}
+	}
+
+	return result
 }

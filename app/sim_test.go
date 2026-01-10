@@ -224,7 +224,7 @@ func TestAppImportExport(t *testing.T) {
 
 	ctxA := bApp.NewContextLegacy(true, cmtproto.Header{Height: bApp.LastBlockHeight()})
 	ctxB := newApp.NewContextLegacy(true, cmtproto.Header{Height: bApp.LastBlockHeight()})
-	_, err = newApp.ModuleManager().InitGenesis(ctxB, bApp.AppCodec(), genesisState)
+	_, err = newApp.ModuleManager.InitGenesis(ctxB, bApp.AppCodec(), genesisState)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "validator set is empty after InitGenesis") {

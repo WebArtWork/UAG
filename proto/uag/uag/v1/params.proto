@@ -1,0 +1,13 @@
+syntax = "proto3";
+package uag.uag.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "uag/x/uag/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (amino.name) = "uag/x/uag/Params";
+  option (gogoproto.equal) = true;
+}

@@ -1,41 +1,27 @@
 version: 1
 validation: sovereign
-default_denom: muag
-
-accounts:
-  - name: alice
-    coins:
-      - 200000000000muag
-  - name: bob
-    coins:
-      - 100000000000muag
-
+default_denom: stake
+accounts: 
+- name: alice
+  coins:
+  - 20000token
+  - 200000000stake
+- name: bob
+  coins:
+  - 10000token
+  - 100000000stake
 client:
   openapi:
     path: docs/static/openapi.json
-
 faucet:
   name: bob
   coins:
-    - 100000000muag
-
+  - 5token
+  - 100000stake
 validators:
-  - name: alice
-    bonded: 100000000000muag
-  - name: validator1
-    bonded: 200000000000muag
-  - name: validator2
-    bonded: 100000000000muag
-
-genesis:
-  chain_id: "uag-test-1"
-  app_state:
-    staking:
-      params:
-        bond_denom: "muag"
-        max_validators: 50
-        unbonding_time: "1814400s"          # 21 days
-        min_commission_rate: "0.050000000000000000"
-    distribution:
-      params:
-        community_tax: "0.020000000000000000"
+- name: alice
+  bonded: 100000000stake
+- name: validator1
+  bonded: 200000000stake
+- name: validator2
+  bonded: 100000000stake
