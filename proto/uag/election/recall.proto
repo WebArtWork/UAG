@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package <app>.election;
+
+option go_package = "<app>/x/election/types";
+
+message Recall {
+  string recall_id = 1;
+  uint32 term_id = 2;
+  string section_id = 3;
+  string creator_address = 4;
+  string reason_phrase = 5;
+  int64 created_at = 6;
+}

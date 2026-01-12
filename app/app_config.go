@@ -2,6 +2,8 @@ package app
 
 import (
 	"time"
+	_ "uag/x/election/module"
+	electionmoduletypes "uag/x/election/types"
 	_ "uag/x/uag/module"
 	uagmoduletypes "uag/x/uag/types"
 
@@ -128,6 +130,7 @@ var (
 						// chain modules
 						uagmoduletypes.ModuleName,
 						wasmtypes.ModuleName,
+						electionmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/beginBlockers
 					},
 					EndBlockers: []string{
@@ -138,6 +141,7 @@ var (
 						// chain modules
 						uagmoduletypes.ModuleName,
 						wasmtypes.ModuleName,
+						electionmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/endBlockers
 					},
 					// The following is mostly only needed when ModuleName != StoreKey name.
@@ -176,6 +180,7 @@ var (
 						// chain modules
 						uagmoduletypes.ModuleName,
 						wasmtypes.ModuleName,
+						electionmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/initGenesis
 					},
 				}),
@@ -275,6 +280,10 @@ var (
 			{
 				Name:   uagmoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&uagmoduletypes.Module{}),
+			},
+			{
+				Name:   electionmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&electionmoduletypes.Module{}),
 			},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},

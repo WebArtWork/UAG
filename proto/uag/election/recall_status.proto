@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package <app>.election;
+
+option go_package = "<app>/x/election/types";
+
+enum RecallState {
+  RECALL_STATE_UNSPECIFIED = 0;
+  RECALL_STATE_ACTIVE = 1;
+  RECALL_STATE_PASSED = 2;
+  RECALL_STATE_REJECTED = 3;
+  RECALL_STATE_CANCELLED = 4;
+  RECALL_STATE_EXPIRED = 5;
+}
+
+message RecallStatus {
+  string recall_id = 1;
+  RecallState state = 2;
+  int64 at = 3;
+}

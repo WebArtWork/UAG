@@ -49,6 +49,7 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
 
 	"uag/docs"
+	electionmodulekeeper "uag/x/election/keeper"
 	uagmodulekeeper "uag/x/uag/keeper"
 )
 
@@ -106,6 +107,7 @@ type App struct {
 	UagKeeper      uagmodulekeeper.Keeper
 	WasmKeeper     wasmkeeper.Keeper
 	FeeGrantKeeper feegrantkeeper.Keeper
+	ElectionKeeper electionmodulekeeper.Keeper
 }
 
 func init() {
@@ -186,6 +188,7 @@ func New(
 		&app.CircuitBreakerKeeper,
 		&app.ParamsKeeper,
 		&app.UagKeeper, &app.FeeGrantKeeper,
+		&app.ElectionKeeper,
 	); err != nil {
 		panic(err)
 	}

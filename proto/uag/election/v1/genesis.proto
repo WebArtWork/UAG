@@ -1,0 +1,17 @@
+syntax = "proto3";
+package uag.election.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "uag/election/v1/params.proto";
+
+option go_package = "uag/x/election/types";
+
+// GenesisState defines the election module's genesis state.
+message GenesisState {
+  // params defines all the parameters of the module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}

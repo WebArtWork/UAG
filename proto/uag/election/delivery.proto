@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package <app>.election;
+
+option go_package = "<app>/x/election/types";
+
+message Delivery {
+  string promise_id = 1;
+  string submitter_address = 2;
+  string phrase = 3;
+  repeated string evidence = 4;
+  int64 created_at = 5;
+}
