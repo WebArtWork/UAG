@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package <app>.election;
+
+option go_package = "<app>/x/election/types";
+
+message Position {
+  uint32 term_id = 1;
+  string section_id = 2;
+  string leader_address = 3;
+  string assignee_address = 4;
+  string description = 5;
+  int64 assigned_at = 6;
+}

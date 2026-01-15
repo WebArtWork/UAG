@@ -5,7 +5,8 @@ package <app>.election;
 option go_package = "<app>/x/election/types";
 
 message Citizen {
-  string address = 1;
-  string name = 2;
-  int64 created_at = 3;
+  string section_id = 1;
+  string address = 2;
+  string name = 3;
+  int64 created_at = 4;
 }
